@@ -1,0 +1,133 @@
+name: Test & Lint
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  test:
+    name: Test on Node ${{ matrix.node-version }}
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+      
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+      
+      - name: Get pnpm store directory
+        id: pnpm-cache
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+      
+      - name: Setup pnpm cache
+        uses: actions/cache@v3
+        with:
+          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+      
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      
+      - name: Run linter
+        run: pnpm lint || echo "Linting not configured yet"
+      
+      - name: Run type check
+        run: pnpm type-check || echo "Type checking not configured yet"
+      
+      - name: Run tests
+        run: pnpm test || echo "Tests not configured yet"
+      
+      - name: Build package
+        run: pnpm run build
+      
+      - name: Check package size
+        run: |
+          echo "📦 Package size:"
+          du -sh dist/
+          ls -lh dist/
+
+  lint:
+    name: Lint Code
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+      
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      
+      - name: Run ESLint
+        run: pnpm lint || echo "ESLint not configured yet"
+      
+      - name: Check formatting
+        run: pnpm format:check || echo "Prettier not configured yet"
+
+  build-examples:
+    name: Build Example Apps
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+      
+      - name: Build package
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm run build
+      
+      - name: Build basic example
+        working-directory: examples/basic
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm run build
+      
+      - name: Build advanced example
+        working-directory: examples/advanced
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm run build
+      
+      - name: Upload example artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: example-builds
+          path: examples/*/dist

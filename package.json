@@ -1,0 +1,54 @@
+{
+  "name": "@unicorn/autoconnect",
+  "version": "1.0.0",
+  "description": "Drop-in Unicorn AutoConnect for existing dApps - zero breaking changes",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs",
+      "types": "./dist/index.d.ts"
+    },
+    "./styles.css": "./dist/styles.css"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsup src/index.js --format cjs,esm --dts --external react,react-dom,wagmi,thirdweb",
+    "dev": "tsup src/index.js --format esm --watch",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "unicorn",
+    "web3",
+    "wallet",
+    "autoconnect",
+    "thirdweb",
+    "wagmi",
+    "account-abstraction",
+    "gasless"
+  ],
+  "author": "Unicorn.eth",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/MyUnicornAccount/autoconnect"
+  },
+  "peerDependencies": {
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0",
+    "thirdweb": "^5.60.0",
+    "wagmi": "^2.0.0"
+  },
+  "devDependencies": {
+    "tsup": "^8.0.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "thirdweb": "^5.68.0",
+    "wagmi": "^2.17.1"
+  }
+}

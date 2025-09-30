@@ -1,0 +1,36 @@
+# Source files (only ship dist/)
+src/
+examples/
+.github/
+
+# Config files
+tsup.config.js
+.eslintrc.js
+.prettierrc
+
+# Development
+*.test.js
+*.spec.js
+__tests__/
+coverage/
+
+# Documentation (keep README.md)
+docs/
+*.md
+!README.md
+!CHANGELOG.md
+!LICENSE
+
+# CI/CD
+.github/
+.travis.yml
+.circleci/
+
+# Editor
+.vscode/
+.idea/
+
+# Misc
+.DS_Store
+*.log
+.env*
