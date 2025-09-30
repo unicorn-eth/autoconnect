@@ -1,6 +1,6 @@
 {
   "name": "@unicorn/autoconnect",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Drop-in Unicorn AutoConnect for existing dApps - zero breaking changes",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",

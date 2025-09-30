@@ -14,30 +14,36 @@ This package allows developers to:
 - ✅ Use TypeScript with full type definitions
 - ✅ Integrate with zero breaking changes to existing code
 
-## Project Status: ✅ Complete and Ready for Publishing
+## Project Status: ✅ Complete, Tested, and Ready for Publishing
 
 ### What's Complete:
 - ✅ Full package source code with isolated React root pattern
 - ✅ TypeScript definitions (manually created, not auto-generated)
-- ✅ Modern build configuration (tsup) - builds successfully
+- ✅ Modern build configuration (tsup) - builds successfully with ZERO warnings
 - ✅ GitHub Actions for automated publishing
-- ✅ Three complete example applications with all support files
+- ✅ Three complete example applications with all support files - ALL TESTED AND WORKING
 - ✅ Comprehensive documentation (10+ docs files)
 - ✅ Migration tools and guides
 - ✅ Professional package structure following best practices
-- ✅ Build tested and working (minor cosmetic warning about import.meta in CJS - does not affect functionality)
+- ✅ Event-based communication tested and working
+- ✅ Disconnect functionality added for testing
+- ✅ Both Unicorn and standard wallet flows verified working
 
-### Build Output:
+### Build Status:
 - ✅ `dist/index.js` (CommonJS)
 - ✅ `dist/index.mjs` (ESM)
 - ✅ `dist/index.d.ts` (TypeScript definitions)
-- ✅ Source maps included
+- ✅ NO WARNINGS - import.meta usage eliminated
+- ✅ Clean build output
 
-### Known Build Notes:
-- ⚠️  Build shows warning about `import.meta` in CommonJS format - **this is cosmetic only**
-- ✅ Warning does not affect functionality (users pass props, not env vars)
-- ✅ Both ESM and CommonJS builds complete successfully
-- ✅ Package is production-ready despite warning
+### Testing Status:
+- ✅ Unicorn AutoConnect - Connects successfully
+- ✅ Event dispatch - Working (useUniversalWallet receives updates)
+- ✅ UI updates - Connect/disconnect buttons work correctly
+- ✅ Standard wallets - MetaMask and others work
+- ✅ Wallet switching - Can switch between Unicorn and standard
+- ✅ Example apps - All three examples tested and working
+- ✅ Local installation - Tested with `file:../..` pattern
 
 ## Package Architecture
 
@@ -520,30 +526,28 @@ pnpm run migrate
 pnpm run build
 ```
 
-### Issue: Build warning about import.meta in CommonJS
-**Symptoms**: Warning about "import.meta is not available with cjs output format"
+### Issue: UI doesn't update when Unicorn connects
+**Symptoms**: Wallet connects (see console) but UI still shows "Connect Wallet" button
 
-**Solution**: This is **expected and safe**
-- Warning is cosmetic only
-- Does not affect functionality
-- Users pass props explicitly, so import.meta fallbacks are never used
-- Both ESM and CommonJS builds work perfectly
+**Solution**: Already fixed! Event dispatch happens inside onConnect callback
+- Check console for: "🦄 Event dispatched: unicorn-wallet-connected"
+- If you don't see this, rebuild package and reinstall in examples
+- Event must be dispatched BEFORE user's onConnect callback
 
-### Issue: pnpm link error - "Unable to find global bin directory"
-**Symptoms**: `pnpm link` fails with global bin directory error
+### Issue: Can't disconnect Unicorn to test standard wallets
+**Symptoms**: No way to disconnect Unicorn wallet to test MetaMask
 
-**Solution**: Use alternative testing methods
+**Solution**: Two options
+1. Click "Disconnect Unicorn & Test Standard Wallets" button (in examples)
+2. Visit app without URL parameters: `http://localhost:3000`
+
+### Issue: pnpm install fails with "Not Found - 404"
+**Symptoms**: `pnpm install @unicorn/autoconnect` tries to fetch from NPM registry
+
+**Solution**: Use file path for local testing
 ```bash
-# Option 1: Use npm pack (recommended)
-npm pack
-npm install /path/to/unicorn-autoconnect-1.0.0.tgz
-
-# Option 2: Test in example apps
-cd examples/basic && pnpm run dev
-
-# Option 3: Fix pnpm setup (if needed)
-pnpm setup
-pnpm link --global
+cd examples/basic
+pnpm install file:../..
 ```
 
 ### Issue: Types not working in IDE
@@ -564,6 +568,14 @@ ls -la dist/
 # In package.json, verify exports order:
 # "types" must come BEFORE "import" and "require"
 ```
+
+### Issue: Build warnings about import.meta
+**Symptoms**: Warning about "import.meta is not available with cjs output format"
+
+**Solution**: Already fixed! Component now uses props-only approach
+- No import.meta references in component
+- Users pass values as props
+- Build completes with ZERO warnings
 
 ## Future Enhancements (Roadmap)
 
@@ -701,23 +713,34 @@ When working on this package, remember:
 
 1. **Core Principle**: Never break existing functionality
 2. **Architecture**: Isolated React root prevents conflicts
-3. **Communication**: Custom events between roots
+3. **Communication**: Custom events between roots - event MUST be dispatched in onConnect
 4. **API**: useUniversalWallet provides unified interface
 5. **Testing**: Always test both Unicorn and standard wallet flows
 6. **Documentation**: Update docs when changing APIs
 7. **Versioning**: Follow semantic versioning strictly
 8. **Examples**: Update examples to showcase new features
 9. **Build**: TypeScript definitions are manually created in `src/types/index.d.ts`, not auto-generated
-10. **Build Warning**: The import.meta warning in CommonJS build is expected and safe - users pass props
-11. **Testing**: Use `npm pack` or example apps for local testing, not `pnpm link` (may need setup)
+10. **Props-First**: Component uses props with hardcoded defaults - NO import.meta usage
+11. **Testing**: Use `pnpm install file:../..` for local testing in examples
+12. **UI Updates**: Event dispatch is critical - must happen in onConnect callback for UI to update
 
-### Important Build Details
+### Important Implementation Details
 
-**TypeScript Approach**:
-- Manual types in `src/types/index.d.ts` (not auto-generated)
-- Build copies this file to `dist/index.d.ts`
-- This avoids JSX parsing issues
-- Cleaner, more accurate types
+**Component Configuration**:
+```javascript
+// Props-first approach - NO import.meta
+const finalClientId = clientId || "4e8c81182c3709ee441e30d776223354";
+const finalFactoryAddress = factoryAddress || "0xD771615c873ba5a2149D5312448cE01D677Ee48A";
+const finalChain = getChainByName(defaultChain);
+```
+
+**Critical Event Dispatch**:
+```javascript
+// Must happen INSIDE onConnect callback
+window.dispatchEvent(new CustomEvent('unicorn-wallet-connected', {
+  detail: { wallet: connectedWallet, address: walletAddress }
+}));
+```
 
 **Build Command**:
 ```bash
@@ -728,7 +751,16 @@ tsup src/index.js --format cjs,esm --external react,react-dom,wagmi,thirdweb && 
 - `dist/index.js` (CommonJS)
 - `dist/index.mjs` (ESM)
 - `dist/index.d.ts` (TypeScript - copied from src/types/)
-- Warning about import.meta in CJS (cosmetic, safe to ignore)
+- ZERO warnings - clean build
+
+**Testing Checklist**:
+- [ ] Build with zero warnings
+- [ ] Install in example with `pnpm install file:../..`
+- [ ] Unicorn connects and UI updates
+- [ ] Console shows "Event dispatched: unicorn-wallet-connected"
+- [ ] Disconnect button works
+- [ ] Standard wallets connect and work
+- [ ] Can switch between wallet types
 
 **File Extensions**:
 - Use `.jsx` and `.js` extensions in imports within `src/index.js`

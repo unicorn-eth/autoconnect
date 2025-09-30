@@ -8,6 +8,7 @@ import { ThirdwebProvider, AutoConnect } from 'thirdweb/react';
 import { createThirdwebClient } from 'thirdweb';
 import { inAppWallet } from 'thirdweb/wallets';
 import { base, polygon, ethereum, arbitrum, optimism } from 'thirdweb/chains';
+import { wrapUnicornWallet } from '../utils/unicornWalletWrapper.js';
 
 // Simple chain mapping
 const getChainByName = (chainName) => {
@@ -42,11 +43,12 @@ const IsolatedAutoConnect = ({
   factoryAddress,
   defaultChain = 'base',
   timeout = 5000,
-  debug = false
+  debug = false,
+  enableTransactionApproval = true, // New prop
 }) => {
   // Configuration - use props with sensible defaults
-  const finalClientId = clientId ;
-  const finalFactoryAddress = factoryAddress ;
+  const finalClientId = clientId || "4e8c81182c3709ee441e30d776223354";
+  const finalFactoryAddress = factoryAddress || "0xD771615c873ba5a2149D5312448cE01D677Ee48A";
   const finalChain = getChainByName(defaultChain);
 
   if (debug) {
@@ -82,17 +84,23 @@ const IsolatedAutoConnect = ({
             const account = connectedWallet.getAccount?.();
             walletAddress = account?.address || connectedWallet.address || 'No address found';
             
+            // Wrap wallet to add transaction approval if enabled
+            const finalWallet = enableTransactionApproval 
+              ? wrapUnicornWallet(connectedWallet, true)
+              : connectedWallet;
+            
             if (debug) {
               console.log('🦄 IsolatedAutoConnect: Success!');
               console.log('Chain:', finalChain.name);
               console.log('Address:', walletAddress);
+              console.log('Transaction Approval:', enableTransactionApproval ? 'Enabled' : 'Disabled');
               console.log('Wallet object:', connectedWallet);
             }
             
             // 🔥 CRITICAL: Dispatch the event so useUniversalWallet can pick it up
             if (typeof window !== 'undefined') {
               window.dispatchEvent(new CustomEvent('unicorn-wallet-connected', {
-                detail: { wallet: connectedWallet, address: walletAddress }
+                detail: { wallet: finalWallet, address: walletAddress }
               }));
               
               if (debug) {
@@ -101,7 +109,7 @@ const IsolatedAutoConnect = ({
             }
             
             // Call user-provided callback AFTER dispatching event
-            onConnect?.(connectedWallet);
+            onConnect?.(finalWallet);
             
           } catch (e) {
             console.warn('Could not extract wallet address:', e);
