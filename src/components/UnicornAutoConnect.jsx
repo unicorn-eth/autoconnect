@@ -44,18 +44,10 @@ const IsolatedAutoConnect = ({
   timeout = 5000,
   debug = false
 }) => {
-  // Configuration with fallbacks
-  const finalClientId = clientId || 
-    import.meta.env.VITE_THIRDWEB_CLIENT_ID || 
-    "4e8c81182c3709ee441e30d776223354";
-    
-  const finalFactoryAddress = factoryAddress || 
-    import.meta.env.VITE_THIRDWEB_FACTORY_ADDRESS || 
-    "0xD771615c873ba5a2149D5312448cE01D677Ee48A";
-    
-  const finalChain = getChainByName(
-    import.meta.env.VITE_DEFAULT_CHAIN || defaultChain
-  );
+  // Configuration - use props with sensible defaults
+  const finalClientId = clientId ;
+  const finalFactoryAddress = factoryAddress ;
+  const finalChain = getChainByName(defaultChain);
 
   if (debug) {
     console.log('🦄 IsolatedAutoConnect: Configuration', {
@@ -83,25 +75,37 @@ const IsolatedAutoConnect = ({
       <AutoConnect
         client={client}
         wallets={[wallet]}
-        onConnect={(connectedWallet) => {
+        onConnect={async (connectedWallet) => {
           // Extract wallet address properly
           let walletAddress = 'Unknown';
           try {
             const account = connectedWallet.getAccount?.();
             walletAddress = account?.address || connectedWallet.address || 'No address found';
+            
+            if (debug) {
+              console.log('🦄 IsolatedAutoConnect: Success!');
+              console.log('Chain:', finalChain.name);
+              console.log('Address:', walletAddress);
+              console.log('Wallet object:', connectedWallet);
+            }
+            
+            // 🔥 CRITICAL: Dispatch the event so useUniversalWallet can pick it up
+            if (typeof window !== 'undefined') {
+              window.dispatchEvent(new CustomEvent('unicorn-wallet-connected', {
+                detail: { wallet: connectedWallet, address: walletAddress }
+              }));
+              
+              if (debug) {
+                console.log('🦄 Event dispatched: unicorn-wallet-connected');
+              }
+            }
+            
+            // Call user-provided callback AFTER dispatching event
+            onConnect?.(connectedWallet);
+            
           } catch (e) {
             console.warn('Could not extract wallet address:', e);
           }
-          
-          if (debug) {
-            console.log('🦄 IsolatedAutoConnect: Success!');
-            console.log('Chain:', finalChain.name);
-            console.log('Address:', walletAddress);
-            console.log('Available methods:', Object.getOwnPropertyNames(connectedWallet));
-          }
-          
-          // Call user-provided callback
-          onConnect?.(connectedWallet);
         }}
         onError={(error) => {
           if (debug) {

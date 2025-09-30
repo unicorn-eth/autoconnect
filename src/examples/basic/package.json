@@ -10,14 +10,15 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "@unicorn/autoconnect": "^1.0.0",
     "@rainbow-me/rainbowkit": "^2.2.8",
     "@tanstack/react-query": "^5.89.0",
+    "@unicorn/autoconnect": "file:../../../unicorn-autoconnect-1.0.1.tgz",
+    "autoconnect": "link:../../../../../../Library/pnpm/global/5/node_modules/@unicorn/autoconnect",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "thirdweb": "^5.68.0",
     "viem": "^2.37.7",
-    "wagmi": "^2.17.1",
-    "thirdweb": "^5.68.0"
+    "wagmi": "^2.17.1"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.3.0",

@@ -6,10 +6,11 @@ export default defineConfig({
   entry: ['src/index.js'],
   
   // Output formats
-  format: ['cjs', 'esm'],
+  format: ['esm','cjs'],
   
-  // Generate TypeScript definitions
-  dts: true,
+  // Don't auto-generate TypeScript definitions from JSX
+  // We have manually created types in src/types/index.d.ts
+  dts: false,
   
   // Code splitting for better tree-shaking
   splitting: false,

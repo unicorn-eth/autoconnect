@@ -16,8 +16,9 @@ import { UnicornAutoConnect, useUniversalWallet } from '@unicorn/autoconnect';
 // Your existing Wagmi config
 const config = getDefaultConfig({
   appName: 'Basic Example',
-  projectId: 'demo-project-id', // Replace with your WalletConnect Project ID
+  projectId: import.meta.env.VITE_WALLETCONNECT_PROJECT_ID || 'YOUR_PROJECT_ID',
   chains: [base],
+  ssr: false,
 });
 
 const queryClient = new QueryClient();
@@ -84,9 +85,9 @@ export default function App() {
               Everything else stays exactly the same!
             */}
             <UnicornAutoConnect
-              clientId={import.meta.env.VITE_THIRDWEB_CLIENT_ID || "4e8c81182c3709ee441e30d776223354"}
-              factoryAddress={import.meta.env.VITE_THIRDWEB_FACTORY_ADDRESS || "0xD771615c873ba5a2149D5312448cE01D677Ee48A"}
-              defaultChain="base"
+              clientId={import.meta.env.VITE_THIRDWEB_CLIENT_ID }
+              factoryAddress={import.meta.env.VITE_THIRDWEB_FACTORY_ADDRESS }
+              defaultChain={import.meta.env.VITE_DEFAULT_CHAIN }
               debug={true}
               onConnect={(wallet) => {
                 console.log('🦄 Unicorn connected!');

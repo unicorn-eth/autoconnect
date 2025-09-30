@@ -1,4 +1,4 @@
-// Environment detection utilities
+// Environment detection utilities Coded lovingly by @cryptowampum and Claude AI
 // Exported so developers can use them if needed
 
 /**
