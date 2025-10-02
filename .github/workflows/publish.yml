@@ -39,8 +39,14 @@ jobs:
         with:
           version: 10.17.1
 
+      - name: Sanity check pnpm version
+        run: pnpm --version
+
       - name: Enable Corepack
         run: corepack enable
+
+      - name: Sanity check pnpm version
+        run: pnpm --version  # should show 10.17.1
 
       - name: Show pnpm & lockfile headers
         run: |
@@ -50,15 +56,19 @@ jobs:
       - name: Install deps
         run: pnpm install --frozen-lockfile
 
-      # === Derive VERSION & NOTES from the GitHub Release tag/body ===
       - name: Derive VERSION & NOTES from Release
         if: github.event_name == 'release'
         run: |
           TAG="${{ github.event.release.tag_name }}"
           VERSION="${TAG#v}"
           echo "VERSION=$VERSION" >> "$GITHUB_ENV"
-          # Preserve multiline notes from the release body
-          printf "NOTES<<'EOF'\n%s\nEOF\n" "${{ github.event.release.body }}" >> "$GITHUB_ENV"
+
+          NOTES_GH="${{ github.event.release.body }}"
+          if [ -z "$NOTES_GH" ]; then
+            # fallback to annotated tag message (empty for lightweight tags)
+            NOTES_GH="$(git for-each-ref "refs/tags/$TAG" --format='%(contents)')"
+          fi
+          printf "NOTES<<'EOF'\n%s\nEOF\n" "$NOTES_GH" >> "$GITHUB_ENV"
 
       # If manually dispatched with an input version, respect it
       - name: Optional bump version (workflow_dispatch)
@@ -72,8 +82,6 @@ jobs:
         if: ${{ env.VERSION != '' }}
         run: npm version "$VERSION" --no-git-tag-version
 
-      - name: Test
-        run: pnpm test || echo "No tests configured yet"
 
       - name: Build
         run: pnpm run build
