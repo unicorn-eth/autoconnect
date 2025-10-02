@@ -9,7 +9,7 @@ import { RainbowKitProvider } from '@rainbow-me/rainbowkit';
 import { getDefaultConfig } from '@rainbow-me/rainbowkit';
 import { base, polygon, arbitrum } from 'wagmi/chains';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
-import { useSendTransaction } from 'wagmi';
+import { useSendTransaction, useSignMessage } from 'wagmi';
 import { parseEther } from 'viem';
 
 // Import from the package
@@ -29,6 +29,7 @@ const queryClient = new QueryClient();
 function ExistingAppContent() {
   const wallet = useUniversalWallet();
   const { sendTransaction, isPending, data: hash, error } = useSendTransaction();
+  const { signMessage: wagmiSignMessage, data: signatureData, isPending: isSignPending } = useSignMessage();
   
   return (
     <div className="content">
@@ -41,6 +42,9 @@ function ExistingAppContent() {
         isPending={isPending}
         hash={hash}
         error={error}
+        wagmiSignMessage={wagmiSignMessage}
+        signatureData={signatureData}
+        isSignPending={isSignPending}
       />
       <WalletConnectionControls wallet={wallet} />
     </div>
@@ -75,10 +79,68 @@ function WalletStatusCard({ wallet }) {
   );
 }
 
-// Example app functionality with transaction demo
-function ExistingAppFeatures({ wallet, sendTransaction, isPending, hash, error }) {
+// Example app functionality with transaction and signing demo
+function ExistingAppFeatures({ wallet, sendTransaction, isPending, hash, error, wagmiSignMessage, signatureData, isSignPending }) {
   const [txStatus, setTxStatus] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [signStatus, setSignStatus] = useState('');
+  const [isSigningLoading, setIsSigningLoading] = useState(false);
+
+  // Watch for signature result from Wagmi
+  React.useEffect(() => {
+    if (signatureData) {
+      setSignStatus(`✅ Message signed!\n\nSignature: ${signatureData.slice(0, 20)}...${signatureData.slice(-10)}`);
+      setIsSigningLoading(false);
+    }
+  }, [signatureData]);
+
+  const handleSignMessage = async () => {
+    if (!wallet.isConnected) {
+      setSignStatus('❌ Please connect a wallet first');
+      return;
+    }
+
+    setIsSigningLoading(true);
+    setSignStatus('');
+
+    try {
+      const message = "Sign this message to verify your wallet ownership.\n\nTimestamp: " + Date.now();
+      
+      console.log('📝 Signing message:', message);
+
+      if (wallet.isUnicorn) {
+        console.log('🦄 Attempting to sign with Unicorn wallet...');
+        
+        // Get the account
+        const account = wallet.unicornWallet.getAccount?.();
+        
+        if (!account || !account.signMessage) {
+          throw new Error('Account does not support message signing');
+        }
+
+        console.log('Account:', account);
+        
+        // Sign the message
+        const signature = await account.signMessage({ message });
+        
+        console.log('✅ Signature:', signature);
+        setSignStatus(`✅ Message signed!\n\nSignature: ${signature.slice(0, 20)}...${signature.slice(-10)}`);
+        setIsSigningLoading(false);
+        
+      } else if (wallet.isStandard) {
+        console.log('💼 Signing with standard wallet via Wagmi...');
+        
+        // Use Wagmi's signMessage hook for standard wallets
+        wagmiSignMessage({ message });
+        // Result will be handled by useEffect watching signatureData
+      }
+      
+    } catch (error) {
+      console.error('Signing error:', error);
+      setSignStatus(`❌ Signing failed: ${error.message}`);
+      setIsSigningLoading(false);
+    }
+  };
 
   const handleTransaction = async () => {
     if (!wallet.isConnected) {
@@ -157,40 +219,85 @@ function ExistingAppFeatures({ wallet, sendTransaction, isPending, hash, error }
       padding: '20px',
       marginTop: '20px'
     }}>
-      <h3>Transaction Demo</h3>
+      <h3>Transaction & Signing Demo</h3>
       
-      <button
-        onClick={handleTransaction}
-        disabled={!wallet.isConnected || isLoading || isPending}
-        style={{
-          background: wallet.isConnected ? '#0ea5e9' : '#94a3b8',
-          color: 'white',
-          border: 'none',
-          padding: '12px 24px',
-          borderRadius: '6px',
-          cursor: wallet.isConnected ? 'pointer' : 'not-allowed',
-          fontSize: '14px',
-          fontWeight: '600',
-          marginTop: '12px'
-        }}
-      >
-        {isLoading || isPending ? '⏳ Processing...' : 
-          wallet.isUnicorn ? '🦄 Send Demo Transaction (Should Show Approval)' : 
-          wallet.isStandard ? '💸 Send Demo Transaction (0.001 ETH)' :
-          'Connect Wallet First'}
-      </button>
+      {/* Transaction Button */}
+      <div style={{ marginBottom: '20px' }}>
+        <h4 style={{ marginBottom: '10px' }}>Send Transaction</h4>
+        <button
+          onClick={handleTransaction}
+          disabled={!wallet.isConnected || isLoading || isPending}
+          style={{
+            background: wallet.isConnected ? '#0ea5e9' : '#94a3b8',
+            color: 'white',
+            border: 'none',
+            padding: '12px 24px',
+            borderRadius: '6px',
+            cursor: wallet.isConnected ? 'pointer' : 'not-allowed',
+            fontSize: '14px',
+            fontWeight: '600'
+          }}
+        >
+          {isLoading || isPending ? '⏳ Processing...' : 
+            wallet.isUnicorn ? '🦄 Send 0.01 USDC (With Approval)' : 
+            wallet.isStandard ? '💸 Send Demo Transaction' :
+            'Connect Wallet First'}
+        </button>
 
-      {txStatus && (
-        <div style={{
-          marginTop: '12px',
-          padding: '12px',
-          background: txStatus.includes('✅') ? '#dcfce7' : '#fee2e2',
-          borderRadius: '6px',
-          fontSize: '14px'
-        }}>
-          {txStatus}
-        </div>
-      )}
+        {txStatus && (
+          <div style={{
+            marginTop: '12px',
+            padding: '12px',
+            background: txStatus.includes('✅') ? '#dcfce7' : '#fee2e2',
+            borderRadius: '6px',
+            fontSize: '14px',
+            whiteSpace: 'pre-wrap'
+          }}>
+            {txStatus}
+          </div>
+        )}
+      </div>
+
+      {/* Signing Button */}
+      <div style={{
+        paddingTop: '20px',
+        borderTop: '1px solid #e5e7eb'
+      }}>
+        <h4 style={{ marginBottom: '10px' }}>Sign Message</h4>
+        <button
+          onClick={handleSignMessage}
+          disabled={!wallet.isConnected || isSigningLoading || isSignPending}
+          style={{
+            background: wallet.isConnected ? '#8b5cf6' : '#94a3b8',
+            color: 'white',
+            border: 'none',
+            padding: '12px 24px',
+            borderRadius: '6px',
+            cursor: wallet.isConnected ? 'pointer' : 'not-allowed',
+            fontSize: '14px',
+            fontWeight: '600'
+          }}
+        >
+          {(isSigningLoading || isSignPending) ? '⏳ Signing...' : 
+            wallet.isUnicorn ? '🦄 Sign Message (EIP-191)' : 
+            wallet.isStandard ? '💼 Sign Message (MetaMask)' :
+            'Connect Wallet First'}
+        </button>
+
+        {signStatus && (
+          <div style={{
+            marginTop: '12px',
+            padding: '12px',
+            background: signStatus.includes('✅') ? '#dcfce7' : '#fee2e2',
+            borderRadius: '6px',
+            fontSize: '14px',
+            fontFamily: signStatus.includes('Signature:') ? 'monospace' : 'inherit',
+            whiteSpace: 'pre-wrap'
+          }}>
+            {signStatus}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

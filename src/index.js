@@ -2,8 +2,17 @@
 // @unicorn/autoconnect - Main export file
 // Clean, simple exports - developers just import and use
 
+// Core components
 export { default as UnicornAutoConnect } from './components/UnicornAutoConnect.jsx';
+
+// Hooks
 export { useUniversalWallet } from './hooks/useUniversalWallet.js';
+export { useUnicornTransaction } from './hooks/useUnicornTransaction.js';
+export { useUnicornSignMessage } from './hooks/useUnicornSignMessage.js';
+
+// Pre-built components
+export { default as UnicornTransactionButton } from './components/UnicornTransactionButton.jsx';
+export { default as UnicornSignButton } from './components/UnicornSignButton.jsx';
 
 // Export utility functions
 export { 

@@ -85,8 +85,9 @@ const IsolatedAutoConnect = ({
             walletAddress = account?.address || connectedWallet.address || 'No address found';
             
             // Wrap wallet to add transaction approval if enabled
+            // Pass client and finalChain to the wrapper
             const finalWallet = enableTransactionApproval 
-              ? wrapUnicornWallet(connectedWallet, true)
+              ? wrapUnicornWallet(connectedWallet, true, client, finalChain)
               : connectedWallet;
             
             if (debug) {
