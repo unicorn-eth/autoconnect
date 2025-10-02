@@ -62,12 +62,20 @@ jobs:
           VERSION="${TAG#v}"
           echo "VERSION=$VERSION" >> "$GITHUB_ENV"
 
+          # Use a unique delimiter that won't appear in release notes
+          DELIMITER="EOF_$(date +%s)_$"
           NOTES_GH="${{ github.event.release.body }}"
           if [ -z "$NOTES_GH" ]; then
             # fallback to annotated tag message (empty for lightweight tags)
             NOTES_GH="$(git for-each-ref "refs/tags/$TAG" --format='%(contents)')"
           fi
-          printf "NOTES<<'EOF'\n%s\nEOF\n" "$NOTES_GH" >> "$GITHUB_ENV"
+          
+          # Use the unique delimiter
+          {
+            echo "NOTES<<${DELIMITER}"
+            echo "$NOTES_GH"
+            echo "${DELIMITER}"
+          } >> "$GITHUB_ENV"
 
       # If manually dispatched with an input version, respect it
       - name: Optional bump version (workflow_dispatch)
