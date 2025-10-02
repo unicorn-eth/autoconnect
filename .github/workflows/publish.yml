@@ -81,13 +81,30 @@ jobs:
       - name: Optional bump version (workflow_dispatch)
         if: ${{ github.event_name == 'workflow_dispatch' && inputs.version != '' }}
         run: |
-          npm version "${{ inputs.version }}" --no-git-tag-version
-          echo "VERSION=${{ inputs.version }}" >> "$GITHUB_ENV"
+          CURRENT_VERSION=$(node -p "require('./package.json').version")
+          INPUT_VERSION="${{ inputs.version }}"
+          
+          if [ "$CURRENT_VERSION" != "$INPUT_VERSION" ]; then
+            npm version "$INPUT_VERSION" --no-git-tag-version
+            echo "VERSION=$INPUT_VERSION" >> "$GITHUB_ENV"
+          else
+            echo "Version is already $INPUT_VERSION, skipping bump"
+            echo "VERSION=$INPUT_VERSION" >> "$GITHUB_ENV"
+          fi
 
       # If VERSION is set from release/tag or dispatch, ensure package.json matches
       - name: Set package.json version from derived VERSION
         if: ${{ env.VERSION != '' }}
-        run: npm version "$VERSION" --no-git-tag-version
+        run: |
+          CURRENT_VERSION=$(node -p "require('./package.json').version")
+          TARGET_VERSION="${{ env.VERSION }}"
+          
+          if [ "$CURRENT_VERSION" != "$TARGET_VERSION" ]; then
+            echo "Updating version from $CURRENT_VERSION to $TARGET_VERSION"
+            npm version "$TARGET_VERSION" --no-git-tag-version
+          else
+            echo "Version is already $TARGET_VERSION, no update needed"
+          fi
 
       - name: Verify TypeScript definitions exist
         run: |
