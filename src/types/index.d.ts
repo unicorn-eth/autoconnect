@@ -1,5 +1,5 @@
 // Type definitions for @unicorn/autoconnect
-import { ReactNode } from 'react';
+import { ReactNode, ReactElement, CSSProperties } from 'react';
 import type { Account } from 'wagmi';
 
 /**
@@ -46,6 +46,12 @@ export interface UnicornAutoConnectProps {
    * @default false
    */
   debug?: boolean;
+
+  /**
+   * Enable transaction approval dialogs for Unicorn wallet
+   * @default false
+   */
+  enableTransactionApproval?: boolean;
 
   /**
    * Callback fired when Unicorn wallet successfully connects
@@ -122,6 +128,162 @@ export interface UniversalWallet {
 }
 
 /**
+ * Transaction object structure
+ */
+export interface Transaction {
+  /** Recipient address */
+  to: string;
+  
+  /** Value in wei (as string) */
+  value: string;
+  
+  /** Transaction data (hex string) */
+  data: string;
+}
+
+/**
+ * Props for UnicornTransactionButton component
+ */
+export interface UnicornTransactionButtonProps {
+  /**
+   * Transaction object to send
+   * @required
+   */
+  transaction: Transaction;
+
+  /**
+   * Callback fired when transaction succeeds
+   */
+  onSuccess?: (result: any) => void;
+
+  /**
+   * Callback fired when transaction fails
+   */
+  onError?: (error: Error) => void;
+
+  /**
+   * Button content (text or elements)
+   */
+  children?: ReactNode;
+
+  /**
+   * Custom button styles
+   */
+  style?: CSSProperties;
+}
+
+/**
+ * Props for UnicornSignButton component
+ */
+export interface UnicornSignButtonProps {
+  /**
+   * Message to sign
+   * @required
+   */
+  message: string;
+
+  /**
+   * Callback fired when signing succeeds
+   */
+  onSuccess?: (signature: string) => void;
+
+  /**
+   * Callback fired when signing fails
+   */
+  onError?: (error: Error) => void;
+
+  /**
+   * Button content (text or elements)
+   */
+  children?: ReactNode;
+
+  /**
+   * Custom button styles
+   */
+  style?: CSSProperties;
+}
+
+/**
+ * Return type for useUnicornTransaction hook
+ */
+export interface UseUnicornTransactionReturn {
+  /**
+   * Function to send a transaction
+   */
+  sendTransaction: (transaction: Transaction) => Promise<any>;
+
+  /**
+   * Whether a transaction is currently being processed
+   */
+  isLoading: boolean;
+
+  /**
+   * Transaction hash (if available)
+   */
+  hash: string | null;
+
+  /**
+   * Error object (if transaction failed)
+   */
+  error: Error | null;
+
+  /**
+   * True if using Unicorn wallet
+   */
+  isUnicorn: boolean;
+
+  /**
+   * True if using standard wallet
+   */
+  isStandard: boolean;
+
+  /**
+   * True if any wallet is connected
+   */
+  isConnected: boolean;
+}
+
+/**
+ * Return type for useUnicornSignMessage hook
+ */
+export interface UseUnicornSignMessageReturn {
+  /**
+   * Function to sign a message
+   */
+  signMessage: (message: string) => Promise<string>;
+
+  /**
+   * Whether a signing operation is in progress
+   */
+  isLoading: boolean;
+
+  /**
+   * Signature string (if available)
+   */
+  signature: string | null;
+
+  /**
+   * Error object (if signing failed)
+   */
+  error: Error | null;
+
+  /**
+   * True if using Unicorn wallet
+   */
+  isUnicorn: boolean;
+
+  /**
+   * True if using standard wallet
+   */
+  isStandard: boolean;
+
+  /**
+   * True if any wallet is connected
+   */
+  isConnected: boolean;
+}
+
+/**
  * Hook that provides unified interface for both Unicorn and standard wallets
  * 
  * @example
@@ -147,6 +309,60 @@ export interface UniversalWallet {
 export function useUniversalWallet(): UniversalWallet;
 
 /**
+ * Universal transaction hook that works with both Unicorn and standard wallets
+ * Handles approval dialogs automatically for Unicorn wallets
+ * 
+ * @example
+ * ```tsx
+ * import { useUnicornTransaction } from '@unicorn/autoconnect';
+ * 
+ * function MyComponent() {
+ *   const { sendTransaction, isLoading, hash } = useUnicornTransaction();
+ *   
+ *   const handleSend = async () => {
+ *     await sendTransaction({
+ *       to: '0x...',
+ *       value: '1000000000000000',
+ *       data: '0x'
+ *     });
+ *   };
+ *   
+ *   return (
+ *     <button onClick={handleSend} disabled={isLoading}>
+ *       {isLoading ? 'Sending...' : 'Send Transaction'}
+ *     </button>
+ *   );
+ * }
+ * ```
+ */
+export function useUnicornTransaction(): UseUnicornTransactionReturn;
+
+/**
+ * Universal message signing hook that works with both Unicorn and standard wallets
+ * 
+ * @example
+ * ```tsx
+ * import { useUnicornSignMessage } from '@unicorn/autoconnect';
+ * 
+ * function MyComponent() {
+ *   const { signMessage, signature, isLoading } = useUnicornSignMessage();
+ *   
+ *   const handleSign = async () => {
+ *     const sig = await signMessage('Sign this message');
+ *     console.log('Signature:', sig);
+ *   };
+ *   
+ *   return (
+ *     <button onClick={handleSign} disabled={isLoading}>
+ *       {isLoading ? 'Signing...' : 'Sign Message'}
+ *     </button>
+ *   );
+ * }
+ * ```
+ */
+export function useUnicornSignMessage(): UseUnicornSignMessageReturn;
+
+/**
  * UnicornAutoConnect component - Add Unicorn wallet support to your app
  * 
  * @example
@@ -161,6 +377,7 @@ export function useUniversalWallet(): UniversalWallet;
  *         clientId={process.env.VITE_THIRDWEB_CLIENT_ID}
  *         factoryAddress="0xD771615c873ba5a2149D5312448cE01D677Ee48A"
  *         defaultChain="base"
+ *         enableTransactionApproval={true}
  *       />
  *     </WagmiProvider>
  *   );
@@ -168,6 +385,62 @@ export function useUniversalWallet(): UniversalWallet;
  * ```
  */
 export function UnicornAutoConnect(props: UnicornAutoConnectProps): ReactNode;
+
+/**
+ * Pre-built transaction button that handles both Unicorn and standard wallets
+ * Shows loading states, success/error messages, and approval dialogs automatically
+ * 
+ * @example
+ * ```tsx
+ * import { UnicornTransactionButton } from '@unicorn/autoconnect';
+ * 
+ * function MyComponent() {
+ *   const transaction = {
+ *     to: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb',
+ *     value: '1000000000000000', // 0.001 ETH
+ *     data: '0x'
+ *   };
+ *   
+ *   return (
+ *     <UnicornTransactionButton
+ *       transaction={transaction}
+ *       onSuccess={(result) => console.log('Sent!', result)}
+ *       onError={(error) => console.error('Failed:', error)}
+ *     >
+ *       Send 0.001 ETH
+ *     </UnicornTransactionButton>
+ *   );
+ * }
+ * ```
+ */
+export function UnicornTransactionButton(
+  props: UnicornTransactionButtonProps
+): ReactElement;
+
+/**
+ * Pre-built message signing button that handles both Unicorn and standard wallets
+ * Shows loading states and signature display automatically
+ * 
+ * @example
+ * ```tsx
+ * import { UnicornSignButton } from '@unicorn/autoconnect';
+ * 
+ * function MyComponent() {
+ *   return (
+ *     <UnicornSignButton
+ *       message="Sign to verify ownership"
+ *       onSuccess={(signature) => console.log('Signed!', signature)}
+ *       onError={(error) => console.error('Failed:', error)}
+ *     >
+ *       Sign Message
+ *     </UnicornSignButton>
+ *   );
+ * }
+ * ```
+ */
+export function UnicornSignButton(
+  props: UnicornSignButtonProps
+): ReactElement;
 
 /**
  * Check if the app is running in Unicorn environment
@@ -197,13 +470,56 @@ export function getUnicornAuthCookie(): string | null;
  */
 export function getChainConfig(chainName: SupportedChain): any;
 
+/**
+ * Request transaction approval from user (used internally)
+ * Shows approval dialog for Unicorn transactions
+ */
+export function requestTransactionApproval(transaction: Transaction): Promise<boolean>;
+
+/**
+ * Wrap a Unicorn wallet to add transaction approval functionality
+ * @param wallet - The Unicorn wallet instance
+ * @param requireApproval - Whether to require approval (default: true)
+ * @param client - Thirdweb client instance
+ * @param chain - Thirdweb chain object
+ * @returns Wrapped wallet with approval flow
+ */
+export function wrapUnicornWallet(
+  wallet: any,
+  requireApproval?: boolean,
+  client?: any,
+  chain?: any
+): any;
+
+/**
+ * Check if a wallet is already wrapped with approval functionality
+ * @param wallet - Wallet to check
+ * @returns True if wrapped
+ */
+export function isWrappedWallet(wallet: any): boolean;
+
+/**
+ * Get original wallet from wrapped wallet
+ * @param wallet - Wrapped wallet
+ * @returns Original wallet
+ */
+export function unwrapWallet(wallet: any): any;
+
 // Default export
 declare const _default: {
   UnicornAutoConnect: typeof UnicornAutoConnect;
+  UnicornTransactionButton: typeof UnicornTransactionButton;
+  UnicornSignButton: typeof UnicornSignButton;
   useUniversalWallet: typeof useUniversalWallet;
+  useUnicornTransaction: typeof useUnicornTransaction;
+  useUnicornSignMessage: typeof useUnicornSignMessage;
   isUnicornEnvironment: typeof isUnicornEnvironment;
   getUnicornAuthCookie: typeof getUnicornAuthCookie;
   getChainConfig: typeof getChainConfig;
+  requestTransactionApproval: typeof requestTransactionApproval;
+  wrapUnicornWallet: typeof wrapUnicornWallet;
+  isWrappedWallet: typeof isWrappedWallet;
+  unwrapWallet: typeof unwrapWallet;
 };
 
 export default _default;

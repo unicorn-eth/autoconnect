@@ -13,21 +13,28 @@ This package allows developers to:
 - ✅ Get automatic updates via `npm update`
 - ✅ Use TypeScript with full type definitions
 - ✅ Integrate with zero breaking changes to existing code
+- ✅ **NEW**: Use pre-built components for zero-code integration
 
-## Project Status: ✅ Complete, Tested, and Ready for Publishing
+## Project Status: ✅ Complete, Tested, and Enhanced with Zero-Code Integration
 
 ### What's Complete:
 - ✅ Full package source code with isolated React root pattern
 - ✅ TypeScript definitions (manually created, not auto-generated)
 - ✅ Modern build configuration (tsup) - builds successfully with ZERO warnings
 - ✅ GitHub Actions for automated publishing
-- ✅ Three complete example applications with all support files - ALL TESTED AND WORKING
-- ✅ Comprehensive documentation (10+ docs files)
+- ✅ **Four complete example applications** with all support files - ALL TESTED AND WORKING
+  - **Zero-Code** (NEW!) - Pre-built components
+  - Basic - Simple wallet display
+  - Advanced - Custom transaction logic
+  - Migration - Upgrade guide
+- ✅ Comprehensive documentation (15+ docs files)
 - ✅ Migration tools and guides
 - ✅ Professional package structure following best practices
 - ✅ Event-based communication tested and working
 - ✅ Disconnect functionality added for testing
 - ✅ Both Unicorn and standard wallet flows verified working
+- ✅ **Pre-built transaction and signing components**
+- ✅ **Universal hooks for transactions and signing**
 
 ### Build Status:
 - ✅ `dist/index.js` (CommonJS)
@@ -42,8 +49,10 @@ This package allows developers to:
 - ✅ UI updates - Connect/disconnect buttons work correctly
 - ✅ Standard wallets - MetaMask and others work
 - ✅ Wallet switching - Can switch between Unicorn and standard
-- ✅ Example apps - All three examples tested and working
+- ✅ Example apps - All four examples tested and working
 - ✅ Local installation - Tested with `file:../..` pattern
+- ✅ **Pre-built components - Transaction and signing buttons work**
+- ✅ **Approval dialogs - Show for Unicorn transactions**
 
 ## Package Architecture
 
@@ -57,7 +66,9 @@ Developer's App (Existing)          @unicorn/autoconnect
 WagmiProvider                       Creates separate React tree
 ├─ RainbowKitProvider              No shared state
 │  ├─ Their Components              Communicates via custom events
-│  └─ UnicornAutoConnect ─────────> Isolated ThirdwebProvider
+│  ├─ UnicornTransactionButton ────> Pre-built button (NEW!)
+│  ├─ UnicornSignButton ───────────> Pre-built button (NEW!)
+│  └─ UnicornAutoConnect ──────────> Isolated ThirdwebProvider
                                     └─ AutoConnect (hidden)
 ```
 
@@ -73,63 +84,51 @@ This ensures:
 @unicorn/autoconnect/
 ├── src/
 │   ├── components/
-│   │   └── UnicornAutoConnect.jsx    # Core component with isolated root
+│   │   ├── UnicornAutoConnect.jsx          # Core component with isolated root
+│   │   ├── UnicornTransactionButton.jsx    # NEW: Pre-built transaction button
+│   │   ├── UnicornSignButton.jsx           # NEW: Pre-built signing button
+│   │   └── UnicornTransactionApproval.jsx  # Approval dialog UI
 │   ├── hooks/
-│   │   └── useUniversalWallet.js     # Unified wallet interface
+│   │   ├── useUniversalWallet.js           # Unified wallet interface
+│   │   ├── useUnicornTransaction.js        # NEW: Universal transaction hook
+│   │   └── useUnicornSignMessage.js        # NEW: Universal signing hook
 │   ├── utils/
-│   │   └── environment.js            # Utility functions
+│   │   ├── environment.js                  # Utility functions
+│   │   └── unicornWalletWrapper.js         # Wallet wrapping for approvals
 │   ├── types/
-│   │   └── index.d.ts                # TypeScript definitions (manually created)
-│   └── index.js                      # Main export (with .jsx/.js extensions)
+│   │   └── index.d.ts                      # TypeScript definitions (manually created)
+│   └── index.js                            # Main export (with .jsx/.js extensions)
 ├── examples/
-│   ├── basic/                        # Minimal integration example
+│   ├── zero-code/                          # NEW: Pre-built components example
 │   │   ├── src/
-│   │   │   ├── App.jsx              # Basic demo
-│   │   │   └── main.jsx             # Entry point
-│   │   ├── index.html               # HTML template
-│   │   ├── vite.config.js           # Build config
-│   │   ├── package.json             # Dependencies
-│   │   └── README.md                # Usage guide
-│   ├── advanced/                     # All features demonstration
-│   │   ├── src/
-│   │   │   ├── App.jsx              # Advanced demo
-│   │   │   └── main.jsx             # Entry point
-│   │   ├── index.html               # HTML template
-│   │   ├── vite.config.js           # Build config
-│   │   ├── package.json             # Dependencies
-│   │   └── README.md                # Feature guide
-│   └── migration/                    # Migration from manual files
-│       ├── scripts/
-│       │   └── migrate.js           # Migration helper
-│       ├── src/
-│       │   ├── App.jsx              # After migration
-│       │   ├── App.before.jsx       # Before migration
-│       │   └── main.jsx             # Entry point
-│       ├── index.html               # HTML template
-│       ├── vite.config.js           # Build config
-│       ├── package.json             # Dependencies
-│       └── README.md                # Migration guide
+│   │   │   ├── App.jsx                    # Zero-code demo
+│   │   │   └── main.jsx                   # Entry point
+│   │   ├── index.html                     # HTML template
+│   │   ├── vite.config.js                 # Build config
+│   │   ├── package.json                   # Dependencies
+│   │   ├── .env.example                   # Environment template
+│   │   └── README.md                      # Usage guide
+│   ├── basic/                              # Minimal integration example
+│   ├── advanced/                           # All features demonstration
+│   └── migration/                          # Migration from manual files
 ├── .github/workflows/
-│   ├── publish.yml                   # Auto-publish to NPM
-│   └── test.yml                      # Run tests on PR
-├── dist/                             # Build output (gitignored, created by build)
-│   ├── index.js                      # CommonJS bundle
-│   ├── index.mjs                     # ESM bundle
-│   ├── index.d.ts                    # TypeScript definitions (copied from src/types/)
-│   └── *.map                         # Source maps
-├── package.json                      # Package configuration
-├── tsup.config.js                    # Build configuration (dts: false, manual copy)
-├── README.md                         # Main documentation
-├── CONTRIBUTING.md                   # Contribution guide
-├── CHANGELOG.md                      # Version history
-├── LICENSE                           # MIT License
-├── SETUP_GUIDE.md                    # Publishing instructions
-├── QUICK_REFERENCE.md                # Developer cheat sheet
-├── ARCHITECTURE.md                   # Technical architecture
-├── COMPLETE_FILE_STRUCTURE.md        # Full file listing
-├── PROJECT_SUMMARY.md                # Project overview
-├── FINAL_CHECKLIST.md                # Pre-publish checklist
-└── PROMPT.md                         # This file (project context)
+│   ├── publish.yml                         # Auto-publish to NPM
+│   └── test.yml                            # Run tests on PR
+├── dist/                                   # Build output (gitignored)
+├── package.json                            # Package configuration
+├── tsup.config.js                          # Build configuration
+├── README.md                               # Main documentation
+├── CONTRIBUTING.md                         # Contribution guide
+├── CHANGELOG.md                            # Version history
+├── LICENSE                                 # MIT License
+├── SETUP_GUIDE.md                          # Publishing instructions
+├── QUICK_REFERENCE.md                      # Developer cheat sheet
+├── EXAMPLES_COMPARISON.md                  # NEW: Example comparison guide
+├── ARCHITECTURE.md                         # Technical architecture
+├── COMPLETE_FILE_STRUCTURE.md              # Full file listing
+├── PROJECT_SUMMARY.md                      # Project overview
+├── FINAL_CHECKLIST.md                      # Pre-publish checklist
+└── PROMPT.md                               # This file (project context)
 ```
 
 ## Key Components Explained
@@ -143,6 +142,7 @@ This ensures:
 - Silent operation - never shows errors to users
 - Communicates via custom events to avoid React warnings
 - Fully configurable via props
+- **NEW**: Supports `enableTransactionApproval` prop
 
 **Technical Innovation**:
 ```javascript
@@ -173,7 +173,80 @@ wallet.isStandard     // true if standard wallet
 wallet.disconnect()   // disconnect function
 ```
 
-### 3. **TypeScript Definitions** (index.d.ts)
+### 3. **UnicornTransactionButton.jsx** (NEW - Pre-Built Component)
+**Purpose**: One-line transaction button that works with both wallet types
+
+**Key Features**:
+- Automatic loading states ("⏳ Processing...")
+- Success/error message display
+- Transaction hash display
+- Approval dialog for Unicorn users
+- Standard wallet popup for MetaMask
+- Customizable styling
+
+**Usage**:
+```jsx
+<UnicornTransactionButton
+  transaction={{ to: '0x...', value: '1000', data: '0x' }}
+  onSuccess={(result) => console.log('Sent!', result)}
+>
+  Send Transaction
+</UnicornTransactionButton>
+```
+
+### 4. **UnicornSignButton.jsx** (NEW - Pre-Built Component)
+**Purpose**: One-line message signing button
+
+**Key Features**:
+- EIP-191 message signing
+- Automatic loading states
+- Signature display
+- Works with both wallet types
+- Customizable styling
+
+**Usage**:
+```jsx
+<UnicornSignButton
+  message="Sign to verify"
+  onSuccess={(sig) => console.log('Signed!', sig)}
+>
+  Sign Message
+</UnicornSignButton>
+```
+
+### 5. **useUnicornTransaction.js** (NEW - Universal Transaction Hook)
+**Purpose**: Hook for custom transaction logic that works with both wallet types
+
+**Returns**:
+```javascript
+{
+  sendTransaction: (tx) => Promise,
+  isLoading: boolean,
+  hash: string | null,
+  error: Error | null,
+  isUnicorn: boolean,
+  isStandard: boolean,
+  isConnected: boolean
+}
+```
+
+### 6. **useUnicornSignMessage.js** (NEW - Universal Signing Hook)
+**Purpose**: Hook for custom signing logic that works with both wallet types
+
+**Returns**:
+```javascript
+{
+  signMessage: (message) => Promise<string>,
+  isLoading: boolean,
+  signature: string | null,
+  error: Error | null,
+  isUnicorn: boolean,
+  isStandard: boolean,
+  isConnected: boolean
+}
+```
+
+### 7. **TypeScript Definitions** (index.d.ts)
 **Purpose**: Full TypeScript support for all exports
 
 **Provides**:
@@ -182,8 +255,9 @@ wallet.disconnect()   // disconnect function
 - Utility function signatures
 - Chain type unions
 - Full IntelliSense support
+- **NEW**: Types for pre-built components and hooks
 
-### 4. **Build Configuration** (tsup.config.js)
+### 8. **Build Configuration** (tsup.config.js)
 **Purpose**: Modern bundler configuration for optimal output
 
 **Outputs**:
@@ -199,6 +273,20 @@ wallet.disconnect()   // disconnect function
 
 ## Example Applications
 
+### Zero-Code Example (NEW!)
+**Purpose**: Demonstrate pre-built components for ultra-simple integration
+
+**Demonstrates**:
+- Pre-built transaction buttons
+- Pre-built signing buttons
+- Automatic UI handling (loading, success, error)
+- Zero custom logic needed
+- 3-line integration
+
+**Target Audience**: Developers who want the absolute quickest integration
+
+**Time to Setup**: 2-5 minutes
+
 ### Basic Example
 **Purpose**: Show minimal 2-minute integration
 
@@ -207,7 +295,9 @@ wallet.disconnect()   // disconnect function
 - Using useUniversalWallet() hook
 - Zero breaking changes
 
-**Target Audience**: Developers who want quickest integration
+**Target Audience**: Developers who want quickest integration with wallet display
+
+**Time to Setup**: 10 minutes
 
 ### Advanced Example
 **Purpose**: Show all features and capabilities
@@ -218,8 +308,11 @@ wallet.disconnect()   // disconnect function
 - Callbacks (onConnect, onError)
 - Debug mode
 - Connection logging
+- Custom transaction logic
 
-**Target Audience**: Developers who want full feature set
+**Target Audience**: Developers who want full feature set and custom control
+
+**Time to Setup**: 20 minutes
 
 ### Migration Example
 **Purpose**: Help developers migrate from manual file copying
@@ -230,21 +323,41 @@ wallet.disconnect()   // disconnect function
 - What changed (only imports!)
 - Migration helper script
 
-**Includes**: Automated migration script that:
-- Scans for old files
-- Checks for old imports
-- Provides step-by-step migration instructions
+**Includes**: Automated migration script
 
 **Target Audience**: Existing users who copied files manually
 
 ## How Developers Use This Package
 
-### Installation
-```bash
-npm install @unicorn/autoconnect
+### Zero-Code Integration (NEW - Simplest!)
+```jsx
+// 1. Import
+import { 
+  UnicornAutoConnect,
+  UnicornTransactionButton,
+  UnicornSignButton 
+} from '@unicorn/autoconnect';
+
+// 2. Add to App
+<UnicornAutoConnect
+  clientId={process.env.VITE_THIRDWEB_CLIENT_ID}
+  factoryAddress={process.env.VITE_THIRDWEB_FACTORY_ADDRESS}
+  enableTransactionApproval={true}
+/>
+
+// 3. Use pre-built buttons
+<UnicornTransactionButton transaction={tx}>
+  Send Transaction
+</UnicornTransactionButton>
+
+<UnicornSignButton message={msg}>
+  Sign Message
+</UnicornSignButton>
 ```
 
-### Integration (3 steps)
+**That's it!** Full Unicorn support in ~3 lines per feature.
+
+### Standard Integration (Custom Logic)
 ```jsx
 // 1. Import
 import { UnicornAutoConnect, useUniversalWallet } from '@unicorn/autoconnect';
@@ -318,6 +431,18 @@ const wallet = useUniversalWallet();
 
 **Trade-off**: Users must have these installed (but they already do)
 
+### Decision 6: Pre-Built Components (NEW)
+**Problem**: Even with hooks, developers still need to write UI logic
+
+**Solution**: Create pre-built components that handle everything
+- Zero custom logic needed
+- Beautiful UI out of the box
+- Automatic loading/success/error states
+- Works with both wallet types
+- Dramatically lower barrier to entry
+
+**Trade-off**: Less customization (but custom hooks still available)
+
 ## Publishing Workflow
 
 ### Initial Setup
@@ -356,13 +481,16 @@ git tag v1.0.0
 git push origin v1.0.0
 ```
 
-### Future Updates
+### Version Updates
 ```bash
-# Make changes
-git commit -m "feat: new feature"
-
-# Update version
+# For new features (backward compatible)
 npm version minor  # 1.0.0 → 1.1.0
+
+# For bug fixes
+npm version patch  # 1.0.0 → 1.0.1
+
+# For breaking changes
+npm version major  # 1.0.0 → 2.0.0
 
 # Push (GitHub Actions auto-publishes!)
 git push && git push --tags
@@ -382,12 +510,6 @@ git push && git push --tags
 6. Publish to NPM (using NPM_TOKEN)
 7. Comment on release with install instructions
 
-**Features**:
-- Automated publishing
-- NPM provenance for security
-- Dry run verification
-- Error handling
-
 ### test.yml
 **Triggers**: On push to main/develop or PRs
 
@@ -400,18 +522,13 @@ git push && git push --tags
 6. Build example apps
 7. Upload artifacts
 
-**Features**:
-- Multi-version testing
-- Example app verification
-- Cache optimization
-- Artifact preservation
-
 ## Documentation Structure
 
 ### For Users (Developers Installing Package)
 - **README.md** - Main documentation on NPM page
 - **QUICK_REFERENCE.md** - One-page cheat sheet
-- **Example Apps** - Working code examples
+- **EXAMPLES_COMPARISON.md** (NEW) - Choose the right example
+- **Example Apps** - Working code examples (4 total)
 
 ### For Contributors
 - **CONTRIBUTING.md** - How to contribute
@@ -442,6 +559,7 @@ git push && git push --tags
 - ✅ Helpful error messages
 - ✅ Good TypeScript support
 - ✅ Active issue resolution
+- ✅ **NEW: Zero-code option for fastest setup**
 
 ### Adoption Metrics
 - 📊 NPM download count
@@ -452,7 +570,21 @@ git push && git push --tags
 
 ## Common Use Cases
 
-### Use Case 1: Basic Integration
+### Use Case 1: Quick Prototype (NEW - Zero-Code)
+**Scenario**: Developer wants to test Unicorn in 5 minutes
+
+**Solution**:
+```jsx
+import { UnicornTransactionButton } from '@unicorn/autoconnect';
+
+<UnicornTransactionButton transaction={tx}>
+  Send
+</UnicornTransactionButton>
+```
+
+**Result**: Full Unicorn support with beautiful UI, zero custom code
+
+### Use Case 2: Basic Integration
 **Scenario**: Developer with existing RainbowKit dApp wants Unicorn support
 
 **Solution**:
@@ -466,7 +598,7 @@ git push && git push --tags
 
 **Result**: App now supports Unicorn AutoConnect, existing wallets still work
 
-### Use Case 2: Transaction Handling
+### Use Case 3: Transaction Handling
 **Scenario**: Developer needs to handle both gasless and standard transactions
 
 **Solution**:
@@ -484,7 +616,7 @@ if (wallet.isUnicorn) {
 
 **Result**: Unified transaction handling for both wallet types
 
-### Use Case 3: Multi-Chain Support
+### Use Case 4: Multi-Chain Support
 **Scenario**: Developer wants to support multiple blockchains
 
 **Solution**:
@@ -498,7 +630,7 @@ if (wallet.isUnicorn) {
 
 **Result**: Works across all supported chains
 
-### Use Case 4: Migration from Manual Files
+### Use Case 5: Migration from Manual Files
 **Scenario**: Developer previously copied files manually, wants to upgrade
 
 **Solution**:
@@ -577,35 +709,54 @@ ls -la dist/
 - Users pass values as props
 - Build completes with ZERO warnings
 
+### Issue: Pre-built buttons not working (NEW)
+**Symptoms**: UnicornTransactionButton or UnicornSignButton doesn't work
+
+**Checks**:
+1. Wallet is connected: `wallet.isConnected` should be true
+2. Transaction object is valid (has `to`, `value`, `data`)
+3. Message string is provided for signing
+4. `enableTransactionApproval={true}` for Unicorn approval dialogs
+
+**Solution**: Check console for errors, enable debug mode
+
 ## Future Enhancements (Roadmap)
 
-### Phase 1: Core Package (Current - v1.0.0)
+### Phase 1: Core Package (v1.0.0 - COMPLETE ✅)
 - ✅ Basic integration
 - ✅ Unified wallet hook
 - ✅ TypeScript support
 - ✅ Example applications
 - ✅ Documentation
 
-### Phase 2: Enhanced Features (v1.1.0)
+### Phase 2: Zero-Code Integration (v1.1.0 - COMPLETE ✅)
+- ✅ Pre-built transaction button
+- ✅ Pre-built signing button
+- ✅ Universal transaction hook
+- ✅ Universal signing hook
+- ✅ Transaction approval dialogs
+- ✅ Zero-code example application
+
+### Phase 3: Enhanced Features (v1.2.0 - PLANNED 🔄)
 - 🔄 Additional chain support
 - 🔄 Enhanced transaction approval UI
 - 🔄 Better error messages for users
 - 🔄 Analytics integration (opt-in)
 - 🔄 Deep linking support
 
-### Phase 3: Advanced Features (v1.2.0)
+### Phase 4: Advanced Features (v1.3.0 - PLANNED 🔄)
 - 🔄 Multi-wallet management
 - 🔄 Custom wallet UI components
 - 🔄 Transaction batching helpers
 - 🔄 Gas estimation utilities
 - 🔄 Network switching helpers
 
-### Phase 4: Ecosystem (v2.0.0)
-- 🔄 Mobile SDK
-- 🔄 React Native support
-- 🔄 Vue/Svelte adapters
-- 🔄 CLI tool for scaffolding
-- 🔄 Plugin system
+### Phase 5: Ecosystem (v2.0.0 - FUTURE 🔮)
+- 🔮 Mobile SDK
+- 🔮 React Native support
+- 🔮 Vue/Svelte adapters
+- 🔮 CLI tool for scaffolding
+- 🔮 Plugin system
 
 ## Development Guidelines
 
@@ -646,6 +797,7 @@ Every decision prioritizes developer experience:
 - Clear documentation
 - Working examples
 - Helpful error messages
+- **NEW: Zero-code option for instant gratification**
 
 ### 2. Zero Breaking Changes
 Never break existing functionality:
@@ -681,6 +833,7 @@ Built for and by the community:
 - ✅ Works with existing setup
 - ✅ Unified interface
 - ✅ Zero configuration for basic use
+- ✅ **NEW: Pre-built components for instant setup**
 
 **vs Building from Scratch**:
 - ✅ Production-ready immediately
@@ -697,13 +850,13 @@ Built for and by the community:
 
 ## Project Completion Status
 
-This project is **100% complete** and ready for:
-- ✅ Publishing to NPM
+This project is **100% complete with zero-code enhancement** and ready for:
+- ✅ Publishing to NPM (v1.1.0)
 - ✅ Production use by developers
 - ✅ Community contributions
 - ✅ Future enhancements
 
-All core features, documentation, examples, and tooling are finished and tested.
+All core features, zero-code integration, documentation, examples, and tooling are finished and tested.
 
 ---
 
@@ -723,6 +876,7 @@ When working on this package, remember:
 10. **Props-First**: Component uses props with hardcoded defaults - NO import.meta usage
 11. **Testing**: Use `pnpm install file:../..` for local testing in examples
 12. **UI Updates**: Event dispatch is critical - must happen in onConnect callback for UI to update
+13. **NEW: Pre-built Components**: Provide zero-code option alongside custom hooks
 
 ### Important Implementation Details
 
@@ -761,13 +915,22 @@ tsup src/index.js --format cjs,esm --external react,react-dom,wagmi,thirdweb && 
 - [ ] Disconnect button works
 - [ ] Standard wallets connect and work
 - [ ] Can switch between wallet types
+- [ ] **NEW: Pre-built buttons work (transaction and signing)**
+- [ ] **NEW: Approval dialogs show for Unicorn transactions**
 
 **File Extensions**:
 - Use `.jsx` and `.js` extensions in imports within `src/index.js`
 - This helps bundlers understand the file types
 
+**Zero-Code Components**:
+- Always handle loading, success, and error states automatically
+- Provide clear visual feedback to users
+- Work seamlessly with both Unicorn and standard wallets
+- Allow customization via `style` prop
+- Fire callbacks (`onSuccess`, `onError`) for developer control
+
 The code quality bar is high - maintain it!
 
 ---
 
-**This package transforms web3 integration from hours to minutes.** 🦄
+**This package transforms web3 integration from hours to minutes, and now from minutes to seconds with zero-code components.** 🦄

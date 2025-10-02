@@ -1,7 +1,7 @@
 {
   "name": "@unicorn/autoconnect",
-  "version": "1.0.2",
-  "description": "Drop-in Unicorn AutoConnect for existing dApps - zero breaking changes",
+  "version": "1.1.0",
+  "description": "Drop-in Unicorn.eth AutoConnect for existing dApps",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -9,13 +9,19 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
-      "require": "./dist/index.cjs"
-    }
+      "require": "./dist/index.cjs",
+      "default": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
   },
   "files": [
     "dist",
-    "README.md"
+    "README.md",
+    "LICENSE"
   ],
+  "engines": {
+     "node": ">=18" 
+  },
   "scripts": {
     "build": "tsup src/index.js --format cjs,esm --external react,react-dom,wagmi,thirdweb && cp src/types/index.d.ts dist/index.d.ts",
     "dev": "tsup src/index.js --format esm --watch",
@@ -23,6 +29,7 @@
   },
   "keywords": [
     "unicorn",
+    "myunicornaccount",
     "web3",
     "wallet",
     "autoconnect",
@@ -35,7 +42,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/MyUnicornAccount/autoconnect"
+    "url": "git+https://github.com/MyUnicornAccount/autoconnect.git"
   },
   "peerDependencies": {
     "react": "^18.0.0",
@@ -49,5 +56,12 @@
     "react-dom": "^18.2.0",
     "thirdweb": "^5.68.0",
     "wagmi": "^2.17.1"
+  },"publishConfig": { 
+    "access": "public", 
+    "provenance": true 
+  },
+"homepage": "https://github.com/MyUnicornAccount/autoconnect#readme",
+"bugs": { 
+  "url": "https://github.com/MyUnicornAccount/autoconnect/issues" 
   }
 }
