@@ -125,7 +125,7 @@ For the simplest possible setup, use our pre-built components:
 
 ### Send Transactions
 \`\`\`jsx
-import { UnicornTransactionButton } from '@unicorn/autoconnect';
+import { UnicornTransactionButton } from '@unicorn.eth/autoconnect';
 
 <UnicornTransactionButton
   transaction={{
@@ -141,7 +141,7 @@ import { UnicornTransactionButton } from '@unicorn/autoconnect';
 
 ### Sign Messages
 \`\`\`jsx
-import { UnicornSignButton } from '@unicorn/autoconnect';
+import { UnicornSignButton } from '@unicorn.eth/autoconnect';
 
 <UnicornSignButton
   message="Sign to verify"
@@ -245,7 +245,7 @@ To use pre-built components:
 import { 
   UnicornTransactionButton,
   UnicornSignButton 
-} from '@unicorn/autoconnect';
+} from '@unicorn.eth/autoconnect';
 \`\`\`
 ```
 
@@ -351,7 +351,7 @@ import {
   useUniversalWallet,
   useUnicornTransaction,
   useUnicornSignMessage
-} from '@unicorn/autoconnect';
+} from '@unicorn.eth/autoconnect';
 
 // Should have no type errors
 const tx = { to: '0x...', value: '1000', data: '0x' };
@@ -398,14 +398,14 @@ pnpm run build
 npm publish --access public
 
 # Watch for success message:
-# + @unicorn/autoconnect@1.1.0
+# + @unicorn.eth/autoconnect@1.1.0
 ```
 
 ### 4. Verify Publication
 
 ```bash
 # Check NPM
-open https://www.npmjs.com/package/@unicorn/autoconnect
+open https://www.npmjs.com/package/@unicorn.eth/autoconnect
 
 # Verify version shows 1.1.0
 # Verify README displays correctly
@@ -419,14 +419,14 @@ open https://www.npmjs.com/package/@unicorn/autoconnect
 mkdir test-install
 cd test-install
 npm init -y
-npm install @unicorn/autoconnect@1.1.0
+npm install @unicorn.eth/autoconnect@1.1.0
 
 # Verify installation
-node -e "console.log(require('@unicorn/autoconnect'))"
+node -e "console.log(require('@unicorn.eth/autoconnect'))"
 # Should show exports
 
 # Test imports
-node -e "const { UnicornTransactionButton } = require('@unicorn/autoconnect'); console.log('✅ Import works')"
+node -e "const { UnicornTransactionButton } = require('@unicorn.eth/autoconnect'); console.log('✅ Import works')"
 ```
 
 ---
@@ -482,11 +482,11 @@ This release introduces **pre-built components** that make Unicorn integration a
 ### 🚀 Getting Started
 
 \`\`\`bash
-npm install @unicorn/autoconnect@1.1.0
+npm install @unicorn.eth/autoconnect@1.1.0
 \`\`\`
 
 \`\`\`jsx
-import { UnicornTransactionButton } from '@unicorn/autoconnect';
+import { UnicornTransactionButton } from '@unicorn.eth/autoconnect';
 
 <UnicornTransactionButton transaction={{to: '0x...', value: '1000', data: '0x'}}>
   Send Transaction
@@ -527,7 +527,7 @@ NPM automatically updates from GitHub, but verify:
 Twitter/Discord announcement:
 
 ```
-🎉 @unicorn/autoconnect v1.1.0 is live!
+🎉 @unicorn.eth/autoconnect v1.1.0 is live!
 
 ✨ New: Zero-code integration with pre-built components
 
@@ -536,7 +536,7 @@ Send transactions in 3 lines:
   Send
 </UnicornTransactionButton>
 
-🔗 npm install @unicorn/autoconnect
+🔗 npm install @unicorn.eth/autoconnect
 📚 Docs: [link]
 
 #web3 #ethereum #cryptocurrency
@@ -547,7 +547,7 @@ Send transactions in 3 lines:
 Post in #announcements:
 
 ```markdown
-## 🦄 @unicorn/autoconnect v1.1.0 Released!
+## 🦄 @unicorn.eth/autoconnect v1.1.0 Released!
 
 We're excited to announce **zero-code integration** with pre-built components!
 
@@ -565,7 +565,7 @@ We're excited to announce **zero-code integration** with pre-built components!
 \`\`\`
 
 ### Links
-- 📦 NPM: https://www.npmjs.com/package/@unicorn/autoconnect
+- 📦 NPM: https://www.npmjs.com/package/@unicorn.eth/autoconnect
 - 📚 Docs: https://github.com/YOUR_USERNAME/autoconnect
 - 🎓 Examples: https://github.com/YOUR_USERNAME/autoconnect/tree/main/examples/zero-code
 
@@ -584,7 +584,7 @@ mkdir post-deploy-test
 cd post-deploy-test
 npm init -y
 npm install react react-dom wagmi thirdweb @rainbow-me/rainbowkit
-npm install @unicorn/autoconnect@1.1.0
+npm install @unicorn.eth/autoconnect@1.1.0
 
 # Create test file
 # ... test imports and basic usage
@@ -633,14 +633,14 @@ If minor issue:
 
 If major issue:
 ```bash
-npm deprecate @unicorn/autoconnect@1.1.0 "Critical bug, use 1.0.0 or wait for 1.1.1"
+npm deprecate @unicorn.eth/autoconnect@1.1.0 "Critical bug, use 1.0.0 or wait for 1.1.1"
 ```
 
 ### Option 3: Unpublish
 
 **Only within 72 hours:**
 ```bash
-npm unpublish @unicorn/autoconnect@1.1.0
+npm unpublish @unicorn.eth/autoconnect@1.1.0
 ```
 
 ---

@@ -1,4 +1,4 @@
-# @unicorn/autoconnect - Architecture Overview
+# @unicorn.eth/autoconnect - Architecture Overview
 
 Visual guide to how the package works and how components interact.
 
@@ -37,7 +37,7 @@ Visual guide to how the package works and how components interact.
                             ↕️
 
 ┌─────────────────────────────────────────────────────────────┐
-│              @unicorn/autoconnect Package                    │
+│              @unicorn.eth/autoconnect Package                    │
 │                                                              │
 │  📦 Exports:                                                │
 │  - UnicornAutoConnect (Component)                           │
@@ -295,7 +295,7 @@ ESM           CommonJS
 ## 🌳 Import Tree
 
 ```
-@unicorn/autoconnect
+@unicorn.eth/autoconnect
 │
 ├─ UnicornAutoConnect
 │  ├─ Uses: React, ReactDOM
@@ -319,7 +319,7 @@ ESM           CommonJS
 
 ### 1. Non-Breaking
 ```
-Existing Code              @unicorn/autoconnect
+Existing Code              @unicorn.eth/autoconnect
 =============              ===================
 Still works   ←────────→   Adds enhancement
 No changes    ←────────→   Only additions

@@ -1,4 +1,4 @@
-# Final Checklist for @unicorn/autoconnect
+# Final Checklist for @unicorn.eth/autoconnect
 
 Use this checklist to ensure everything is ready before publishing.
 
@@ -129,7 +129,7 @@ Use this checklist to ensure everything is ready before publishing.
 - [ ] Ran `pnpm link` in package root
 - [ ] Link created successfully
 - [ ] Tested in a separate project
-- [ ] Import works: `import { UnicornAutoConnect } from '@unicorn/autoconnect'`
+- [ ] Import works: `import { UnicornAutoConnect } from '@unicorn.eth/autoconnect'`
 - [ ] TypeScript types work
 - [ ] Component renders without errors
 
@@ -138,7 +138,7 @@ Use this checklist to ensure everything is ready before publishing.
 **Basic Example:**
 - [ ] `cd examples/basic`
 - [ ] `pnpm install`
-- [ ] `pnpm link @unicorn/autoconnect`
+- [ ] `pnpm link @unicorn.eth/autoconnect`
 - [ ] `pnpm run dev`
 - [ ] App loads without errors
 - [ ] Can connect with standard wallet
@@ -147,7 +147,7 @@ Use this checklist to ensure everything is ready before publishing.
 **Advanced Example:**
 - [ ] `cd examples/advanced`
 - [ ] `pnpm install`
-- [ ] `pnpm link @unicorn/autoconnect`
+- [ ] `pnpm link @unicorn.eth/autoconnect`
 - [ ] `pnpm run dev`
 - [ ] All features work
 - [ ] Transaction demo works
@@ -156,7 +156,7 @@ Use this checklist to ensure everything is ready before publishing.
 **Migration Example:**
 - [ ] `cd examples/migration`
 - [ ] `pnpm install`
-- [ ] `pnpm link @unicorn/autoconnect`
+- [ ] `pnpm link @unicorn.eth/autoconnect`
 - [ ] `pnpm run dev`
 - [ ] Shows migration comparison
 - [ ] Migration script runs: `pnpm run migrate`
@@ -245,7 +245,7 @@ Use this checklist to ensure everything is ready before publishing.
 - [ ] Run `npm publish --access public`
 - [ ] Watch for success message
 - [ ] Note the published version
-- [ ] Visit npmjs.com/package/@unicorn/autoconnect
+- [ ] Visit npmjs.com/package/@unicorn.eth/autoconnect
 - [ ] Verify package appears correctly
 
 ### Git Tagging
@@ -271,11 +271,11 @@ Use this checklist to ensure everything is ready before publishing.
 
 ### NPM Package
 
-- [ ] Visit https://www.npmjs.com/package/@unicorn/autoconnect
+- [ ] Visit https://www.npmjs.com/package/@unicorn.eth/autoconnect
 - [ ] Package appears correctly
 - [ ] README renders properly
 - [ ] Version shows as 1.0.0
-- [ ] Install works: `npm install @unicorn/autoconnect`
+- [ ] Install works: `npm install @unicorn.eth/autoconnect`
 
 ### Fresh Installation Test
 
@@ -284,7 +284,7 @@ Use this checklist to ensure everything is ready before publishing.
 mkdir test-install && cd test-install
 npm init -y
 npm install react react-dom wagmi thirdweb @rainbow-me/rainbowkit
-npm install @unicorn/autoconnect
+npm install @unicorn.eth/autoconnect
 ```
 
 - [ ] Installation completes successfully
@@ -398,7 +398,7 @@ Use this space for your specific notes:
 
 **GitHub Username**: ________________
 
-**Package Name**: @unicorn/autoconnect
+**Package Name**: @unicorn.eth/autoconnect
 
 **First Published**: ________________
 
@@ -423,7 +423,7 @@ When all items are checked:
 ```
 ╔══════════════════════════════════════════════════════╗
 ║                                                      ║
-║    🦄  @unicorn/autoconnect  🦄                     ║
+║    🦄  @unicorn.eth/autoconnect  🦄                     ║
 ║                                                      ║
 ║         Successfully Published to NPM!               ║
 ║                                                      ║

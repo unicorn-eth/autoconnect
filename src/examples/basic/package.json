@@ -2,7 +2,7 @@
   "name": "unicorn-autoconnect-basic-example",
   "version": "1.0.0",
   "private": true,
-  "description": "Basic integration example for @unicorn/autoconnect",
+  "description": "Basic integration example for @unicorn.eth/autoconnect",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -12,8 +12,8 @@
   "dependencies": {
     "@rainbow-me/rainbowkit": "^2.2.8",
     "@tanstack/react-query": "^5.89.0",
-    "@unicorn/autoconnect": "file:../../../unicorn-autoconnect-1.0.1.tgz",
-    "autoconnect": "link:../../../../../../Library/pnpm/global/5/node_modules/@unicorn/autoconnect",
+    "@unicorn.eth/autoconnect": "file:../../../unicorn-autoconnect-1.0.1.tgz",
+    "autoconnect": "link:../../../../../../Library/pnpm/global/5/node_modules/@unicorn.eth/autoconnect",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "thirdweb": "^5.68.0",

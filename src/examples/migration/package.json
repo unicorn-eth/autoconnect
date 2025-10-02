@@ -13,7 +13,7 @@
   "dependencies": {
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "@unicorn/autoconnect": "^1.0.0",
+    "@unicorn.eth/autoconnect": "^1.0.0",
     "@rainbow-me/rainbowkit": "^2.2.8",
     "@tanstack/react-query": "^5.89.0",
     "viem": "^2.37.7",

@@ -1,4 +1,4 @@
-# @unicorn/autoconnect
+# @unicorn.eth/autoconnect
 
 > Add Unicorn AutoConnect to your dApp in 2 minutes - zero breaking changes
 
@@ -16,11 +16,11 @@ Drop-in Unicorn wallet integration for existing web3 apps. Works alongside your 
 ## Installation
 
 ```bash
-npm install @unicorn/autoconnect
+npm install @unicorn.eth/autoconnect
 # or
-yarn add @unicorn/autoconnect
+yarn add @unicorn.eth/autoconnect
 # or
-pnpm add @unicorn/autoconnect
+pnpm add @unicorn.eth/autoconnect
 ```
 
 ## Quick Start
@@ -28,7 +28,7 @@ pnpm add @unicorn/autoconnect
 ### 1. Add to your App component
 
 ```jsx
-import { UnicornAutoConnect } from '@unicorn/autoconnect';
+import { UnicornAutoConnect } from '@unicorn.eth/autoconnect';
 
 function App() {
   return (
@@ -56,7 +56,7 @@ import { useAccount } from 'wagmi';
 const { address, isConnected } = useAccount();
 
 // After:
-import { useUniversalWallet } from '@unicorn/autoconnect';
+import { useUniversalWallet } from '@unicorn.eth/autoconnect';
 const wallet = useUniversalWallet();
 // Now works with both Unicorn and standard wallets!
 ```
@@ -144,7 +144,7 @@ interface UniversalWallet {
 ### Example Usage
 
 ```jsx
-import { useUniversalWallet } from '@unicorn/autoconnect';
+import { useUniversalWallet } from '@unicorn.eth/autoconnect';
 import { useSendTransaction } from 'wagmi';
 
 function MyComponent() {
@@ -237,10 +237,10 @@ If you previously copied the files manually:
 // - src/hooks/useUniversalWallet.js
 
 // Install package instead:
-npm install @unicorn/autoconnect
+npm install @unicorn.eth/autoconnect
 
 // Update imports:
-import { UnicornAutoConnect, useUniversalWallet } from '@unicorn/autoconnect';
+import { UnicornAutoConnect, useUniversalWallet } from '@unicorn.eth/autoconnect';
 
 // Everything else stays the same!
 ```
@@ -260,7 +260,7 @@ These should already be in your project.
 Full TypeScript definitions included:
 
 ```typescript
-import type { UniversalWallet, UnicornConfig } from '@unicorn/autoconnect';
+import type { UniversalWallet, UnicornConfig } from '@unicorn.eth/autoconnect';
 ```
 
 ## Troubleshooting

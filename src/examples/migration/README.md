@@ -20,7 +20,7 @@ import { useUniversalWallet } from './hooks/useUniversalWallet';
 
 ```jsx
 // New way - install from NPM
-import { UnicornAutoConnect, useUniversalWallet } from '@unicorn/autoconnect';
+import { UnicornAutoConnect, useUniversalWallet } from '@unicorn.eth/autoconnect';
 ```
 
 **Benefits:**
@@ -34,11 +34,11 @@ import { UnicornAutoConnect, useUniversalWallet } from '@unicorn/autoconnect';
 ### 1. Install the package
 
 ```bash
-npm install @unicorn/autoconnect
+npm install @unicorn.eth/autoconnect
 # or
-yarn add @unicorn/autoconnect
+yarn add @unicorn.eth/autoconnect
 # or
-pnpm add @unicorn/autoconnect
+pnpm add @unicorn.eth/autoconnect
 ```
 
 ### 2. Remove old files
@@ -57,11 +57,11 @@ src/
 ```diff
 // In your App.jsx
 - import UnicornAutoConnect from './components/UnicornAutoConnect';
-+ import { UnicornAutoConnect } from '@unicorn/autoconnect';
++ import { UnicornAutoConnect } from '@unicorn.eth/autoconnect';
 
 // In your components
 - import { useUniversalWallet } from './hooks/useUniversalWallet';
-+ import { useUniversalWallet } from '@unicorn/autoconnect';
++ import { useUniversalWallet } from '@unicorn.eth/autoconnect';
 ```
 
 ### 4. Update your code (if needed)
@@ -70,7 +70,7 @@ The API is identical, but if you were using environment detection:
 
 ```diff
 - import { isUnicornEnvironment } from './utils/environment';
-+ import { isUnicornEnvironment } from '@unicorn/autoconnect';
++ import { isUnicornEnvironment } from '@unicorn.eth/autoconnect';
 ```
 
 ### 5. Test
@@ -88,7 +88,7 @@ Visit these URLs to test:
 Your app now uses the official package. Future updates are just:
 
 ```bash
-npm update @unicorn/autoconnect
+npm update @unicorn.eth/autoconnect
 ```
 
 ## What Stays the Same
@@ -113,7 +113,7 @@ npm update @unicorn/autoconnect
 
 Make sure you installed the package:
 ```bash
-npm install @unicorn/autoconnect
+npm install @unicorn.eth/autoconnect
 ```
 
 ### TypeScript errors?
@@ -174,7 +174,7 @@ function MyComponent() {
 import React from 'react';
 import { WagmiProvider } from 'wagmi';
 import { RainbowKitProvider } from '@rainbow-me/rainbowkit';
-import { UnicornAutoConnect } from '@unicorn/autoconnect';
+import { UnicornAutoConnect } from '@unicorn.eth/autoconnect';
 
 function App() {
   return (
@@ -193,7 +193,7 @@ function App() {
 
 ```jsx
 // MyComponent.jsx
-import { useUniversalWallet } from '@unicorn/autoconnect';
+import { useUniversalWallet } from '@unicorn.eth/autoconnect';
 
 function MyComponent() {
   const wallet = useUniversalWallet();

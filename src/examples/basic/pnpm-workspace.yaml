@@ -1,2 +1,2 @@
 overrides:
-  autoconnect: link:../../../../../../Library/pnpm/global/5/node_modules/@unicorn/autoconnect
+  autoconnect: link:../../../../../../Library/pnpm/global/5/node_modules/@unicorn.eth/autoconnect

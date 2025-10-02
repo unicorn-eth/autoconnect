@@ -11,7 +11,7 @@ import { base } from 'wagmi/chains';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 
 // Import from the package
-import { UnicornAutoConnect, useUniversalWallet } from '@unicorn/autoconnect';
+import { UnicornAutoConnect, useUniversalWallet } from '@unicorn.eth/autoconnect';
 
 // Your existing Wagmi config
 const config = getDefaultConfig({

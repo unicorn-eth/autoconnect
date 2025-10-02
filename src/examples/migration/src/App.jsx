@@ -11,7 +11,7 @@ import { base, polygon } from 'wagmi/chains';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 
 // ✅ NEW WAY - NPM package import
-import { UnicornAutoConnect, useUniversalWallet } from '@unicorn/autoconnect';
+import { UnicornAutoConnect, useUniversalWallet } from '@unicorn.eth/autoconnect';
 
 const config = getDefaultConfig({
   appName: 'Migration Example - After',
@@ -44,7 +44,7 @@ function WalletInfo() {
       }}>
         <p style={{ margin: 0, color: '#166534' }}>
           ✅ Using NPM package:<br/>
-          npm install @unicorn/autoconnect
+          npm install @unicorn.eth/autoconnect
         </p>
       </div>
 
@@ -100,7 +100,7 @@ function WalletInfo() {
             <span style={{ color: '#dc2626' }}>- import ... from './components/...'</span>
           </div>
           <div>
-            <span style={{ color: '#16a34a' }}>+ import ... from '@unicorn/autoconnect'</span>
+            <span style={{ color: '#16a34a' }}>+ import ... from '@unicorn.eth/autoconnect'</span>
           </div>
         </div>
         <p style={{ marginTop: '12px', marginBottom: 0, color: '#92400e', fontSize: '14px' }}>

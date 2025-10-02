@@ -1,70 +1,59 @@
 {
-  "name": "@unicorn/autoconnect",
+  "name": "@unicorn.eth/autoconnect",
   "version": "1.1.0",
-  "description": "Drop-in Unicorn.eth AutoConnect for existing dApps",
-  "main": "./dist/index.cjs",
-  "module": "./dist/index.js",
+  "description": "Drop-in Unicorn wallet integration for existing web3 apps. Works alongside your existing wallet setup (RainbowKit, Wagmi, etc.) without modifying any code.",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
-  "packageManager": "pnpm@10.17.1",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/index.js",
-      "require": "./dist/index.cjs",
-      "default": "./dist/index.js"
-    },
-    "./package.json": "./package.json"
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    }
   },
   "files": [
     "dist",
     "README.md",
     "LICENSE"
   ],
-  "engines": {
-     "node": ">=18" 
-  },
   "scripts": {
     "build": "tsup src/index.js --format cjs,esm --external react,react-dom,wagmi,thirdweb && cp src/types/index.d.ts dist/index.d.ts",
     "dev": "tsup src/index.js --format esm --watch",
     "prepublishOnly": "pnpm run build"
-  }
-,
+  },
   "keywords": [
     "unicorn",
-    "myunicornaccount",
-    "web3",
     "wallet",
-    "autoconnect",
-    "thirdweb",
+    "web3",
+    "ethereum",
     "wagmi",
-    "account-abstraction",
-    "gasless"
+    "rainbowkit",
+    "thirdweb",
+    "autoconnect",
+    "gasless",
+    "smart-account"
   ],
   "author": "Unicorn.eth",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/MyUnicornAccount/autoconnect.git"
+    "url": "https://github.com/unicorn-eth/autoconnect.git"
   },
+  "bugs": {
+    "url": "https://github.com/unicorn-eth/autoconnect/issues"
+  },
+  "homepage": "https://github.com/unicorn-eth/autoconnect#readme",
   "peerDependencies": {
-    "react": "^18.0.0",
-    "react-dom": "^18.0.0",
-    "thirdweb": "^5.60.0",
-    "wagmi": "^2.0.0"
+    "react": ">=18.0.0",
+    "react-dom": ">=18.0.0",
+    "thirdweb": ">=5.60.0",
+    "wagmi": ">=2.0.0"
   },
   "devDependencies": {
-    "tsup": "^8.0.0",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "thirdweb": "^5.68.0",
-    "wagmi": "^2.17.1"
-  },"publishConfig": { 
-    "access": "public", 
-    "provenance": true 
+    "tsup": "^8.0.0"
   },
-"homepage": "https://github.com/MyUnicornAccount/autoconnect#readme",
-"bugs": { 
-  "url": "https://github.com/MyUnicornAccount/autoconnect/issues" 
-  },
-"sideEffects": false
+  "publishConfig": {
+    "access": "public"
+  }
 }

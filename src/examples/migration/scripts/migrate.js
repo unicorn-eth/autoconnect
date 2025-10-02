@@ -68,18 +68,18 @@ async function main() {
   }
 
   // Check for package installation
-  log('blue', 'Step 2: Checking for @unicorn/autoconnect package...\n');
+  log('blue', 'Step 2: Checking for @unicorn.eth/autoconnect package...\n');
   
   const packageJsonPath = path.join(process.cwd(), 'package.json');
   if (fs.existsSync(packageJsonPath)) {
     const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
     const deps = { ...packageJson.dependencies, ...packageJson.devDependencies };
     
-    if (deps['@unicorn/autoconnect']) {
-      log('green', `✅ Package installed: @unicorn/autoconnect@${deps['@unicorn/autoconnect']}\n`);
+    if (deps['@unicorn.eth/autoconnect']) {
+      log('green', `✅ Package installed: @unicorn.eth/autoconnect@${deps['@unicorn.eth/autoconnect']}\n`);
     } else {
       log('red', '❌ Package not installed\n');
-      log('yellow', 'Run: npm install @unicorn/autoconnect\n');
+      log('yellow', 'Run: npm install @unicorn.eth/autoconnect\n');
     }
   }
 
@@ -121,14 +121,14 @@ async function main() {
   } else {
     console.log();
     log('yellow', '⚠️  Replace old imports with:');
-    log('green', "   import { UnicornAutoConnect, useUniversalWallet } from '@unicorn/autoconnect';\n");
+    log('green', "   import { UnicornAutoConnect, useUniversalWallet } from '@unicorn.eth/autoconnect';\n");
   }
 
   // Migration checklist
   header('📋 Migration Checklist');
   
   const steps = [
-    { done: !foundOldImports, text: 'Update imports to use @unicorn/autoconnect' },
+    { done: !foundOldImports, text: 'Update imports to use @unicorn.eth/autoconnect' },
     { done: !foundOldFiles, text: 'Remove old manual files' },
     { done: true, text: 'Test your app works correctly' },
     { done: true, text: 'Commit changes to version control' },
@@ -147,11 +147,11 @@ async function main() {
   
   if (foundOldFiles || foundOldImports) {
     log('yellow', '1. Install the package:');
-    log('blue', '   npm install @unicorn/autoconnect\n');
+    log('blue', '   npm install @unicorn.eth/autoconnect\n');
     
     log('yellow', '2. Update all imports:');
     log('red', '   - import ... from \'./components/UnicornAutoConnect\'');
-    log('green', '   + import { UnicornAutoConnect } from \'@unicorn/autoconnect\'\n');
+    log('green', '   + import { UnicornAutoConnect } from \'@unicorn.eth/autoconnect\'\n');
     
     log('yellow', '3. Remove old files:');
     for (const file of filesToCheck) {
@@ -164,7 +164,7 @@ async function main() {
     
     log('yellow', '5. Commit changes:');
     log('blue', '   git add .');
-    log('blue', '   git commit -m "chore: migrate to @unicorn/autoconnect package"\n');
+    log('blue', '   git commit -m "chore: migrate to @unicorn.eth/autoconnect package"\n');
   } else {
     log('green', '✅ Migration appears complete!');
     log('blue', '\nTest your app to make sure everything works:');

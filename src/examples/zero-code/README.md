@@ -1,6 +1,6 @@
 # Zero-Code Integration Example
 
-This example demonstrates the **absolute simplest way** to use @unicorn/autoconnect - just import pre-built components and use them!
+This example demonstrates the **absolute simplest way** to use @unicorn.eth/autoconnect - just import pre-built components and use them!
 
 ## 🎯 What This Shows
 
@@ -239,7 +239,7 @@ The pre-built buttons include:
 To use these components in your own app:
 
 ```bash
-npm install @unicorn/autoconnect
+npm install @unicorn.eth/autoconnect
 ```
 
 ```jsx
@@ -247,7 +247,7 @@ import {
   UnicornAutoConnect,
   UnicornTransactionButton,
   UnicornSignButton
-} from '@unicorn/autoconnect';
+} from '@unicorn.eth/autoconnect';
 ```
 
 ---

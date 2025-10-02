@@ -1,8 +1,8 @@
-# Project Prompt: @unicorn/autoconnect NPM Package
+# Project Prompt: @unicorn.eth/autoconnect NPM Package
 
 ## Project Overview
 
-This is a **professional NPM package** that provides drop-in Unicorn AutoConnect integration for existing web3 dApps. The package transforms the clean `simple-integration` example into a reusable library that any developer can install via `npm install @unicorn/autoconnect`.
+This is a **professional NPM package** that provides drop-in Unicorn AutoConnect integration for existing web3 dApps. The package transforms the clean `simple-integration` example into a reusable library that any developer can install via `npm install @unicorn.eth/autoconnect`.
 
 ## Core Mission
 
@@ -61,7 +61,7 @@ This package allows developers to:
 The package uses an **isolated React root pattern** to avoid conflicts:
 
 ```
-Developer's App (Existing)          @unicorn/autoconnect
+Developer's App (Existing)          @unicorn.eth/autoconnect
 =======================             ===================
 WagmiProvider                       Creates separate React tree
 ├─ RainbowKitProvider              No shared state
@@ -81,7 +81,7 @@ This ensures:
 ## File Structure
 
 ```
-@unicorn/autoconnect/
+@unicorn.eth/autoconnect/
 ├── src/
 │   ├── components/
 │   │   ├── UnicornAutoConnect.jsx          # Core component with isolated root
@@ -336,7 +336,7 @@ import {
   UnicornAutoConnect,
   UnicornTransactionButton,
   UnicornSignButton 
-} from '@unicorn/autoconnect';
+} from '@unicorn.eth/autoconnect';
 
 // 2. Add to App
 <UnicornAutoConnect
@@ -360,7 +360,7 @@ import {
 ### Standard Integration (Custom Logic)
 ```jsx
 // 1. Import
-import { UnicornAutoConnect, useUniversalWallet } from '@unicorn/autoconnect';
+import { UnicornAutoConnect, useUniversalWallet } from '@unicorn.eth/autoconnect';
 
 // 2. Add to App
 <UnicornAutoConnect
@@ -575,7 +575,7 @@ git push && git push --tags
 
 **Solution**:
 ```jsx
-import { UnicornTransactionButton } from '@unicorn/autoconnect';
+import { UnicornTransactionButton } from '@unicorn.eth/autoconnect';
 
 <UnicornTransactionButton transaction={tx}>
   Send
@@ -636,7 +636,7 @@ if (wallet.isUnicorn) {
 **Solution**:
 ```bash
 # Install package
-npm install @unicorn/autoconnect
+npm install @unicorn.eth/autoconnect
 
 # Run migration helper
 cd examples/migration
@@ -674,7 +674,7 @@ pnpm run build
 2. Visit app without URL parameters: `http://localhost:3000`
 
 ### Issue: pnpm install fails with "Not Found - 404"
-**Symptoms**: `pnpm install @unicorn/autoconnect` tries to fetch from NPM registry
+**Symptoms**: `pnpm install @unicorn.eth/autoconnect` tries to fetch from NPM registry
 
 **Solution**: Use file path for local testing
 ```bash

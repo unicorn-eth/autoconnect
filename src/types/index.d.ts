@@ -1,4 +1,4 @@
-// Type definitions for @unicorn/autoconnect
+// Type definitions for @unicorn.eth/autoconnect
 import { ReactNode, ReactElement, CSSProperties } from 'react';
 import type { Account } from 'wagmi';
 
@@ -288,7 +288,7 @@ export interface UseUnicornSignMessageReturn {
  * 
  * @example
  * ```tsx
- * import { useUniversalWallet } from '@unicorn/autoconnect';
+ * import { useUniversalWallet } from '@unicorn.eth/autoconnect';
  * 
  * function MyComponent() {
  *   const wallet = useUniversalWallet();
@@ -314,7 +314,7 @@ export function useUniversalWallet(): UniversalWallet;
  * 
  * @example
  * ```tsx
- * import { useUnicornTransaction } from '@unicorn/autoconnect';
+ * import { useUnicornTransaction } from '@unicorn.eth/autoconnect';
  * 
  * function MyComponent() {
  *   const { sendTransaction, isLoading, hash } = useUnicornTransaction();
@@ -342,7 +342,7 @@ export function useUnicornTransaction(): UseUnicornTransactionReturn;
  * 
  * @example
  * ```tsx
- * import { useUnicornSignMessage } from '@unicorn/autoconnect';
+ * import { useUnicornSignMessage } from '@unicorn.eth/autoconnect';
  * 
  * function MyComponent() {
  *   const { signMessage, signature, isLoading } = useUnicornSignMessage();
@@ -367,7 +367,7 @@ export function useUnicornSignMessage(): UseUnicornSignMessageReturn;
  * 
  * @example
  * ```tsx
- * import { UnicornAutoConnect } from '@unicorn/autoconnect';
+ * import { UnicornAutoConnect } from '@unicorn.eth/autoconnect';
  * 
  * function App() {
  *   return (
@@ -392,7 +392,7 @@ export function UnicornAutoConnect(props: UnicornAutoConnectProps): ReactNode;
  * 
  * @example
  * ```tsx
- * import { UnicornTransactionButton } from '@unicorn/autoconnect';
+ * import { UnicornTransactionButton } from '@unicorn.eth/autoconnect';
  * 
  * function MyComponent() {
  *   const transaction = {
@@ -423,7 +423,7 @@ export function UnicornTransactionButton(
  * 
  * @example
  * ```tsx
- * import { UnicornSignButton } from '@unicorn/autoconnect';
+ * import { UnicornSignButton } from '@unicorn.eth/autoconnect';
  * 
  * function MyComponent() {
  *   return (
@@ -448,7 +448,7 @@ export function UnicornSignButton(
  * 
  * @example
  * ```ts
- * import { isUnicornEnvironment } from '@unicorn/autoconnect';
+ * import { isUnicornEnvironment } from '@unicorn.eth/autoconnect';
  * 
  * if (isUnicornEnvironment()) {
  *   console.log('Running in Unicorn portal');

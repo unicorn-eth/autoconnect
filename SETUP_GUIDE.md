@@ -1,4 +1,4 @@
-# Complete Setup Guide for @unicorn/autoconnect
+# Complete Setup Guide for @unicorn.eth/autoconnect
 
 This guide walks you through setting up and publishing the NPM package from scratch.
 
@@ -81,7 +81,7 @@ cp ../simple-integration/src/hooks/useUniversalWallet.js src/hooks/
 Create `src/index.js`:
 
 ```javascript
-// @unicorn/autoconnect - Main export file
+// @unicorn.eth/autoconnect - Main export file
 export { default as UnicornAutoConnect } from './components/UnicornAutoConnect';
 export { useUniversalWallet } from './hooks/useUniversalWallet';
 export { 
@@ -123,7 +123,7 @@ Use the package.json from the artifacts above, or create manually:
 
 ```json
 {
-  "name": "@unicorn/autoconnect",
+  "name": "@unicorn.eth/autoconnect",
   "version": "1.0.0",
   "description": "Drop-in Unicorn AutoConnect for existing dApps - zero breaking changes",
   "main": "./dist/index.cjs",
@@ -263,10 +263,10 @@ pnpm link
 
 # Create a test app or use existing one
 cd /path/to/test-app
-pnpm link @unicorn/autoconnect
+pnpm link @unicorn.eth/autoconnect
 
 # Test import
-import { UnicornAutoConnect } from '@unicorn/autoconnect';
+import { UnicornAutoConnect } from '@unicorn.eth/autoconnect';
 ```
 
 ### 6.4 Verify Package Contents
@@ -317,21 +317,21 @@ ls -la dist/
 npm publish --access public
 
 # You should see:
-# + @unicorn/autoconnect@1.0.0
+# + @unicorn.eth/autoconnect@1.0.0
 ```
 
 ### 7.4 Verify Publication
 
 ```bash
 # Check on NPM
-# Visit: https://www.npmjs.com/package/@unicorn/autoconnect
+# Visit: https://www.npmjs.com/package/@unicorn.eth/autoconnect
 
 # Try installing in a test project
 cd /tmp
 mkdir test-install
 cd test-install
 npm init -y
-npm install @unicorn/autoconnect
+npm install @unicorn.eth/autoconnect
 
 # Should install successfully!
 ```
@@ -400,7 +400,7 @@ cat > index.html << 'EOF'
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Basic Example - @unicorn/autoconnect</title>
+    <title>Basic Example - @unicorn.eth/autoconnect</title>
   </head>
   <body>
     <div id="root"></div>
@@ -443,11 +443,11 @@ mkdir test-unicorn-package
 cd test-unicorn-package
 npm init -y
 npm install react react-dom wagmi thirdweb @rainbow-me/rainbowkit
-npm install @unicorn/autoconnect
+npm install @unicorn.eth/autoconnect
 
 # Create test file
 cat > test.js << 'EOF'
-import { UnicornAutoConnect, useUniversalWallet } from '@unicorn/autoconnect';
+import { UnicornAutoConnect, useUniversalWallet } from '@unicorn.eth/autoconnect';
 console.log('✅ Package imports work!');
 EOF
 
@@ -459,7 +459,7 @@ node test.js
 ```bash
 # Create TypeScript test
 cat > test.ts << 'EOF'
-import { UnicornAutoConnect, useUniversalWallet, type UniversalWallet } from '@unicorn/autoconnect';
+import { UnicornAutoConnect, useUniversalWallet, type UniversalWallet } from '@unicorn.eth/autoconnect';
 
 const wallet: UniversalWallet = useUniversalWallet();
 console.log('✅ TypeScript types work!');
@@ -489,20 +489,20 @@ Your package is now live!
 
 ```bash
 # NPM page
-https://www.npmjs.com/package/@unicorn/autoconnect
+https://www.npmjs.com/package/@unicorn.eth/autoconnect
 
 # GitHub repo
 https://github.com/YOUR_USERNAME/autoconnect
 
 # Installation command
-npm install @unicorn/autoconnect
+npm install @unicorn.eth/autoconnect
 ```
 
 ## 📊 Post-Publication
 
 ### Monitor Usage
 
-- **NPM downloads**: https://www.npmjs.com/package/@unicorn/autoconnect
+- **NPM downloads**: https://www.npmjs.com/package/@unicorn.eth/autoconnect
 - **GitHub stars**: Watch your repo grow!
 - **Issues**: Respond to user questions
 

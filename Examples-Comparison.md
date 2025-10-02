@@ -33,7 +33,7 @@ Choose the right example for your use case!
 import { 
   UnicornTransactionButton,
   UnicornSignButton 
-} from '@unicorn/autoconnect';
+} from '@unicorn.eth/autoconnect';
 
 // That's it!
 <UnicornTransactionButton transaction={tx}>
@@ -57,14 +57,14 @@ import {
 - ✅ Zero breaking changes
 
 **Use when:**
-- 🆕 You're new to @unicorn/autoconnect
+- 🆕 You're new to @unicorn.eth/autoconnect
 - 📱 You only need wallet connection display
 - ⚡ You want simplest possible setup
 - 🎓 You're learning the basics
 
 **Code example:**
 ```jsx
-import { useUniversalWallet } from '@unicorn/autoconnect';
+import { useUniversalWallet } from '@unicorn.eth/autoconnect';
 
 const wallet = useUniversalWallet();
 
@@ -100,7 +100,7 @@ const wallet = useUniversalWallet();
 
 **Code example:**
 ```jsx
-import { useUniversalWallet } from '@unicorn/autoconnect';
+import { useUniversalWallet } from '@unicorn.eth/autoconnect';
 
 const wallet = useUniversalWallet();
 const { sendTransaction } = useSendTransaction();
@@ -139,7 +139,7 @@ const handleTx = async () => {
 import UnicornAutoConnect from './components/UnicornAutoConnect';
 
 // After: NPM package
-import { UnicornAutoConnect } from '@unicorn/autoconnect';
+import { UnicornAutoConnect } from '@unicorn.eth/autoconnect';
 ```
 
 ---
@@ -154,7 +154,7 @@ Do you need custom transaction logic?
 - **NO** → Use [Zero-Code Example](#zero-code-example) ✨
 - **YES** → Continue...
 
-Are you new to @unicorn/autoconnect?
+Are you new to @unicorn.eth/autoconnect?
 - **YES** → Start with [Basic Example](#basic-example), then [Advanced Example](#advanced-example)
 - **NO** → Jump to [Advanced Example](#advanced-example) 🚀
 

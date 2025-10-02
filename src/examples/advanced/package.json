@@ -2,7 +2,7 @@
   "name": "unicorn-autoconnect-advanced-example",
   "version": "1.0.0",
   "private": true,
-  "description": "Advanced integration example for @unicorn/autoconnect - all features",
+  "description": "Advanced integration example for @unicorn.eth/autoconnect - all features",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -13,7 +13,7 @@
   "dependencies": {
     "@rainbow-me/rainbowkit": "^2.2.8",
     "@tanstack/react-query": "^5.89.0",
-    "@unicorn/autoconnect": "file:../../../unicorn-autoconnect-1.0.2.tgz",
+    "@unicorn.eth/autoconnect": "file:../../../unicorn-autoconnect-1.0.2.tgz",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "thirdweb": "^5.68.0",

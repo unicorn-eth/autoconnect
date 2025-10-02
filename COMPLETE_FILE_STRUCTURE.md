@@ -1,11 +1,11 @@
-# Complete File Structure for @unicorn/autoconnect
+# Complete File Structure for @unicorn.eth/autoconnect
 
 This document shows the complete directory structure with all files needed for the NPM package.
 
 ## 📁 Complete Directory Tree
 
 ```
-@unicorn/autoconnect/
+@unicorn.eth/autoconnect/
 │
 ├── .github/
 │   └── workflows/
@@ -129,7 +129,7 @@ Create for each example (`basic`, `advanced`, `migration`):
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>[Example Name] - @unicorn/autoconnect</title>
+    <title>[Example Name] - @unicorn.eth/autoconnect</title>
   </head>
   <body>
     <div id="root"></div>
@@ -186,7 +186,7 @@ Create custom README for each example explaining its specific use case.
 Only these files are published (see `.npmignore`):
 
 ```
-@unicorn/autoconnect@1.0.0
+@unicorn.eth/autoconnect@1.0.0
 ├── dist/
 │   ├── index.js
 │   ├── index.cjs
@@ -282,7 +282,7 @@ pnpm run build
 pnpm link
 cd examples/basic
 pnpm install
-pnpm link @unicorn/autoconnect
+pnpm link @unicorn.eth/autoconnect
 pnpm run dev
 
 # Publish
@@ -315,7 +315,7 @@ Before publishing:
 
 Update these in all documentation:
 
-- **NPM Package**: `https://www.npmjs.com/package/@unicorn/autoconnect`
+- **NPM Package**: `https://www.npmjs.com/package/@unicorn.eth/autoconnect`
 - **GitHub Repo**: `https://github.com/YOUR_USERNAME/autoconnect`
 - **Issues**: `https://github.com/YOUR_USERNAME/autoconnect/issues`
 - **Discussions**: `https://github.com/YOUR_USERNAME/autoconnect/discussions`

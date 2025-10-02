@@ -15,7 +15,7 @@ import {
   UnicornTransactionButton,
   UnicornSignButton,
   useUniversalWallet
-} from '@unicorn/autoconnect';
+} from '@unicorn.eth/autoconnect';
 
 const config = getDefaultConfig({
   appName: 'Zero Code Example',
@@ -309,7 +309,7 @@ import {
   UnicornAutoConnect,
   UnicornTransactionButton,
   UnicornSignButton
-} from '@unicorn/autoconnect';
+} from '@unicorn.eth/autoconnect';
 
 // Add AutoConnect
 <UnicornAutoConnect
@@ -353,7 +353,7 @@ import {
               fontSize: '14px'
             }}>
               <p style={{ margin: 0 }}>
-                Built with @unicorn/autoconnect • Zero breaking changes
+                Built with @unicorn.eth/autoconnect • Zero breaking changes
               </p>
             </div>
           </div>

@@ -1,4 +1,4 @@
-# @unicorn/autoconnect - Complete Project Summary
+# @unicorn.eth/autoconnect - Complete Project Summary
 
 ## 🎉 What We've Built
 
@@ -8,7 +8,7 @@ A **professional NPM package** that transforms your clean `simple-integration` e
 
 ## 📦 Package Overview
 
-**Name**: `@unicorn/autoconnect`
+**Name**: `@unicorn.eth/autoconnect`
 **Current Version**: `1.1.0` (with zero-code components)
 **License**: MIT
 **Size**: ~10-20 KB (minified)
@@ -205,12 +205,12 @@ import { useUniversalWallet } from './hooks/useUniversalWallet';
 ### After v1.0.0 (NPM Package) - Better! 🎉
 
 ```bash
-npm install @unicorn/autoconnect
+npm install @unicorn.eth/autoconnect
 ```
 
 ```jsx
 // Import from package:
-import { UnicornAutoConnect, useUniversalWallet } from '@unicorn/autoconnect';
+import { UnicornAutoConnect, useUniversalWallet } from '@unicorn.eth/autoconnect';
 
 // Benefits:
 // - npm install - done!
@@ -223,7 +223,7 @@ import { UnicornAutoConnect, useUniversalWallet } from '@unicorn/autoconnect';
 
 ```jsx
 // Import pre-built components:
-import { UnicornTransactionButton } from '@unicorn/autoconnect';
+import { UnicornTransactionButton } from '@unicorn.eth/autoconnect';
 
 // Use in 3 lines:
 <UnicornTransactionButton transaction={tx}>
@@ -375,7 +375,7 @@ pnpm run build
 
 # 2. Test locally
 pnpm link
-cd test-app && pnpm link @unicorn/autoconnect
+cd test-app && pnpm link @unicorn.eth/autoconnect
 
 # 3. Publish
 npm login
@@ -467,14 +467,14 @@ This project demonstrates:
 
 **Once Published:**
 
-- NPM: `https://www.npmjs.com/package/@unicorn/autoconnect`
+- NPM: `https://www.npmjs.com/package/@unicorn.eth/autoconnect`
 - GitHub: `https://github.com/YOUR_USERNAME/autoconnect`
 - Issues: `https://github.com/YOUR_USERNAME/autoconnect/issues`
 - Docs: Your README.md on NPM
 
 **Installation:**
 ```bash
-npm install @unicorn/autoconnect
+npm install @unicorn.eth/autoconnect
 ```
 
 ---

@@ -17,7 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.0.0] - 2025-01-XX
 
 ### Added
-- 🎉 Initial release of @unicorn/autoconnect
+- 🎉 Initial release of @unicorn.eth/autoconnect
 - ✨ `UnicornAutoConnect` component for drop-in integration
 - ✨ `useUniversalWallet` hook for unified wallet interface
 - ✨ Isolated React root pattern to prevent provider conflicts
@@ -62,19 +62,19 @@ When upgrading between versions:
 
 #### Patch Updates (1.0.x → 1.0.y)
 ```bash
-npm update @unicorn/autoconnect
+npm update @unicorn.eth/autoconnect
 ```
 No code changes needed.
 
 #### Minor Updates (1.x.0 → 1.y.0)
 ```bash
-npm install @unicorn/autoconnect@latest
+npm install @unicorn.eth/autoconnect@latest
 ```
 New features available, existing code continues to work.
 
 #### Major Updates (1.x.x → 2.x.x)
 ```bash
-npm install @unicorn/autoconnect@2
+npm install @unicorn.eth/autoconnect@2
 ```
 Check migration guide in release notes for breaking changes.
 
@@ -101,11 +101,11 @@ import { useUniversalWallet } from './hooks/useUniversalWallet';
 
 **After (NPM Package v1.0.0):**
 ```bash
-npm install @unicorn/autoconnect
+npm install @unicorn.eth/autoconnect
 ```
 
 ```jsx
-import { UnicornAutoConnect, useUniversalWallet } from '@unicorn/autoconnect';
+import { UnicornAutoConnect, useUniversalWallet } from '@unicorn.eth/autoconnect';
 ```
 
 Everything else stays the same!
@@ -118,7 +118,7 @@ Everything else stays the same!
 
 ## Links
 
-- [NPM Package](https://www.npmjs.com/package/@unicorn/autoconnect)
+- [NPM Package](https://www.npmjs.com/package/@unicorn.eth/autoconnect)
 - [GitHub Repository](https://github.com/MyUnicornAccount/autoconnect)
 - [Documentation](https://docs.unicorn.eth)
 - [Discord Community](https://discord.gg/unicorn)

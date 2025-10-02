@@ -13,7 +13,7 @@ import { useSendTransaction, useSignMessage } from 'wagmi';
 import { parseEther } from 'viem';
 
 // Import from the package
-import { UnicornAutoConnect, useUniversalWallet } from '@unicorn/autoconnect';
+import { UnicornAutoConnect, useUniversalWallet } from '@unicorn.eth/autoconnect';
 
 // Multi-chain Wagmi config
 const config = getDefaultConfig({

@@ -1,6 +1,6 @@
 # Basic Integration Example
 
-This is the **simplest possible integration** of @unicorn/autoconnect into an existing dApp.
+This is the **simplest possible integration** of @unicorn.eth/autoconnect into an existing dApp.
 
 ## 🎯 What This Shows
 
@@ -54,7 +54,7 @@ const wallet = useUniversalWallet();
 ## 🎓 Learning Path
 
 Start here if you:
-- 🆕 Are new to @unicorn/autoconnect
+- 🆕 Are new to @unicorn.eth/autoconnect
 - ⚡ Want the quickest integration
 - 📦 Just need basic wallet connection
 - 🎯 Are building a proof of concept

@@ -1,15 +1,15 @@
-# @unicorn/autoconnect - Zero-Code Quick Reference
+# @unicorn.eth/autoconnect - Zero-Code Quick Reference
 
 ## 🚀 Installation
 
 ```bash
-npm install @unicorn/autoconnect
+npm install @unicorn.eth/autoconnect
 ```
 
 ## ⚡ 3-Line Transaction
 
 ```jsx
-import { UnicornTransactionButton } from '@unicorn/autoconnect';
+import { UnicornTransactionButton } from '@unicorn.eth/autoconnect';
 
 <UnicornTransactionButton transaction={{ to: '0x...', value: '1000', data: '0x' }}>
   Send
@@ -19,7 +19,7 @@ import { UnicornTransactionButton } from '@unicorn/autoconnect';
 ## ✍️ 3-Line Signing
 
 ```jsx
-import { UnicornSignButton } from '@unicorn/autoconnect';
+import { UnicornSignButton } from '@unicorn.eth/autoconnect';
 
 <UnicornSignButton message="Sign this">
   Sign
@@ -33,7 +33,7 @@ import {
   UnicornAutoConnect,
   UnicornTransactionButton,
   UnicornSignButton 
-} from '@unicorn/autoconnect';
+} from '@unicorn.eth/autoconnect';
 
 // Your existing app stays the same!
 <YourApp>
@@ -239,7 +239,7 @@ function MultiTransaction() {
 ### Conditional Rendering
 
 ```jsx
-import { useUniversalWallet } from '@unicorn/autoconnect';
+import { useUniversalWallet } from '@unicorn.eth/autoconnect';
 
 function ConditionalButton() {
   const wallet = useUniversalWallet();
@@ -333,7 +333,7 @@ const mintNFT = {
 
 **Solution**: 
 ```jsx
-import { useUniversalWallet } from '@unicorn/autoconnect';
+import { useUniversalWallet } from '@unicorn.eth/autoconnect';
 
 const wallet = useUniversalWallet();
 console.log('Connected:', wallet.isConnected);
@@ -483,7 +483,7 @@ console.log('Address:', wallet.address);
 For custom transaction logic:
 
 ```jsx
-import { useUnicornTransaction } from '@unicorn/autoconnect';
+import { useUnicornTransaction } from '@unicorn.eth/autoconnect';
 
 const { sendTransaction, isLoading, hash, error } = useUnicornTransaction();
 
@@ -501,7 +501,7 @@ const handleClick = async () => {
 For custom signing logic:
 
 ```jsx
-import { useUnicornSignMessage } from '@unicorn/autoconnect';
+import { useUnicornSignMessage } from '@unicorn.eth/autoconnect';
 
 const { signMessage, signature, isLoading } = useUnicornSignMessage();
 
@@ -516,7 +516,7 @@ const handleClick = async () => {
 For wallet information:
 
 ```jsx
-import { useUniversalWallet } from '@unicorn/autoconnect';
+import { useUniversalWallet } from '@unicorn.eth/autoconnect';
 
 const wallet = useUniversalWallet();
 
@@ -530,7 +530,7 @@ console.log('Connector:', wallet.connector?.name);
 
 - **Examples**: [View Examples](https://github.com/YOUR_USERNAME/autoconnect/tree/main/examples)
 - **Full Docs**: [Documentation](https://github.com/YOUR_USERNAME/autoconnect#readme)
-- **NPM Package**: [@unicorn/autoconnect](https://www.npmjs.com/package/@unicorn/autoconnect)
+- **NPM Package**: [@unicorn.eth/autoconnect](https://www.npmjs.com/package/@unicorn.eth/autoconnect)
 - **Discord**: [Join Community](https://discord.gg/unicorn)
 
 ## 🎓 Learning Path

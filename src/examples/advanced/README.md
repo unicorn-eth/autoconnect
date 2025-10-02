@@ -1,6 +1,6 @@
 # Advanced Integration Example
 
-This example demonstrates **all features and capabilities** of @unicorn/autoconnect.
+This example demonstrates **all features and capabilities** of @unicorn.eth/autoconnect.
 
 ## 🚀 What This Shows
 

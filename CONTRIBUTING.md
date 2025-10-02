@@ -1,4 +1,4 @@
-# Contributing to @unicorn/autoconnect
+# Contributing to @unicorn.eth/autoconnect
 
 Thank you for considering contributing! This guide will help you get started.
 
@@ -42,14 +42,14 @@ pnpm link
 ```bash
 cd examples/basic
 pnpm install
-pnpm link @unicorn/autoconnect
+pnpm link @unicorn.eth/autoconnect
 pnpm run dev
 ```
 
 ## Project Structure
 
 ```
-@unicorn/autoconnect/
+@unicorn.eth/autoconnect/
 ├── src/                    # Source code
 │   ├── components/         # React components
 │   ├── hooks/              # React hooks
@@ -286,4 +286,4 @@ By contributing, you agree that your contributions will be licensed under the MI
 
 ---
 
-Thank you for contributing to @unicorn/autoconnect! 🦄
+Thank you for contributing to @unicorn.eth/autoconnect! 🦄

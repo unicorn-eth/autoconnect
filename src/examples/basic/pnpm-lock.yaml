@@ -5,7 +5,7 @@ settings:
   excludeLinksFromLockfile: false
 
 overrides:
-  autoconnect: link:../../../../../../Library/pnpm/global/5/node_modules/@unicorn/autoconnect
+  autoconnect: link:../../../../../../Library/pnpm/global/5/node_modules/@unicorn.eth/autoconnect
 
 importers:
 
@@ -17,12 +17,12 @@ importers:
       '@tanstack/react-query':
         specifier: ^5.89.0
         version: 5.90.2(react@18.3.1)
-      '@unicorn/autoconnect':
+      '@unicorn.eth/autoconnect':
         specifier: file:../../../unicorn-autoconnect-1.0.1.tgz
         version: file:../../../unicorn-autoconnect-1.0.1.tgz(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(thirdweb@5.108.5(@hey-api/openapi-ts@0.84.4(typescript@5.9.2))(@solana/sysvars@2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.9.2))(@tanstack/query-core@5.90.2)(bufferutil@4.0.9)(fastestsmallesttextencoderdecoder@1.0.22)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@9.1.9(@testing-library/dom@10.4.1)(bufferutil@4.0.9)(utf-8-validate@5.0.10)(vite@7.1.7(jiti@2.6.0)))(typescript@5.9.2)(utf-8-validate@5.0.10)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10)))(wagmi@2.17.5(@tanstack/query-core@5.90.2)(@tanstack/react-query@5.90.2(react@18.3.1))(bufferutil@4.0.9)(react@18.3.1)(typescript@5.9.2)(utf-8-validate@5.0.10)(viem@2.37.9(bufferutil@4.0.9)(typescript@5.9.2)(utf-8-validate@5.0.10)(zod@3.25.75))(zod@3.25.75))
       autoconnect:
-        specifier: link:../../../../../../Library/pnpm/global/5/node_modules/@unicorn/autoconnect
-        version: link:../../../../../../Library/pnpm/global/5/node_modules/@unicorn/autoconnect
+        specifier: link:../../../../../../Library/pnpm/global/5/node_modules/@unicorn.eth/autoconnect
+        version: link:../../../../../../Library/pnpm/global/5/node_modules/@unicorn.eth/autoconnect
       react:
         specifier: ^18.2.0
         version: 18.3.1
@@ -1384,7 +1384,7 @@ packages:
   '@types/trusted-types@2.0.7':
     resolution: {integrity: sha512-ScaPdn1dQczgbl0QFTeTOmVHFULt394XJgOQNoyVhZ6r2vLnMLJfBPd53SB52T/3G36VI1/g2MZaX0cwDuXsfw==}
 
-  '@unicorn/autoconnect@file:../../../unicorn-autoconnect-1.0.1.tgz':
+  '@unicorn.eth/autoconnect@file:../../../unicorn-autoconnect-1.0.1.tgz':
     resolution: {integrity: sha512-dA4RnPaYq+AD0dRceQ+DeQHU+Q0NehwNFUpG6s1B9jSzuwhqLav5LUzzJV9J+0O2nQsXsK58e9/X4k5TONLCeA==, tarball: file:../../../unicorn-autoconnect-1.0.1.tgz}
     version: 1.0.1
     peerDependencies:
@@ -5273,7 +5273,7 @@ snapshots:
 
   '@types/trusted-types@2.0.7': {}
 
-  '@unicorn/autoconnect@file:../../../unicorn-autoconnect-1.0.1.tgz(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(thirdweb@5.108.5(@hey-api/openapi-ts@0.84.4(typescript@5.9.2))(@solana/sysvars@2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.9.2))(@tanstack/query-core@5.90.2)(bufferutil@4.0.9)(fastestsmallesttextencoderdecoder@1.0.22)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@9.1.9(@testing-library/dom@10.4.1)(bufferutil@4.0.9)(utf-8-validate@5.0.10)(vite@7.1.7(jiti@2.6.0)))(typescript@5.9.2)(utf-8-validate@5.0.10)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10)))(wagmi@2.17.5(@tanstack/query-core@5.90.2)(@tanstack/react-query@5.90.2(react@18.3.1))(bufferutil@4.0.9)(react@18.3.1)(typescript@5.9.2)(utf-8-validate@5.0.10)(viem@2.37.9(bufferutil@4.0.9)(typescript@5.9.2)(utf-8-validate@5.0.10)(zod@3.25.75))(zod@3.25.75))':
+  '@unicorn.eth/autoconnect@file:../../../unicorn-autoconnect-1.0.1.tgz(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(thirdweb@5.108.5(@hey-api/openapi-ts@0.84.4(typescript@5.9.2))(@solana/sysvars@2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.9.2))(@tanstack/query-core@5.90.2)(bufferutil@4.0.9)(fastestsmallesttextencoderdecoder@1.0.22)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@9.1.9(@testing-library/dom@10.4.1)(bufferutil@4.0.9)(utf-8-validate@5.0.10)(vite@7.1.7(jiti@2.6.0)))(typescript@5.9.2)(utf-8-validate@5.0.10)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10)))(wagmi@2.17.5(@tanstack/query-core@5.90.2)(@tanstack/react-query@5.90.2(react@18.3.1))(bufferutil@4.0.9)(react@18.3.1)(typescript@5.9.2)(utf-8-validate@5.0.10)(viem@2.37.9(bufferutil@4.0.9)(typescript@5.9.2)(utf-8-validate@5.0.10)(zod@3.25.75))(zod@3.25.75))':
     dependencies:
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)

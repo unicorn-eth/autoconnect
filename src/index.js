@@ -1,5 +1,5 @@
 // coded lovingly by @cryptowampum and Claude AI
-// @unicorn/autoconnect - Main export file
+// @unicorn.eth/autoconnect - Main export file
 // Clean, simple exports - developers just import and use
 
 // Core components

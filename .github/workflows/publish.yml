@@ -18,7 +18,7 @@ jobs:
       id-token: write  # for npm provenance
 
     env:
-      NPM_SCOPE: '@unicorn'
+      NPM_SCOPE: '@unicorn.eth'
 
     steps:
       - name: Checkout
