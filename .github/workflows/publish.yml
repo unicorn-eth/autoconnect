@@ -1,4 +1,4 @@
-name: Publish to NPM
+name: Publish to npm
 
 on:
   release:
@@ -6,83 +6,144 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version to publish (leave empty for current package.json version)'
+        description: 'Version to publish (e.g. 1.2.3). Leave empty to use current package.json version.'
         required: false
 
 jobs:
   publish:
     runs-on: ubuntu-latest
-    
+
     permissions:
       contents: read
-      id-token: write # Required for npm provenance
-    
+      id-token: write  # required for npm provenance
+
+    env:
+      # Optional: set your scope once, used by setup-node
+      NPM_SCOPE: '@unicorn'
+
     steps:
-      - name: Checkout code
+      - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
           registry-url: 'https://registry.npmjs.org'
-      
+          scope: ${{ env.NPM_SCOPE }}
+          cache: 'pnpm'  # built-in cache for pnpm
+
+      # Use your local pnpm version to avoid lockfile incompatibility
       - name: Install pnpm
-        uses: pnpm/action-setup@v2
+        uses: pnpm/action-setup@v4
         with:
-          version: 8
-      
-      - name: Get pnpm store directory
-        id: pnpm-cache
+          version: 10.17.1
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Show pnpm & lockfile headers
+        run: |
+          pnpm --version
+          head -n 5 pnpm-lock.yaml
+
+      - name: Install deps
+        run: pnpm install --frozen-lockfile
+
+      # === Derive version & notes from the tag/release ===
+      # For 'release' events: use the release's tag (e.g., v1.2.3) and body as notes
+      - name: Derive VERSION & NOTES from GitHub Release
+        if: github.event_name == 'release'
+        run: |
+          TAG="${{ github.event.release.tag_name }}"
+          VERSION="${TAG#v}"  # strip leading v if present
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          # Preserve multi-line notes in an env var
+          printf "NOTES<<'EOF'\n%s\nEOF\n" "${{ github.event.release.body }}" >> $GITHUB_ENV
+
+      # For manual runs, you can still provide a version input to bump package.json
+      - name: Optional: bump version (workflow_dispatch)
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.version != '' }}
+        run: |
+          npm version ${{ inputs.version }} --no-git-tag-version
+          echo "VERSION=${{ inputs.version }}" >> $GITHUB_ENV
+
+      # If we have a VERSION from the release/tag, set package.json to match it
+      - name: Set package.json version from tag (release flow)
+        if: ${{ env.VERSION != '' }}
+        run: npm version "$VERSION" --no-git-tag-version
+
+      - name: Test
+        run: pnpm test || echo "No tests configured yet"
+
+      - name: Build
+        run: pnpm run build
+
+      - name: Check packed contents
+        run: |
+          echo "📦 Package contents (npm pack --dry-run):"
+          npm pack --dry-run
+
+      - name: Read package metadata
+        id: meta
+        run: |
+          NAME=$(node -p "require('./package.json').name")
+          VERSION=$(node -p "require('./package.json').version")
+          echo "name=$NAME" >> $GITHUB_OUTPUT
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Skip if version already on npm
+        id: already
         shell: bash
         run: |
-          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
-      
-      - name: Setup pnpm cache
-        uses: actions/cache@v3
-        with:
-          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-store-
-      
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-      
-      - name: Run tests
-        run: pnpm test || echo "No tests configured yet"
-      
-      - name: Build package
-        run: pnpm run build
-      
-      - name: Check package contents
-        run: |
-          echo "📦 Package contents:"
-          npm pack --dry-run
-      
-      - name: Publish to NPM
-        run: npm publish --provenance --access public
+          if npm view "${{ steps.meta.outputs.name }}@${{ steps.meta.outputs.version }}" version >/dev/null 2>&1; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+            echo "Version already exists on npm. Skipping publish."
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Publish to npm
+        if: steps.already.outputs.exists == 'false'
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-      
-      - name: Create GitHub Release Comment
+        run: |
+          # For scoped packages, default access is restricted; we want public
+          npm publish --provenance --access public
+
+      # Append install snippet to the Release and keep your original notes intact
+      - name: Append install snippet to GitHub Release (release events only)
         if: github.event_name == 'release'
         uses: actions/github-script@v7
         with:
           script: |
-            const packageJson = require('./package.json');
-            github.rest.issues.createComment({
-              issue_number: context.payload.release.id,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: `🎉 Published to NPM!\n\nInstall with:\n\`\`\`bash\nnpm install ${packageJson.name}@${packageJson.version}\n\`\`\``
-            })
-      
-      - name: Notify on success
-        if: success()
+            const fs = require('fs');
+            const pkg = JSON.parse(fs.readFileSync('./package.json', 'utf8'));
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const release_id = context.payload.release.id;
+
+            const install = `\n\n### 📦 Install\n\`\`\`bash\nnpm i ${pkg.name}@${pkg.version}\n\`\`\`\n`;
+            const current = context.payload.release.body || '';
+            const body = current.includes('### 📦 Install') ? current : current + install;
+
+            await github.rest.repos.updateRelease({ owner, repo, release_id, body });
+
+      - name: Summary
+        if: always()
         run: |
-          echo "✅ Successfully published to NPM!"
-          echo "📦 Package: @unicorn/autoconnect"
-          echo "🔗 https://www.npmjs.com/package/@unicorn/autoconnect"
+          {
+            echo "## Publish summary"
+            echo ""
+            echo "- Package: \`${{ steps.meta.outputs.name }}\`"
+            echo "- Version: \`${{ steps.meta.outputs.version }}\`"
+            echo "- Already on npm: \`${{ steps.already.outputs.exists }}\`"
+            echo "- npm: https://www.npmjs.com/package/${{ steps.meta.outputs.name }}"
+            if [ -n "${NOTES:-}" ]; then
+              echo ""
+              echo "### Release notes (from GitHub tag/release)"
+              echo "$NOTES"
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
