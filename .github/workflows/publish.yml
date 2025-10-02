@@ -82,9 +82,45 @@ jobs:
         if: ${{ env.VERSION != '' }}
         run: npm version "$VERSION" --no-git-tag-version
 
+      - name: Verify TypeScript definitions exist
+        run: |
+          if [ ! -f "src/types/index.d.ts" ]; then
+            echo "❌ Error: src/types/index.d.ts not found!"
+            echo "This file should be manually created and committed to the repo."
+            exit 1
+          fi
+          echo "✅ TypeScript definitions found at src/types/index.d.ts"
 
       - name: Build
         run: pnpm run build
+
+      - name: Verify build output
+        run: |
+          echo "📦 Checking build output..."
+          
+          # Check if dist directory exists
+          if [ ! -d "dist" ]; then
+            echo "❌ Error: dist/ directory not found!"
+            exit 1
+          fi
+          
+          # Check for required files
+          REQUIRED_FILES=("dist/index.js" "dist/index.mjs" "dist/index.d.ts")
+          for file in "${REQUIRED_FILES[@]}"; do
+            if [ ! -f "$file" ]; then
+              echo "❌ Error: $file not found!"
+              exit 1
+            fi
+            echo "✅ Found: $file"
+          done
+          
+          echo ""
+          echo "📊 Build output sizes:"
+          ls -lh dist/
+          
+          echo ""
+          echo "📝 TypeScript definitions preview:"
+          head -n 20 dist/index.d.ts
 
       - name: Check packed contents
         run: |
@@ -105,19 +141,23 @@ jobs:
         run: |
           if npm view "${{ steps.meta.outputs.name }}@${{ steps.meta.outputs.version }}" version >/dev/null 2>&1; then
             echo "exists=true" >> "$GITHUB_OUTPUT"
-            echo "Version already exists on npm. Skipping publish."
+            echo "⚠️  Version ${{ steps.meta.outputs.version }} already exists on npm. Skipping publish."
           else
             echo "exists=false" >> "$GITHUB_OUTPUT"
+            echo "✅ Version ${{ steps.meta.outputs.version }} is new. Ready to publish."
           fi
 
       - name: Publish to npm
         if: steps.already.outputs.exists == 'false'
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: npm publish --provenance --access public
+        run: |
+          echo "🚀 Publishing ${{ steps.meta.outputs.name }}@${{ steps.meta.outputs.version }} to npm..."
+          npm publish --provenance --access public
+          echo "✅ Successfully published to npm!"
 
       - name: Append install snippet to GitHub Release
-        if: github.event_name == 'release'
+        if: github.event_name == 'release' && steps.already.outputs.exists == 'false'
         uses: actions/github-script@v7
         with:
           script: |
@@ -127,7 +167,7 @@ jobs:
             const repo = context.repo.repo;
             const release_id = context.payload.release.id;
 
-            const install = `\n\n### 📦 Install\n\`\`\`bash\nnpm i ${pkg.name}@${pkg.version}\n\`\`\`\n`;
+            const install = `\n\n### 📦 Install\n\`\`\`bash\nnpm install ${pkg.name}@${pkg.version}\n\`\`\`\n`;
             const current = context.payload.release.body || '';
             const body = current.includes('### 📦 Install') ? current : current + install;
 
@@ -137,15 +177,21 @@ jobs:
         if: always()
         run: |
           {
-            echo "## Publish summary"
+            echo "## 📦 Publish Summary"
             echo ""
-            echo "- Package: \`${{ steps.meta.outputs.name }}\`"
-            echo "- Version: \`${{ steps.meta.outputs.version }}\`"
-            echo "- Already on npm: \`${{ steps.already.outputs.exists }}\`"
-            echo "- npm: https://www.npmjs.com/package/${{ steps.meta.outputs.name }}"
+            echo "| Item | Value |"
+            echo "|------|-------|"
+            echo "| Package | \`${{ steps.meta.outputs.name }}\` |"
+            echo "| Version | \`${{ steps.meta.outputs.version }}\` |"
+            echo "| Already on npm | \`${{ steps.already.outputs.exists }}\` |"
+            echo "| Published | \`${{ steps.already.outputs.exists == 'false' && 'Yes ✅' || 'No (already exists)' }}\` |"
+            echo ""
+            echo "### 🔗 Links"
+            echo "- [View on npm](https://www.npmjs.com/package/${{ steps.meta.outputs.name }})"
+            echo "- [View package files](https://unpkg.com/browse/${{ steps.meta.outputs.name }}@${{ steps.meta.outputs.version }}/)"
             if [ -n "${NOTES:-}" ]; then
               echo ""
-              echo "### Release notes (from GitHub release body)"
+              echo "### 📝 Release Notes"
               echo "$NOTES"
             fi
           } >> "$GITHUB_STEP_SUMMARY"
