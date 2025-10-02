@@ -63,5 +63,6 @@
 "homepage": "https://github.com/MyUnicornAccount/autoconnect#readme",
 "bugs": { 
   "url": "https://github.com/MyUnicornAccount/autoconnect/issues" 
-  }
+  },
+"sideEffects": false
 }
