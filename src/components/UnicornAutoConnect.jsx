@@ -98,10 +98,31 @@ const IsolatedAutoConnect = ({
               console.log('Wallet object:', connectedWallet);
             }
             
+            // 🔥 CRITICAL: Store globally for late-mounting components
+            // This ensures components that mount AFTER connection can still access state
+            if (typeof window !== 'undefined') {
+              window.__UNICORN_WALLET_STATE__ = {
+                wallet: finalWallet,
+                address: walletAddress,
+                chain: finalChain.name,
+                chainId: finalChain.id,
+                timestamp: Date.now()
+              };
+              
+              if (debug) {
+                console.log('🦄 Global state stored:', window.__UNICORN_WALLET_STATE__);
+              }
+            }
+            
             // 🔥 CRITICAL: Dispatch the event so useUniversalWallet can pick it up
             if (typeof window !== 'undefined') {
               window.dispatchEvent(new CustomEvent('unicorn-wallet-connected', {
-                detail: { wallet: finalWallet, address: walletAddress }
+                detail: { 
+                  wallet: finalWallet, 
+                  address: walletAddress,
+                  chain: finalChain.name,
+                  chainId: finalChain.id
+                }
               }));
               
               if (debug) {
@@ -109,11 +130,20 @@ const IsolatedAutoConnect = ({
               }
             }
             
-            // Call user-provided callback AFTER dispatching event
-            onConnect?.(finalWallet);
+            // Call user-provided callback AFTER dispatching event and storing state
+            if (onConnect) {
+              try {
+                onConnect(finalWallet);
+              } catch (callbackError) {
+                console.error('🦄 Error in onConnect callback:', callbackError);
+              }
+            }
             
           } catch (e) {
-            console.warn('Could not extract wallet address:', e);
+            console.warn('🦄 Could not extract wallet address:', e);
+            if (onError) {
+              onError(e);
+            }
           }
         }}
         onError={(error) => {
@@ -123,7 +153,9 @@ const IsolatedAutoConnect = ({
           }
           
           // Call user-provided callback but don't show errors to user
-          onError?.(error);
+          if (onError) {
+            onError(error);
+          }
         }}
         timeout={timeout}
       />
@@ -168,6 +200,12 @@ const UnicornAutoConnect = (props) => {
         console.log('🦄 UnicornAutoConnect: Cleaning up isolated React root');
       }
       clearTimeout(timer);
+      
+      // Clear global state on unmount
+      if (typeof window !== 'undefined') {
+        delete window.__UNICORN_WALLET_STATE__;
+      }
+      
       setTimeout(() => {
         try {
           root.unmount();
