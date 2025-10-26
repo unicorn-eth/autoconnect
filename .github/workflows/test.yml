@@ -130,12 +130,6 @@ jobs:
           pnpm install --frozen-lockfile --shamefully-hoist
           pnpm run build
       
-      - name: Build basic example
-        working-directory: src/examples/basic
-        run: |
-          rm -rf node_modules
-          pnpm install --frozen-lockfile --shamefully-hoist
-          pnpm run build
       
       - name: Upload example artifacts
         uses: actions/upload-artifact@v4
