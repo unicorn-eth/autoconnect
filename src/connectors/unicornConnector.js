@@ -1,5 +1,5 @@
 // src/connectors/unicornConnector.js
-// Wagmi connector for Unicorn wallet integration
+// Wagmi connector for Unicorn wallet integration - why is this so weird??
 import { createConnector } from 'wagmi';
 import { createThirdwebClient } from 'thirdweb';
 import { inAppWallet } from 'thirdweb/wallets';
