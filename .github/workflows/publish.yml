@@ -52,9 +52,8 @@ jobs:
           pnpm --version
           head -n 5 pnpm-lock.yaml
 
-      - name: Install deps
-      
-        run: 
+      - name: Install deps (clean + shamefully-hoist)
+        run: |
           rm -rf node_modules
           pnpm install --no-frozen-lockfile --shamefully-hoist
 
