@@ -7,7 +7,7 @@ settings:
 importers:
 
   .:
-    devDependencies:
+    dependencies:
       react:
         specifier: ^18.2.0
         version: 18.3.1
@@ -17,12 +17,13 @@ importers:
       thirdweb:
         specifier: ^5.68.0
         version: 5.108.5(@hey-api/openapi-ts@0.84.4(typescript@5.9.2))(@solana/sysvars@2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.9.2))(@tanstack/query-core@5.90.2)(bufferutil@4.0.9)(fastestsmallesttextencoderdecoder@1.0.22)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@9.1.9(@testing-library/dom@10.4.1)(bufferutil@4.0.9)(utf-8-validate@5.0.10)(vite@7.1.8(jiti@2.6.0)))(typescript@5.9.2)(utf-8-validate@5.0.10)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))
+      wagmi:
+        specifier: ^2.17.0
+        version: 2.17.5(@tanstack/query-core@5.90.2)(@tanstack/react-query@5.90.2(react@18.3.1))(bufferutil@4.0.9)(react@18.3.1)(typescript@5.9.2)(utf-8-validate@5.0.10)(viem@2.37.9(bufferutil@4.0.9)(typescript@5.9.2)(utf-8-validate@5.0.10)(zod@4.1.11))(zod@4.1.11)
+    devDependencies:
       tsup:
         specifier: ^8.0.0
         version: 8.5.0(jiti@2.6.0)(postcss@8.5.6)(typescript@5.9.2)
-      wagmi:
-        specifier: ^2.17.1
-        version: 2.17.5(@tanstack/query-core@5.90.2)(@tanstack/react-query@5.90.2(react@18.3.1))(bufferutil@4.0.9)(react@18.3.1)(typescript@5.9.2)(utf-8-validate@5.0.10)(viem@2.37.9(bufferutil@4.0.9)(typescript@5.9.2)(utf-8-validate@5.0.10)(zod@4.1.11))(zod@4.1.11)
 
 packages:
 
