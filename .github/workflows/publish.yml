@@ -117,8 +117,22 @@ jobs:
           fi
           echo "✅ TypeScript definitions found at src/types/index.d.ts"
 
+       - name: Debug - Check file exists
+         run: |
+          echo "=== Checking if unicornConnector.js exists ==="
+          ls -la src/
+          echo ""
+          echo "=== Connectors directory ==="
+          ls -la src/connectors/
+          echo ""
+          echo "=== First 10 lines of unicornConnector.js ==="
+          head -10 src/connectors/unicornConnector.js
+          echo ""
+          echo "=== Checking index.js import ==="
+          grep unicornConnector src/index.js
+            
       - name: Build
-        run: pnpm run build
+        run:  pnpm run build
 
       - name: Verify build output
         run: |
