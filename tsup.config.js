@@ -26,10 +26,13 @@ export default defineConfig({
     'react',
     'react-dom',
     'wagmi',
+    'viem',  // ← ADDED - fixes "Could not resolve viem" error
     'thirdweb',
     'thirdweb/react',
     'thirdweb/chains',
     'thirdweb/wallets',
+    '@tanstack/react-query',  // ← ADDED - should also be external
+    '@rainbow-me/rainbowkit',  // ← ADDED - should also be external
   ],
   
   // Don't bundle node_modules
