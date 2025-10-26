@@ -39,12 +39,25 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          key: ${{ runner.os }}-pnpm-store-v2-${{ hashFiles('**/pnpm-lock.yaml') }}
           restore-keys: |
-            ${{ runner.os }}-pnpm-store-
+            ${{ runner.os }}-pnpm-store-v2-
       
-      - name: Install dependencies (with shamefully-hoist to fix rollup)
-        run: pnpm install --frozen-lockfile --shamefully-hoist
+              - name: Debug pnpm config
+        run: |
+          echo "=== .npmrc content ==="
+          cat .npmrc
+          echo ""
+          echo "=== pnpm config ==="
+          pnpm config list
+          echo ""
+          echo "=== Checking for rollup ==="
+          find node_modules -name "*rollup*linux*" || echo "Not found"
+
+      - name: Clean install (fix rollup + clear bad cache)
+        run: |
+          rm -rf node_modules
+          pnpm install --frozen-lockfile --shamefully-hoist
       
       - name: Run linter
         run: pnpm lint || echo "Linting not configured yet"
@@ -82,8 +95,10 @@ jobs:
         with:
           version: 10.17.1
       
-      - name: Install dependencies (with shamefully-hoist to fix rollup)
-        run: pnpm install --frozen-lockfile --shamefully-hoist
+      - name: Clean install (fix rollup)
+        run: |
+          rm -rf node_modules
+          pnpm install --frozen-lockfile --shamefully-hoist
       
       - name: Run ESLint
         run: pnpm lint || echo "ESLint not configured yet"
@@ -111,19 +126,20 @@ jobs:
       
       - name: Build package
         run: |
+          rm -rf node_modules
           pnpm install --frozen-lockfile --shamefully-hoist
           pnpm run build
       
       - name: Build basic example
         working-directory: src/examples/basic
         run: |
+          rm -rf node_modules
           pnpm install --frozen-lockfile --shamefully-hoist
           pnpm run build
-      
       
       - name: Upload example artifacts
         uses: actions/upload-artifact@v4
         with:
           name: example-builds-${{ github.run_id }}
-          path: examples/*/dist
+          path: src/examples/*/dist
           retention-days: 7
