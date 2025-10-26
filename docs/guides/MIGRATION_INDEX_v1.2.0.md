@@ -1,166 +1,288 @@
-# v1.2.0 Migration Documentation Index
+# Unicorn AutoConnect v1.2 - CORRECT Integration Guide
 
-## 📚 All Migration Documents
+## ✅ v1.2 Uses Wagmi Connector Approach
 
-### For Users Upgrading
+In v1.2, we moved from a component-based approach to a **wagmi connector** for better integration.
 
-1. **[MIGRATION_QUICK_START_v1.2.0.md](./MIGRATION_QUICK_START_v1.2.0.md)** ⭐ START HERE
-   - Quick 3-step guide
-   - Focuses on the architectural change
-   - 2-minute read
-   - **Best for:** Quick reference while migrating
+## Installation
 
-2. **[RELEASE_NOTES_v1.2.0.md](./RELEASE_NOTES_v1.2.0.md)** 📖 COMPREHENSIVE
-   - Complete breaking changes list
-   - Detailed migration steps
-   - Why each change was made
-   - Recommended updates
-   - **Best for:** Understanding all changes
+```bash
+npm install @unicorn.eth/autoconnect@1.2.0
+# or
+pnpm add @unicorn.eth/autoconnect@1.2.0
+```
 
-3. **[README_v1.2.0.md](./README_v1.2.0.md)** 📘 REFERENCE
-   - Complete v1.2.0 documentation
-   - API reference
-   - Code examples
-   - **Best for:** Learning the new API
+## Integration Steps
 
-4. **[QUICK_REFERENCE_v1.2.0_CORRECTED.md](./QUICK_REFERENCE_v1.2.0_CORRECTED.md)** 🔍 API DOCS
-   - Detailed hook documentation
-   - Configuration options
-   - Common patterns
-   - **Best for:** Daily development reference
+### Step 1: Add Unicorn Connector to Wagmi Config
 
-### For Maintainers
+```typescript
+import { createConfig, http } from 'wagmi';
+import { mainnet, polygon, base } from 'wagmi/chains';
+import { injected, walletConnect } from 'wagmi/connectors';
+import { unicornConnector } from '@unicorn.eth/autoconnect';
 
-5. **[RELEASE_SUMMARY_v1.2.0.md](./RELEASE_SUMMARY_v1.2.0.md)** 📊 OVERVIEW
-   - High-level summary
-   - Files ready for release
-   - Pre-release checklist
-   - Success criteria
+const config = createConfig({
+  chains: [polygon, base],
+  connectors: [
+    injected(),
+    walletConnect({ projectId: 'YOUR_WC_PROJECT_ID' }),
+    // Add Unicorn connector
+    unicornConnector({
+      clientId: process.env.NEXT_PUBLIC_THIRDWEB_CLIENT_ID,
+      factoryAddress: process.env.NEXT_PUBLIC_THIRDWEB_FACTORY_ADDRESS,
+      defaultChain: polygon.id, // Chain ID as number (e.g., 137)
+    }),
+  ],
+  transports: {
+    [polygon.id]: http(),
+    [base.id]: http(),
+  },
+});
+```
 
-6. **[PUBLISHING_v1.2.0.md](./PUBLISHING_v1.2.0.md)** 🚀 DEPLOY
-   - Publishing checklist
-   - Git commands
-   - NPM publish steps
-   - Post-release tasks
+**Key Points:**
+- ✅ `unicornConnector` is a function that creates a wagmi connector
+- ✅ `defaultChain` is a **number** (chain ID), not a string
+- ✅ Works alongside other connectors (MetaMask, WalletConnect, etc.)
+- ✅ No component needed!
 
-7. **[FILE_MANIFEST_v1.2.0.md](./FILE_MANIFEST_v1.2.0.md)** 📦 FILES
-   - Complete file list
-   - Copy commands
-   - Priority order
-   - Verification steps
+### Step 2: Use Universal Hooks in Components
 
-8. **[CONTINUATION_PROMPT.md](./CONTINUATION_PROMPT.md)** 🔄 CONTEXT
-   - Full project context
-   - For continuing development
-   - Technical details
-   - Known limitations
+```typescript
+import { 
+  useUniversalWallet,
+  useUniversalTransaction,
+  useUniversalSignMessage 
+} from '@unicorn.eth/autoconnect';
 
-## 🎯 Quick Navigation
+function MyComponent() {
+  const wallet = useUniversalWallet();
+  const { sendTransaction, isPending } = useUniversalTransaction();
+  const { signMessage } = useUniversalSignMessage();
 
-### "I just want to upgrade quickly"
-→ [MIGRATION_QUICK_START_v1.2.0.md](./MIGRATION_QUICK_START_v1.2.0.md)
+  const handleSend = async () => {
+    await sendTransaction({
+      to: '0x...',
+      value: '0.1', // in ETH
+    });
+  };
 
-### "I need to understand all changes"
-→ [RELEASE_NOTES_v1.2.0.md](./RELEASE_NOTES_v1.2.0.md)
+  return (
+    <div>
+      <p>Address: {wallet.address}</p>
+      <p>Type: {wallet.isUnicorn ? '🦄 Unicorn' : '👛 Standard'}</p>
+      <button onClick={handleSend} disabled={isPending}>
+        Send Transaction
+      </button>
+    </div>
+  );
+}
+```
 
-### "I want API documentation"
-→ [QUICK_REFERENCE_v1.2.0_CORRECTED.md](./QUICK_REFERENCE_v1.2.0_CORRECTED.md)
+## Environment Variables
 
-### "I need to publish this release"
-→ [PUBLISHING_v1.2.0.md](./PUBLISHING_v1.2.0.md)
+```bash
+# .env.local
+NEXT_PUBLIC_THIRDWEB_CLIENT_ID=your_client_id_here
+NEXT_PUBLIC_THIRDWEB_FACTORY_ADDRESS=0xYourFactoryAddress
+```
 
-### "I want to see code examples"
-→ [README_v1.2.0.md](./README_v1.2.0.md)
+## Complete Example
 
-## 🚨 Breaking Changes Summary
+```typescript
+// config/wagmi.ts
+import { createConfig, http } from 'wagmi';
+import { polygon, base } from 'wagmi/chains';
+import { injected, walletConnect } from 'wagmi/connectors';
+import { unicornConnector } from '@unicorn.eth/autoconnect';
 
-### 1. Architecture (BIGGEST CHANGE)
-**Before:** `<UnicornAutoConnect />` component  
-**After:** `unicornConnector()` in wagmi config
+export const wagmiConfig = createConfig({
+  chains: [polygon, base],
+  connectors: [
+    injected(),
+    walletConnect({ 
+      projectId: process.env.NEXT_PUBLIC_WC_PROJECT_ID 
+    }),
+    unicornConnector({
+      clientId: process.env.NEXT_PUBLIC_THIRDWEB_CLIENT_ID!,
+      factoryAddress: process.env.NEXT_PUBLIC_THIRDWEB_FACTORY_ADDRESS!,
+      defaultChain: polygon.id, // 137
+    }),
+  ],
+  transports: {
+    [polygon.id]: http(),
+    [base.id]: http(),
+  },
+});
+```
 
-### 2. Verification Response
-**Before:** Boolean return value  
-**After:** Structured object with `isValid`, `isSmartAccount`, etc.
+```typescript
+// App.tsx
+import { WagmiProvider } from 'wagmi';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { wagmiConfig } from './config/wagmi';
 
-### 3. Internal Changes (Low Impact)
-- Transaction delegation updated
-- Contract reads use publicClient
-- Better error messages
+const queryClient = new QueryClient();
 
-## ⚡ Migration Time Estimates
+export function App() {
+  return (
+    <WagmiProvider config={wagmiConfig}>
+      <QueryClientProvider client={queryClient}>
+        <YourApp />
+      </QueryClientProvider>
+    </WagmiProvider>
+  );
+}
+```
 
-| User Type | Time Needed | Recommended Docs |
-|-----------|-------------|------------------|
-| Small app (< 5 files) | 15 minutes | Quick Start only |
-| Medium app (5-20 files) | 30 minutes | Quick Start + Release Notes |
-| Large app (20+ files) | 1-2 hours | All migration docs |
-| Complex integration | 2-4 hours | All docs + examples |
+```typescript
+// components/SendTransaction.tsx
+import { 
+  useUniversalWallet,
+  useUniversalTransaction 
+} from '@unicorn.eth/autoconnect';
 
-## ✅ Migration Checklist
+export function SendTransaction() {
+  const wallet = useUniversalWallet();
+  const { sendTransaction, isPending, error } = useUniversalTransaction();
 
-### Essential (Required)
-- [ ] Read [MIGRATION_QUICK_START_v1.2.0.md](./MIGRATION_QUICK_START_v1.2.0.md)
-- [ ] Update package to v1.2.0
-- [ ] Remove `<UnicornAutoConnect />` component
-- [ ] Add `unicornConnector()` to config
-- [ ] Update `verifyMessage` responses (if used)
-- [ ] Test with Unicorn wallet
-- [ ] Test with standard wallet
+  const handleSend = async () => {
+    try {
+      const result = await sendTransaction({
+        to: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb',
+        value: '0.01',
+      });
+      console.log('Transaction sent:', result);
+    } catch (err) {
+      console.error('Transaction failed:', err);
+    }
+  };
 
-### Recommended
-- [ ] Read [RELEASE_NOTES_v1.2.0.md](./RELEASE_NOTES_v1.2.0.md)
-- [ ] Switch to Universal Hooks
-- [ ] Add smart account signature handling
-- [ ] Update error handling
-- [ ] Test all features thoroughly
+  if (!wallet.isConnected) {
+    return <p>Please connect your wallet</p>;
+  }
 
-### Optional
-- [ ] Read technical documentation
-- [ ] Update to latest patterns
-- [ ] Improve UX for smart accounts
-- [ ] Add loading states
+  return (
+    <div>
+      <p>Connected: {wallet.address}</p>
+      {wallet.isUnicorn && <p>⚡ Gasless enabled</p>}
+      
+      <button onClick={handleSend} disabled={isPending}>
+        {isPending ? 'Sending...' : 'Send 0.01 ETH'}
+      </button>
+      
+      {error && <p>Error: {error.message}</p>}
+    </div>
+  );
+}
+```
 
-## 🆘 Getting Help
+## API Reference
 
-### Common Issues
+### unicornConnector(options)
 
-**"Unicorn not showing in wallet list"**
-→ Make sure you added `config.connectors.push(unicornConnector(...))`
+Creates a wagmi connector for Unicorn wallets.
 
-**"Verification returns false for Unicorn"**
-→ Expected! Check `result.isSmartAccount` - signature IS valid on-chain
+**Options:**
+```typescript
+{
+  clientId: string;         // Required: Thirdweb client ID
+  factoryAddress: string;   // Required: Smart account factory address  
+  defaultChain: number;     // Required: Default chain ID (e.g., 137)
+}
+```
 
-**"Import error for unicornConnector"**
-→ Make sure you're on v1.2.0: `npm list @unicorn.eth/autoconnect`
+### useUniversalWallet()
 
-### Support Channels
+Returns unified wallet information for both Unicorn and standard wallets.
 
-- 🐛 **Bugs**: [GitHub Issues](https://github.com/YOUR_USERNAME/autoconnect/issues)
-- 💬 **Questions**: [Discord #developers](https://discord.gg/unicorn)
-- 📧 **Email**: support@unicorn.eth
+```typescript
+{
+  address: string | undefined;
+  isConnected: boolean;
+  isUnicorn: boolean;       // true if Unicorn wallet
+  chainId: number | undefined;
+  connector: { name: string; id: string } | null;
+  unicornWallet: any;       // Raw Thirdweb wallet (if Unicorn)
+}
+```
 
-## 📝 Technical Documentation
+### useUniversalTransaction()
 
-For deeper understanding:
+Unified transaction interface.
 
-- **[OPTION_4_IMPLEMENTATION.md](./OPTION_4_IMPLEMENTATION.md)** - Structured verification
-- **[SMART_ACCOUNT_SIGNATURES.md](./SMART_ACCOUNT_SIGNATURES.md)** - ERC-1271 explained
-- **[DELEGATION_ANALYSIS.md](./DELEGATION_ANALYSIS.md)** - Transaction delegation
-- **[BUG_FIXES_SUMMARY.md](./BUG_FIXES_SUMMARY.md)** - All bugs fixed
+```typescript
+{
+  sendTransaction: (params) => Promise<any>;
+  writeContract: (params) => Promise<any>;
+  readContract: (params) => Promise<any>;
+  isPending: boolean;
+  error: Error | null;
+}
+```
 
-## 🎉 After Migration
+### useUniversalSignMessage()
 
-Once you've migrated to v1.2.0:
+Unified signing interface.
 
-1. ✅ Your app uses standard Wagmi patterns
-2. ✅ Unicorn appears in RainbowKit naturally
-3. ✅ Universal Hooks work with all wallets
-4. ✅ Smart account signatures are handled properly
-5. ✅ All bugs from v1.1.x are fixed
+```typescript
+{
+  signMessage: (params) => Promise<string>;
+  signTypedData: (params) => Promise<string>;
+  verifyMessage: (params) => Promise<VerificationResult>;
+  isPending: boolean;
+  error: Error | null;
+  signature: string | null;
+}
+```
 
-**Welcome to v1.2.0!** 🦄✨
+## Migration from v1.1 Component Approach
+
+If you were using the component approach:
+
+**Before (v1.1):**
+```jsx
+<UnicornAutoConnect
+  clientId={...}
+  factoryAddress={...}
+  defaultChain="polygon"
+/>
+```
+
+**After (v1.2):**
+```typescript
+// In wagmi config
+unicornConnector({
+  clientId: ...,
+  factoryAddress: ...,
+  defaultChain: 137, // Number, not string!
+})
+```
+
+## Why Connector Approach is Better
+
+1. ✅ **Native wagmi integration** - Works like any other connector
+2. ✅ **Better TypeScript support** - Full type safety
+3. ✅ **Simpler setup** - No extra components needed
+4. ✅ **Standard patterns** - Follows wagmi conventions
+5. ✅ **Easier testing** - Standard wagmi testing approaches work
+
+## Troubleshooting
+
+### "unicornConnector is not a function"
+- Make sure you're using v1.2.0+
+- Check that you're importing from the correct package
+
+### Transactions not working
+- Verify environment variables are set
+- Check that defaultChain matches one of your configured chains
+- Ensure Thirdweb factory address is correct
+
+### TypeScript errors
+- Update to latest @unicorn.eth/autoconnect
+- Ensure wagmi v2+ and viem v2+ are installed
 
 ---
 
-**Last Updated:** 2025-XX-XX  
-**Version:** 1.2.0
+**v1.2 uses the connector approach - no component needed!** 🎉
