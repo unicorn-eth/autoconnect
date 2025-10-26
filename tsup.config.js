@@ -28,7 +28,8 @@ export default defineConfig({
     'wagmi',
     'wagmi/actions',
     'viem',
-    'viem/actions',  // ← ADD THIS for viem/actions imports
+    'viem/actions',
+    'viem/chains',  // ← ADD THIS for chain imports
     'thirdweb',
     'thirdweb/react',
     'thirdweb/chains',

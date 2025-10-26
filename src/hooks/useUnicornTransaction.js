@@ -1,8 +1,9 @@
 // src/hooks/useUnicornTransaction.js
-// Enhanced transaction hook for Unicorn wallets - v1.1.2 FIXED
+// Enhanced transaction hook for Unicorn wallets - v1.2.0 FIXED
 import { useState, useCallback } from 'react';
+import { parseEther, encodeFunctionData, createPublicClient, http } from 'viem';
+import { base } from 'viem/chains';
 import { useUniversalWallet } from './useUniversalWallet';
-import { parseEther } from 'viem';
 
 export const useUnicornTransaction = () => {
   const wallet = useUniversalWallet();
@@ -80,7 +81,6 @@ export const useUnicornTransaction = () => {
       }
 
       // Encode the function call
-      const { encodeFunctionData } = await import('viem');
       const data = encodeFunctionData({
         abi: [functionAbi],
         functionName,
@@ -129,10 +129,6 @@ export const useUnicornTransaction = () => {
     }
 
     try {
-      // Use viem's readContract directly with a public client
-      const { createPublicClient, http } = await import('viem');
-      const { base } = await import('viem/chains');
-      
       // Create a public client for the current chain
       const publicClient = createPublicClient({
         chain: base, // TODO: Make this dynamic based on wallet.chainId

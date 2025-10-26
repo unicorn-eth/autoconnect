@@ -1,8 +1,8 @@
 // src/hooks/useUnicornSignMessage.js
-// Enhanced message signing hook for Unicorn wallets
+// Enhanced message signing hook for Unicorn wallets - v1.2.0 FIXED
 import { useState, useCallback } from 'react';
+import { hashMessage, verifyMessage as viemVerifyMessage } from 'viem';
 import { useUniversalWallet } from './useUniversalWallet';
-import { hashMessage } from 'viem';
 
 export const useUnicornSignMessage = () => {
   const wallet = useUniversalWallet();
@@ -81,8 +81,6 @@ export const useUnicornSignMessage = () => {
     }
 
     try {
-      const { verifyMessage: viemVerify } = await import('viem');
-      
       // Ensure message is in the correct format
       const messageToVerify = typeof message === 'string' ? message : message.raw;
       
@@ -110,7 +108,7 @@ export const useUnicornSignMessage = () => {
       }
 
       // For standard wallets (EOAs), use normal verification
-      const isValid = await viemVerify({
+      const isValid = await viemVerifyMessage({
         address: wallet.address,
         message: messageToVerify,
         signature,
