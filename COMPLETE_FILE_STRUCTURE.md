@@ -1,4 +1,4 @@
-# Complete File Structure for @unicorn.eth/autoconnect
+# Complete File Structure for @unicorn.eth/autoconnect v1.2.0
 
 This document shows the complete directory structure with all files needed for the NPM package.
 
@@ -9,55 +9,68 @@ This document shows the complete directory structure with all files needed for t
 │
 ├── .github/
 │   └── workflows/
-│       ├── publish.yml              ✅ Created - Auto-publish to NPM
-│       └── test.yml                 ✅ Created - Run tests on PR
+│       ├── publish.yml              ✅ Auto-publish to NPM
+│       └── test.yml                 ✅ Run tests on PR
 │
 ├── src/
-│   ├── components/
-│   │   └── UnicornAutoConnect.jsx  ✅ Created - Core component
+│   ├── connector/
+│   │   ├── UnicornConnector.js     ✅ Wagmi connector class
+│   │   └── index.js                ✅ Exports unicornConnector()
 │   │
 │   ├── hooks/
-│   │   └── useUniversalWallet.js   ✅ Created - Bridge hook
+│   │   ├── useUniversalWallet.js   ✅ Universal wallet hook
+│   │   ├── useUniversalTransaction.js ✅ Universal transaction hook
+│   │   ├── useUniversalSignMessage.js ✅ Universal signing hook
+│   │   ├── useUnicornTransaction.js   ✅ Unicorn-specific transactions
+│   │   └── useUnicornSignMessage.js   ✅ Unicorn-specific signing
 │   │
 │   ├── utils/
-│   │   └── environment.js          ✅ Created - Utility functions
+│   │   ├── unicornWalletWrapper.js ✅ Transaction wrapper with approvals
+│   │   └── environment.js          ✅ Environment detection
 │   │
 │   ├── types/
-│   │   └── index.d.ts              ✅ Created - TypeScript definitions
+│   │   └── index.d.ts              ✅ TypeScript definitions
 │   │
-│   └── index.js                    ✅ Created - Main export file
+│   └── index.js                    ✅ Main export file
+│
+├── docs/
+│   ├── technical/
+│   │   ├── OPTION_4_IMPLEMENTATION.md     ✅ Structured verification
+│   │   ├── SMART_ACCOUNT_SIGNATURES.md    ✅ ERC-1271 explained
+│   │   ├── DELEGATION_ANALYSIS.md         ✅ Transaction delegation
+│   │   └── BUG_FIXES_SUMMARY.md           ✅ All bugs fixed
+│   │
+│   ├── QUICK_REFERENCE.md          ✅ API documentation
+│   └── API.md                      ⬜ Detailed API reference
 │
 ├── examples/
 │   │
 │   ├── basic/
 │   │   ├── src/
-│   │   │   ├── App.jsx             ✅ Created - Minimal integration
-│   │   │   └── main.jsx            ✅ Create - Entry point
-│   │   ├── index.html              ✅ Create - HTML template
-│   │   ├── package.json            ✅ Created - Dependencies
-│   │   ├── vite.config.js          ✅ Create - Build config
-│   │   └── README.md               ✅ Create - Usage instructions
+│   │   │   ├── App.jsx             ✅ Minimal integration
+│   │   │   └── main.jsx            ✅ Entry point
+│   │   ├── index.html              ✅ HTML template
+│   │   ├── package.json            ✅ Dependencies
+│   │   ├── vite.config.js          ✅ Build config
+│   │   └── README.md               ✅ Usage instructions
 │   │
 │   ├── advanced/
 │   │   ├── src/
-│   │   │   ├── App.jsx             ✅ Created - All features demo
-│   │   │   └── main.jsx            ✅ Create - Entry point
-│   │   ├── index.html              ✅ Create - HTML template
-│   │   ├── package.json            ✅ Created - Dependencies
-│   │   ├── vite.config.js          ✅ Create - Build config
-│   │   └── README.md               ✅ Create - Advanced guide
+│   │   │   ├── App.jsx             ✅ All features demo
+│   │   │   └── main.jsx            ✅ Entry point
+│   │   ├── index.html              ✅ HTML template
+│   │   ├── package.json            ✅ Dependencies
+│   │   ├── vite.config.js          ✅ Build config
+│   │   └── README.md               ✅ Advanced guide
 │   │
-│   └── migration/
-│       ├── scripts/
-│       │   └── migrate.js          ✅ Created - Migration helper
+│   └── v1.2.0-test/
 │       ├── src/
-│       │   ├── App.jsx             ✅ Created - After migration
-│       │   ├── App.before.jsx      ✅ Created - Before migration
-│       │   └── main.jsx            ✅ Create - Entry point
-│       ├── index.html              ✅ Create - HTML template
-│       ├── package.json            ✅ Created - Dependencies
-│       ├── vite.config.js          ✅ Create - Build config
-│       └── README.md               ✅ Created - Migration guide
+│       │   ├── App.jsx             ✅ Test all v1.2.0 features
+│       │   └── main.jsx            ✅ Entry point
+│       ├── index.html              ✅ HTML template
+│       ├── package.json            ✅ Dependencies
+│       ├── vite.config.js          ✅ Build config
+│       └── README.md               ✅ Testing guide
 │
 ├── dist/                           (Generated by build - gitignored)
 │   ├── index.js                    # ESM bundle
@@ -66,30 +79,39 @@ This document shows the complete directory structure with all files needed for t
 │
 ├── node_modules/                   (Gitignored)
 │
-├── .gitignore                      ✅ Created - Git exclusions
-├── .npmignore                      ✅ Created - NPM exclusions
-├── package.json                    ✅ Created - Package config
+├── .gitignore                      ✅ Git exclusions
+├── .npmignore                      ✅ NPM exclusions
+├── package.json                    ✅ v1.2.0 - Package config
 ├── pnpm-lock.yaml                  (Generated by pnpm install)
-├── tsup.config.js                  ✅ Created - Build configuration
-├── README.md                       ✅ Created - Main documentation
-├── CONTRIBUTING.md                 ✅ Created - Contribution guide
-├── CHANGELOG.md                    ✅ Created - Version history
-├── LICENSE                         ✅ Created - MIT License
-└── SETUP_GUIDE.md                  ✅ Created - Publishing guide
+├── tsup.config.js                  ✅ Build configuration
+├── README.md                       ✅ v1.2.0 - Main documentation
+├── CONTRIBUTING.md                 ✅ Contribution guide
+├── CHANGELOG.md                    ✅ v1.2.0 - Version history
+├── RELEASE_NOTES.md                ✅ v1.2.0 - Release notes
+├── MIGRATION_QUICK_START.md        ✅ v1.2.0 - Quick migration guide
+├── MIGRATION_INDEX.md              ✅ v1.2.0 - Migration doc index
+├── LICENSE                         ✅ MIT License
+└── CONTINUATION_PROMPT.md          ✅ Dev context for v1.2.0
 ```
 
 ## 📋 File Checklist
 
-### Core Package Files (Required)
+### Core Package Files (Required) - v1.2.0
 
-- [x] `src/index.js` - Main export
-- [x] `src/components/UnicornAutoConnect.jsx` - Core component
-- [x] `src/hooks/useUniversalWallet.js` - Bridge hook
-- [x] `src/utils/environment.js` - Utilities
+- [x] `src/index.js` - Main export (exports unicornConnector)
+- [x] `src/connector/UnicornConnector.js` - Wagmi connector class
+- [x] `src/connector/index.js` - Connector factory function
+- [x] `src/hooks/useUniversalWallet.js` - Universal wallet hook
+- [x] `src/hooks/useUniversalTransaction.js` - Universal transaction hook (NEW!)
+- [x] `src/hooks/useUniversalSignMessage.js` - Universal signing hook (NEW!)
+- [x] `src/hooks/useUnicornTransaction.js` - Unicorn transactions
+- [x] `src/hooks/useUnicornSignMessage.js` - Unicorn signing (structured verification!)
+- [x] `src/utils/unicornWalletWrapper.js` - Transaction wrapper with approvals
+- [x] `src/utils/environment.js` - Environment detection
 - [x] `src/types/index.d.ts` - TypeScript definitions
-- [x] `package.json` - Package configuration
+- [x] `package.json` - v1.2.0 configuration
 - [x] `tsup.config.js` - Build configuration
-- [x] `README.md` - Main documentation
+- [x] `README.md` - v1.2.0 documentation
 - [x] `LICENSE` - MIT License
 
 ### Configuration Files (Required)
@@ -97,30 +119,327 @@ This document shows the complete directory structure with all files needed for t
 - [x] `.gitignore` - Git exclusions
 - [x] `.npmignore` - NPM exclusions
 
-### Documentation Files (Recommended)
+### Documentation Files (v1.2.0)
 
 - [x] `CONTRIBUTING.md` - How to contribute
-- [x] `CHANGELOG.md` - Version history
-- [x] `SETUP_GUIDE.md` - Publishing instructions
+- [x] `CHANGELOG.md` - Version history with v1.2.0
+- [x] `RELEASE_NOTES.md` - v1.2.0 release notes
+- [x] `MIGRATION_QUICK_START.md` - Quick migration guide (v1.1.x → v1.2.0)
+- [x] `MIGRATION_INDEX.md` - Migration documentation index
+- [x] `docs/QUICK_REFERENCE.md` - Complete API documentation
+- [x] `docs/technical/OPTION_4_IMPLEMENTATION.md` - Structured verification
+- [x] `docs/technical/SMART_ACCOUNT_SIGNATURES.md` - ERC-1271 explained
+- [x] `docs/technical/DELEGATION_ANALYSIS.md` - Transaction delegation
+- [x] `docs/technical/BUG_FIXES_SUMMARY.md` - Bug fixes
+- [x] `CONTINUATION_PROMPT.md` - Development context
 
 ### GitHub Actions (Recommended)
 
 - [x] `.github/workflows/publish.yml` - Auto-publish workflow
 - [x] `.github/workflows/test.yml` - Testing workflow
 
-### Example Apps (Recommended)
+### Example Apps (v1.2.0)
 
-- [x] `examples/basic/` - Basic integration example
-- [x] `examples/advanced/` - Advanced features example
-- [x] `examples/migration/` - Migration guide example
+- [x] `examples/basic/` - Basic integration with unicornConnector
+
+
+## 🆕 What's New in v1.2.0 File Structure
+
+### Added Files
+
+1. **`src/connector/`** - NEW directory for Wagmi connector
+   - `UnicornConnector.js` - Connector class
+   - `index.js` - Factory function
+
+2. **Universal Hooks** - NEW hooks that work with all wallets
+   - `useUniversalTransaction.js`
+   - `useUniversalSignMessage.js`
+
+3. **Migration Documentation**
+   - `RELEASE_NOTES.md` - Complete v1.2.0 notes
+   - `MIGRATION_QUICK_START.md` - Quick 3-step guide
+   - `MIGRATION_INDEX.md` - Documentation index
+
+4. **Technical Documentation**
+   - `docs/technical/OPTION_4_IMPLEMENTATION.md`
+   - `docs/technical/SMART_ACCOUNT_SIGNATURES.md`
+   - `docs/technical/DELEGATION_ANALYSIS.md`
+   - `docs/technical/BUG_FIXES_SUMMARY.md`
+
+5. **Test Example**
+   - `examples/basic/` - Comprehensive test suite
+
+### Removed Files (from v1.1.x)
+
+- ❌ `src/components/UnicornAutoConnect.jsx` - No longer needed (use connector instead)
+
+### Updated Files
+
+- ✅ `src/hooks/useUnicornSignMessage.js` - Now returns structured verification
+- ✅ `src/hooks/useUnicornTransaction.js` - Fixed delegation
+- ✅ `package.json` - Version 1.2.0
+- ✅ `README.md` - Updated for unicornConnector approach
+- ✅ `docs/QUICK_REFERENCE.md` - Updated API documentation
+
+## 🔧 Key Architecture Changes
+
+### v1.1.x Architecture (OLD)
+```
+Component-based
+├── <UnicornAutoConnect /> component
+│   └── Isolated React root
+│   └── Custom event communication
+└── Custom hooks (useUniversalWallet, etc.)
+```
+
+### v1.2.0 Architecture (NEW)
+```
+Connector-based
+├── unicornConnector() → Standard Wagmi connector
+│   └── Integrates with RainbowKit
+│   └── Works with standard Wagmi hooks
+└── Universal Hooks (work with all wallet types)
+    ├── useUniversalTransaction
+    ├── useUniversalSignMessage
+    └── useUniversalWallet
+```
+
+## 📦 What Gets Published to NPM
+
+Only these files are published (see `.npmignore`):
+
+```
+@unicorn.eth/autoconnect@1.2.0
+├── dist/
+│   ├── index.js           # ESM format
+│   ├── index.cjs          # CommonJS format
+│   └── index.d.ts         # TypeScript definitions
+├── README.md              # Main documentation
+├── CHANGELOG.md           # Version history
+├── RELEASE_NOTES.md       # v1.2.0 notes
+└── LICENSE                # MIT License
+```
+
+**Total package size**: ~15-25 KB
+
+## 🚀 Build Output
+
+After running `npm run build`, you'll see:
+
+```bash
+dist/
+├── index.js          # ESM format (import)
+├── index.cjs         # CommonJS format (require)
+├── index.d.ts        # TypeScript definitions
+└── index.js.map      # Source map
+```
+
+## 🔍 What Each File Does
+
+### Core Source Files (v1.2.0)
+
+| File | Purpose |
+|------|---------|
+| `src/index.js` | Main entry point, exports unicornConnector and hooks |
+| `src/connector/UnicornConnector.js` | Wagmi connector class implementation |
+| `src/connector/index.js` | Factory function for creating connector |
+| `src/hooks/useUniversalWallet.js` | Get wallet info for any wallet type |
+| `src/hooks/useUniversalTransaction.js` | Send transactions with any wallet |
+| `src/hooks/useUniversalSignMessage.js` | Sign messages with any wallet |
+| `src/hooks/useUnicornTransaction.js` | Unicorn-specific transaction logic |
+| `src/hooks/useUnicornSignMessage.js` | Unicorn-specific signing (structured verification) |
+| `src/utils/unicornWalletWrapper.js` | Wraps transactions with approval dialogs |
+| `src/utils/environment.js` | Detect Unicorn environment |
+| `src/types/index.d.ts` | TypeScript type definitions |
+
+### Configuration Files
+
+| File | Purpose |
+|------|---------|
+| `package.json` | NPM package configuration (v1.2.0) |
+| `tsup.config.js` | Build tool configuration |
+| `.gitignore` | Git exclusions (node_modules, dist, etc.) |
+| `.npmignore` | NPM exclusions (src, examples, etc.) |
+
+### Documentation Files (v1.2.0)
+
+| File | Purpose |
+|------|---------|
+| `README.md` | Package documentation with unicornConnector |
+| `CHANGELOG.md` | Version history including v1.2.0 |
+| `RELEASE_NOTES.md` | Complete v1.2.0 release notes |
+| `MIGRATION_QUICK_START.md` | Quick migration from v1.1.x |
+| `MIGRATION_INDEX.md` | Index of all migration docs |
+| `CONTRIBUTING.md` | Guide for contributors |
+| `LICENSE` | MIT License |
+| `CONTINUATION_PROMPT.md` | Development context |
+| `docs/QUICK_REFERENCE.md` | Complete API documentation |
+| `docs/technical/*.md` | Technical deep dives |
+
+### GitHub Actions
+
+| File | Purpose |
+|------|---------|
+| `.github/workflows/publish.yml` | Auto-publish on release |
+| `.github/workflows/test.yml` | Run tests on PR |
+
+### Example Applications (v1.2.0)
+
+| Directory | Purpose |
+|-----------|---------|
+| `examples/basic/` | Minimal integration with unicornConnector |
+| `examples/advanced/` | All features with Universal Hooks |
+| `examples/v1.2.0-test/` | Comprehensive test suite |
+
+## 📝 Files to Update from Outputs
+
+Copy these files from `/mnt/user-data/outputs/`:
+
+### Core Code Files
+```bash
+cp useUnicornTransaction-FIXED.js src/hooks/useUnicornTransaction.js
+cp useUnicornSignMessage.js src/hooks/useUnicornSignMessage.js
+```
+
+### Documentation Files
+```bash
+cp README_v1.2.0.md README.md
+cp QUICK_REFERENCE_v1.2.0_CORRECTED.md docs/QUICK_REFERENCE.md
+cp RELEASE_NOTES_v1.2.0.md RELEASE_NOTES.md
+cp MIGRATION_QUICK_START_v1.2.0.md MIGRATION_QUICK_START.md
+cp MIGRATION_INDEX_v1.2.0.md MIGRATION_INDEX.md
+cp CONTINUATION_PROMPT.md ./
+
+# Technical docs
+mkdir -p docs/technical
+cp OPTION_4_IMPLEMENTATION.md docs/technical/
+cp SMART_ACCOUNT_SIGNATURES.md docs/technical/
+cp DELEGATION_ANALYSIS.md docs/technical/
+cp BUG_FIXES_SUMMARY.md docs/technical/
+```
+
+### Example Files
+```bash
+cp example-v112-test-App.jsx examples/v1.2.0-test/src/App.jsx
+```
+
+### Package Configuration
+```bash
+# Update package.json version to 1.2.0
+# Update CHANGELOG.md with v1.2.0 entry
+```
 
 ## 🔧 Files to Create Manually
 
 Some files need to be created based on your environment:
 
-### 1. Example HTML Files
+### 1. Connector Implementation
 
-Create for each example (`basic`, `advanced`, `migration`):
+**src/connector/UnicornConnector.js**
+```javascript
+// Wagmi connector class that implements the Connector interface
+// - connect()
+// - disconnect()
+// - getAccount()
+// - getChainId()
+// - isAuthorized()
+// etc.
+```
+
+**src/connector/index.js**
+```javascript
+import { UnicornConnector } from './UnicornConnector';
+
+export function unicornConnector({ chains, options }) {
+  return new UnicornConnector({
+    chains,
+    options: {
+      clientId: options.clientId,
+      factoryAddress: options.factoryAddress,
+      defaultChain: options.defaultChain || 'base',
+      timeout: options.timeout || 5000,
+      debug: options.debug || false,
+      enableTransactionApproval: options.enableTransactionApproval !== false,
+    }
+  });
+}
+```
+
+### 2. Main Export File
+
+**src/index.js**
+```javascript
+// Connector
+export { unicornConnector } from './connector';
+
+// Hooks
+export { useUniversalWallet } from './hooks/useUniversalWallet';
+export { useUniversalTransaction } from './hooks/useUniversalTransaction';
+export { useUniversalSignMessage } from './hooks/useUniversalSignMessage';
+export { useUnicornTransaction } from './hooks/useUnicornTransaction';
+export { useUnicornSignMessage } from './hooks/useUnicornSignMessage';
+
+// Utils (if needed by advanced users)
+export { wrapUnicornWallet } from './utils/unicornWalletWrapper';
+```
+
+### 3. TypeScript Definitions
+
+**src/types/index.d.ts**
+```typescript
+import { Connector } from 'wagmi';
+
+export interface UnicornConnectorOptions {
+  clientId: string;
+  factoryAddress: string;
+  defaultChain?: string;
+  timeout?: number;
+  debug?: boolean;
+  enableTransactionApproval?: boolean;
+}
+
+export function unicornConnector(config: {
+  chains: any[];
+  options: UnicornConnectorOptions;
+}): Connector;
+
+export interface UniversalWallet {
+  isConnected: boolean;
+  address: string | undefined;
+  chain: string | undefined;
+  chainId: number | undefined;
+  isUnicorn: boolean;
+  isStandard: boolean;
+  connector: { name: string; id: string } | null;
+  wagmiAccount: any;
+  unicornWallet: any;
+  disconnect: () => void;
+}
+
+export interface VerificationResult {
+  isValid: boolean;
+  isSmartAccount: boolean;
+  requiresOnChainVerification: boolean;
+  standard: 'ECDSA' | 'ERC-1271';
+  message: string;
+  error?: string;
+}
+
+export function useUniversalWallet(): UniversalWallet;
+export function useUniversalTransaction(): any;
+export function useUniversalSignMessage(): {
+  signMessageAsync: (params: any) => Promise<string>;
+  signTypedDataAsync: (params: any) => Promise<string>;
+  verifyMessage: (params: any) => Promise<VerificationResult>;
+  isPending: boolean;
+  signature: string | null;
+  error: Error | null;
+};
+```
+
+### 4. Example HTML Files
+
+Create for each example (`basic`, `advanced`, `v1.2.0-test`):
 
 **examples/[example]/index.html**
 ```html
@@ -129,7 +448,7 @@ Create for each example (`basic`, `advanced`, `migration`):
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>[Example Name] - @unicorn.eth/autoconnect</title>
+    <title>[Example Name] - @unicorn.eth/autoconnect v1.2.0</title>
   </head>
   <body>
     <div id="root"></div>
@@ -138,9 +457,7 @@ Create for each example (`basic`, `advanced`, `migration`):
 </html>
 ```
 
-### 2. Example Main Files
-
-Create for each example:
+### 5. Example Main Files
 
 **examples/[example]/src/main.jsx**
 ```javascript
@@ -156,9 +473,7 @@ createRoot(document.getElementById('root')).render(
 )
 ```
 
-### 3. Example Vite Configs
-
-Create for each example:
+### 6. Example Vite Configs
 
 **examples/[example]/vite.config.js**
 ```javascript
@@ -177,139 +492,87 @@ export default defineConfig({
 })
 ```
 
-### 4. Example README Files
-
-Create custom README for each example explaining its specific use case.
-
-## 📦 What Gets Published to NPM
-
-Only these files are published (see `.npmignore`):
-
-```
-@unicorn.eth/autoconnect@1.0.0
-├── dist/
-│   ├── index.js
-│   ├── index.cjs
-│   └── index.d.ts
-├── README.md
-├── CHANGELOG.md
-└── LICENSE
-```
-
-**Total package size**: ~10-20 KB
-
-## 🚀 Build Output
-
-After running `pnpm run build`, you'll see:
-
-```bash
-dist/
-├── index.js          # ESM format (import)
-├── index.cjs         # CommonJS format (require)
-├── index.d.ts        # TypeScript definitions
-└── index.js.map      # Source map
-```
-
-## 🔍 What Each File Does
-
-### Core Source Files
-
-| File | Purpose |
-|------|---------|
-| `src/index.js` | Main entry point, exports all public APIs |
-| `src/components/UnicornAutoConnect.jsx` | React component for AutoConnect |
-| `src/hooks/useUniversalWallet.js` | Hook for unified wallet interface |
-| `src/utils/environment.js` | Environment detection utilities |
-| `src/types/index.d.ts` | TypeScript type definitions |
-
-### Configuration Files
-
-| File | Purpose |
-|------|---------|
-| `package.json` | NPM package configuration |
-| `tsup.config.js` | Build tool configuration |
-| `.gitignore` | Git exclusions (node_modules, dist, etc.) |
-| `.npmignore` | NPM exclusions (src, examples, etc.) |
-
-### Documentation Files
-
-| File | Purpose |
-|------|---------|
-| `README.md` | Package documentation for NPM |
-| `CONTRIBUTING.md` | Guide for contributors |
-| `CHANGELOG.md` | Version history |
-| `LICENSE` | MIT License |
-| `SETUP_GUIDE.md` | Publishing instructions |
-
-### GitHub Actions
-
-| File | Purpose |
-|------|---------|
-| `.github/workflows/publish.yml` | Auto-publish on release |
-| `.github/workflows/test.yml` | Run tests on PR |
-
-### Example Applications
-
-| Directory | Purpose |
-|-----------|---------|
-| `examples/basic/` | Minimal integration example |
-| `examples/advanced/` | All features demonstration |
-| `examples/migration/` | Migration from manual files |
-
-## 📝 Next Steps
-
-1. **Copy files from artifacts** above to your project
-2. **Create manual files** listed in "Files to Create Manually"
-3. **Update placeholders** (YOUR_USERNAME, etc.)
-4. **Install dependencies**: `pnpm install`
-5. **Build package**: `pnpm run build`
-6. **Test locally**: Link and test in example apps
-7. **Publish**: `npm publish --access public`
-8. **Create release**: Tag and release on GitHub
-
-## 🎯 Quick Start Commands
+## 🎯 Quick Start Commands (v1.2.0)
 
 ```bash
 # Setup
 git clone https://github.com/YOUR_USERNAME/autoconnect.git
 cd autoconnect
-pnpm install
+npm install
 
 # Build
-pnpm run build
+npm run build
 
 # Test locally
-pnpm link
+npm link
 cd examples/basic
-pnpm install
-pnpm link @unicorn.eth/autoconnect
-pnpm run dev
+npm install
+npm link @unicorn.eth/autoconnect
+npm run dev
 
-# Publish
+# Verify v1.2.0 features
+cd ../v1.2.0-test
+npm install
+npm link @unicorn.eth/autoconnect
+npm run dev
+
+# Publish v1.2.0
+npm version 1.2.0
 npm publish --access public
 
 # Create release
-git tag v1.0.0
-git push origin v1.0.0
+git tag v1.2.0
+git push origin v1.2.0
 ```
 
-## ✅ Verification Checklist
+## ✅ Pre-Release Checklist (v1.2.0)
 
-Before publishing:
+Before publishing v1.2.0:
 
-- [ ] All source files copied correctly
-- [ ] All configuration files in place
-- [ ] TypeScript definitions generated
+### Code
+- [ ] `unicornConnector` implemented and tested
+- [ ] Universal Hooks working with all wallet types
+- [ ] Structured verification response implemented
+- [ ] All bugs from v1.1.x fixed
+- [ ] Transaction delegation uses wrapper properly
+- [ ] Contract reads use publicClient
+
+### Documentation
+- [ ] README.md updated for v1.2.0
+- [ ] CHANGELOG.md includes v1.2.0 entry
+- [ ] RELEASE_NOTES.md complete
+- [ ] MIGRATION_QUICK_START.md written
+- [ ] QUICK_REFERENCE.md updated
+- [ ] All placeholders (YOUR_USERNAME) updated
+
+### Testing
 - [ ] Build completes without errors
+- [ ] Test with Unicorn wallet
+- [ ] Test with MetaMask
+- [ ] All 5 test features work:
+  - [ ] Send ETH
+  - [ ] Read contract
+  - [ ] Write contract
+  - [ ] Sign message
+  - [ ] Verify signature (check structured response)
+- [ ] Unicorn appears in RainbowKit wallet list
+- [ ] Approval dialogs work for Unicorn
+- [ ] Standard wallet popups work
+
+### Package
+- [ ] `package.json` version = 1.2.0
+- [ ] All peer dependencies correct
+- [ ] `.npmignore` configured correctly
+- [ ] TypeScript definitions generated
 - [ ] Examples work with linked package
-- [ ] README is complete and accurate
-- [ ] CHANGELOG documents version
-- [ ] GitHub Actions workflows configured
-- [ ] NPM_TOKEN added to GitHub secrets
-- [ ] Package name is available on NPM
-- [ ] All placeholders updated
-- [ ] Git repository initialized
-- [ ] Initial commit made
+
+### Release
+- [ ] Git repository clean
+- [ ] All changes committed
+- [ ] Tag v1.2.0 created
+- [ ] GitHub release created with notes
+- [ ] NPM publish successful
+- [ ] Announced to community
 
 ## 🔗 Important URLs
 
@@ -319,7 +582,29 @@ Update these in all documentation:
 - **GitHub Repo**: `https://github.com/YOUR_USERNAME/autoconnect`
 - **Issues**: `https://github.com/YOUR_USERNAME/autoconnect/issues`
 - **Discussions**: `https://github.com/YOUR_USERNAME/autoconnect/discussions`
+- **Discord**: `https://discord.gg/unicorn`
+
+## 📊 Migration Impact
+
+### From v1.1.x to v1.2.0
+
+**Breaking Changes:**
+1. Architecture: `<UnicornAutoConnect />` → `unicornConnector()`
+2. Verification: Boolean → Structured object
+
+**Time to Migrate:**
+- Small apps: 15-30 minutes
+- Medium apps: 30-60 minutes
+- Large apps: 1-2 hours
+
+**Migration Steps:**
+1. Remove `<UnicornAutoConnect />` component
+2. Add `unicornConnector()` to config
+3. Update `verifyMessage` responses
+4. Test
+
+See `MIGRATION_QUICK_START.md` for details.
 
 ---
 
-**You now have a complete, professional NPM package!** 🎉
+**You now have a complete v1.2.0 package with proper Wagmi connector integration!** 🎉🦄
