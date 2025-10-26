@@ -44,7 +44,7 @@ jobs:
             ${{ runner.os }}-pnpm-store-
       
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --shamefully-hoist --frozen-lockfile
       
       - name: Run linter
         run: pnpm lint || echo "Linting not configured yet"
