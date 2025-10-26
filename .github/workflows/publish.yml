@@ -53,7 +53,10 @@ jobs:
           head -n 5 pnpm-lock.yaml
 
       - name: Install deps
-        run: pnpm install --shamefully-hoist --no-frozen-lockfile
+      
+        run: 
+          rm -rf node_modules
+          pnpm install --no-frozen-lockfile --shamefully-hoist
 
       - name: Derive VERSION & NOTES from Release
         if: github.event_name == 'release'
