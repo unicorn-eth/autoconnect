@@ -25,6 +25,35 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          ref: ${{ github.event_name == 'workflow_dispatch' && 'main' || github.ref }}
+
+      - name: Debug - Show what was checked out
+        run: |
+          echo "=== Current commit ==="
+          git log -1 --oneline
+          echo ""
+          echo "=== Current branch/ref ==="
+          git branch -a
+          echo ""
+          echo "=== Files in src/ ==="
+          ls -la src/
+          echo ""
+          echo "=== src/index.js content (first 25 lines) ==="
+          head -25 src/index.js
+          echo ""
+          echo "=== Check for unicornConnector ==="
+          if [ -f "src/unicornConnector.js" ]; then
+            echo "✅ Found src/unicornConnector.js"
+            head -10 src/unicornConnector.js
+          else
+            echo "❌ src/unicornConnector.js NOT FOUND"
+          fi
+          echo ""
+          if [ -f "src/connectors/unicornConnector.js" ]; then
+            echo "✅ Found src/connectors/unicornConnector.js"
+          else
+            echo "❌ src/connectors/unicornConnector.js NOT FOUND"
+          fi
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -116,23 +145,9 @@ jobs:
             exit 1
           fi
           echo "✅ TypeScript definitions found at src/types/index.d.ts"
-
-       - name: Debug - Check file exists
-         run: |
-          echo "=== Checking if unicornConnector.js exists ==="
-          ls -la src/
-          echo ""
-          echo "=== Connectors directory ==="
-          ls -la src/connectors/
-          echo ""
-          echo "=== First 10 lines of unicornConnector.js ==="
-          head -10 src/connectors/unicornConnector.js
-          echo ""
-          echo "=== Checking index.js import ==="
-          grep unicornConnector src/index.js
             
       - name: Build
-        run:  pnpm run build
+        run: pnpm run build
 
       - name: Verify build output
         run: |
