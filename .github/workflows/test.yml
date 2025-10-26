@@ -115,16 +115,11 @@ jobs:
           pnpm run build
       
       - name: Build basic example
-        working-directory: examples/basic
+        working-directory: src/examples/basic
         run: |
           pnpm install --frozen-lockfile --shamefully-hoist
           pnpm run build
       
-      - name: Build advanced example
-        working-directory: examples/advanced
-        run: |
-          pnpm install --frozen-lockfile --shamefully-hoist
-          pnpm run build
       
       - name: Upload example artifacts
         uses: actions/upload-artifact@v4
