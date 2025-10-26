@@ -25,9 +25,9 @@ jobs:
           node-version: ${{ matrix.node-version }}
       
       - name: Install pnpm
-        uses: pnpm/action-setup@v2
+        uses: pnpm/action-setup@v4
         with:
-          version: 8
+          version: 10.17.1
       
       - name: Get pnpm store directory
         id: pnpm-cache
@@ -36,15 +36,28 @@ jobs:
           echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
       
       - name: Setup pnpm cache
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          key: ${{ runner.os }}-pnpm-store-v2-${{ hashFiles('**/pnpm-lock.yaml') }}
           restore-keys: |
-            ${{ runner.os }}-pnpm-store-
+            ${{ runner.os }}-pnpm-store-v2-
       
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+              - name: Debug pnpm config
+        run: |
+          echo "=== .npmrc content ==="
+          cat .npmrc
+          echo ""
+          echo "=== pnpm config ==="
+          pnpm config list
+          echo ""
+          echo "=== Checking for rollup ==="
+          find node_modules -name "*rollup*linux*" || echo "Not found"
+
+      - name: Clean install (fix rollup + clear bad cache)
+        run: |
+          rm -rf node_modules
+          pnpm install --frozen-lockfile --shamefully-hoist
       
       - name: Run linter
         run: pnpm lint || echo "Linting not configured yet"
@@ -78,12 +91,14 @@ jobs:
           node-version: '20'
       
       - name: Install pnpm
-        uses: pnpm/action-setup@v2
+        uses: pnpm/action-setup@v4
         with:
-          version: 8
+          version: 10.17.1
       
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+      - name: Clean install (fix rollup)
+        run: |
+          rm -rf node_modules
+          pnpm install --frozen-lockfile --shamefully-hoist
       
       - name: Run ESLint
         run: pnpm lint || echo "ESLint not configured yet"
@@ -105,29 +120,26 @@ jobs:
           node-version: '20'
       
       - name: Install pnpm
-        uses: pnpm/action-setup@v2
+        uses: pnpm/action-setup@v4
         with:
-          version: 8
+          version: 10.17.1
       
       - name: Build package
         run: |
-          pnpm install --frozen-lockfile
+          rm -rf node_modules
+          pnpm install --frozen-lockfile --shamefully-hoist
           pnpm run build
       
       - name: Build basic example
-        working-directory: examples/basic
+        working-directory: src/examples/basic
         run: |
-          pnpm install --frozen-lockfile
-          pnpm run build
-      
-      - name: Build advanced example
-        working-directory: examples/advanced
-        run: |
-          pnpm install --frozen-lockfile
+          rm -rf node_modules
+          pnpm install --frozen-lockfile --shamefully-hoist
           pnpm run build
       
       - name: Upload example artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: example-builds
-          path: examples/*/dist
+          name: example-builds-${{ github.run_id }}
+          path: src/examples/*/dist
+          retention-days: 7

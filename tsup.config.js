@@ -6,7 +6,7 @@ export default defineConfig({
   entry: ['src/index.js'],
   
   // Output formats
-  format: ['esm','cjs'],
+  format: ['esm', 'cjs'],
   
   // Don't auto-generate TypeScript definitions from JSX
   // We have manually created types in src/types/index.d.ts
@@ -22,17 +22,36 @@ export default defineConfig({
   clean: true,
   
   // External dependencies (not bundled)
+  // CRITICAL: These MUST be marked as external for library packages
   external: [
+    // React
     'react',
     'react-dom',
+    
+    // Wagmi and subpaths
     'wagmi',
+    'wagmi/actions',
+    'wagmi/chains',
+    
+    // Viem and ALL subpaths - CRITICAL FOR BUILD
+    'viem',
+    'viem/actions',
+    'viem/chains',
+    'viem/utils',
+    'viem/accounts',
+    
+    // Thirdweb and subpaths
     'thirdweb',
     'thirdweb/react',
     'thirdweb/chains',
     'thirdweb/wallets',
+    
+    // Other peer dependencies
+    '@tanstack/react-query',
+    '@rainbow-me/rainbowkit',
   ],
   
-  // Don't bundle node_modules
+  // Explicitly allow nothing to be bundled from node_modules except our own code
   noExternal: [],
   
   // Output directory
@@ -53,5 +72,22 @@ export default defineConfig({
   // Banner for CommonJS compatibility
   banner: {
     js: '"use client";',
+  },
+  
+  // Additional esbuild options to ensure externals work
+  esbuildOptions(options) {
+    options.external = [
+      ...options.external || [],
+      'react',
+      'react-dom',
+      'wagmi',
+      'wagmi/*',
+      'viem',
+      'viem/*',
+      'thirdweb',
+      'thirdweb/*',
+      '@tanstack/*',
+      '@rainbow-me/*',
+    ];
   },
 });

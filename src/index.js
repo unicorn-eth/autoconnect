@@ -1,33 +1,24 @@
-// coded lovingly by @cryptowampum and Claude AI
-// @unicorn.eth/autoconnect - Main export file
-// Clean, simple exports - developers just import and use
+// src/index.js
+// @unicorn.eth/autoconnect v1.1.2
+// Enhanced with full transaction and signing support
 
-// Core components
-export { default as UnicornAutoConnect } from './components/UnicornAutoConnect.jsx';
+// Core component
+export { default as UnicornAutoConnect } from './components/UnicornAutoConnect';
 
-// Hooks
-export { useUniversalWallet } from './hooks/useUniversalWallet.js';
-export { useUnicornTransaction } from './hooks/useUnicornTransaction.js';
-export { useUnicornSignMessage } from './hooks/useUnicornSignMessage.js';
+// Pre-built UI components (v1.1.0+)
+export { UnicornTransactionButton } from './components/UnicornTransactionButton';
+export { UnicornSignButton } from './components/UnicornSignButton';
 
-// Pre-built components
-export { default as UnicornTransactionButton } from './components/UnicornTransactionButton.jsx';
-export { default as UnicornSignButton } from './components/UnicornSignButton.jsx';
+// Core hooks
+export { useUniversalWallet } from './hooks/useUniversalWallet';
 
-// Export utility functions
-export { 
-  isUnicornEnvironment,
-  getUnicornAuthCookie,
-  getChainConfig 
-} from './utils/environment.js';
+// Transaction hooks (v1.1.2 - NEW/ENHANCED)
+export { useUnicornTransaction } from './hooks/useUnicornTransaction';
+export { useUniversalTransaction } from './hooks/useUniversalTransaction';
 
-// Export transaction approval utilities
-export { default as requestTransactionApproval } from './components/UnicornTransactionApproval.jsx';
-export { 
-  wrapUnicornWallet,
-  isWrappedWallet,
-  unwrapWallet 
-} from './utils/unicornWalletWrapper.js';
+// Signing hooks (v1.1.2 - NEW/ENHANCED)
+export { useUnicornSignMessage } from './hooks/useUnicornSignMessage';
+export { useUniversalSignMessage } from './hooks/useUniversalSignMessage';
 
-// Re-export types for TypeScript users (future enhancement)
-// export type { UniversalWallet, UnicornConfig } from './types';
+// Utility functions (if any)
+// export { ... } from './utils';

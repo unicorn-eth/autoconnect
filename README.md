@@ -1,19 +1,33 @@
 # @unicorn.eth/autoconnect
 
-> Add Unicorn AutoConnect to your dApp in 2 minutes - zero breaking changes
+[![npm version](https://img.shields.io/npm/v/@unicorn.eth/autoconnect.svg)](https://www.npmjs.com/package/@unicorn.eth/autoconnect)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-Drop-in Unicorn wallet integration for existing web3 apps. Works alongside your existing wallet setup (RainbowKit, Wagmi, etc.) without modifying any code.
+> Drop-in Unicorn wallet integration for React/Wagmi apps - zero breaking changes
 
-## Features
+Add gasless, smart account functionality to your dApp in 2 minutes. Works alongside your existing wallet setup (RainbowKit, Wagmi) as a standard Wagmi connector.
 
-- ✅ **Zero breaking changes** - existing wallets keep working
-- ✅ **2-minute setup** - just import and configure
-- ✅ **Unified interface** - one hook for all wallet types
-- ✅ **Gasless transactions** - automatic for Unicorn users
-- ✅ **TypeScript support** - full type definitions
-- ✅ **Production ready** - battle-tested isolation pattern
+## ✨ Features
 
-## Installation
+- 🔌 **Standard Wagmi Connector** - Works like any other wallet (MetaMask, WalletConnect, etc.)
+- 🎯 **Universal Hooks** - One hook works with ALL wallet types
+- 🆓 **Gasless Transactions** - Automatic for Unicorn users
+- 🔐 **Smart Account Support** - Proper ERC-1271 signature handling
+- 🚀 **Zero Breaking Changes** - Existing wallets keep working
+- ⚡ **2-Minute Setup** - Just add the connector
+- 📦 **TypeScript Support** - Full type definitions
+- 🎨 **RainbowKit Compatible** - Shows in wallet list automatically
+
+## 🆕 What's New in v1.2.0
+
+- 🎯 **Universal Hooks** - `useUniversalTransaction` and `useUniversalSignMessage` work with both wallet types
+- 🔐 **Structured Verification** - Smart account signature handling with full context
+- ⚡ **Improved Delegation** - Proper transaction approval dialogs
+- 🐛 **Bug Fixes** - Fixed chain validation, read operations, and more
+
+**⚠️ Breaking Change:** `verifyMessage` now returns structured object. [See migration guide](#-migration-from-v11x)
+
+## 📦 Installation
 
 ```bash
 npm install @unicorn.eth/autoconnect
@@ -23,59 +37,94 @@ yarn add @unicorn.eth/autoconnect
 pnpm add @unicorn.eth/autoconnect
 ```
 
-## Quick Start
+## 🚀 Quick Start
 
-### 1. Add to your App component
+### 1. Add the Connector
 
 ```jsx
-import { UnicornAutoConnect } from '@unicorn.eth/autoconnect';
+import { getDefaultConfig, RainbowKitProvider } from '@rainbow-me/rainbowkit';
+import { WagmiProvider } from 'wagmi';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { unicornConnector } from '@unicorn.eth/autoconnect';
+import { base, polygon, mainnet } from 'wagmi/chains';
+import '@rainbow-me/rainbowkit/styles.css';
+
+// Create wagmi config
+const config = getDefaultConfig({
+  appName: 'My dApp',
+  projectId: 'YOUR_WALLETCONNECT_PROJECT_ID',
+  chains: [base, polygon, mainnet],
+  ssr: true,
+});
+
+// Add Unicorn connector
+config.connectors.push(
+  unicornConnector({
+    chains: [base, polygon, mainnet],
+    options: {
+      clientId: process.env.NEXT_PUBLIC_THIRDWEB_CLIENT_ID,
+      factoryAddress: process.env.NEXT_PUBLIC_THIRDWEB_FACTORY_ADDRESS,
+      defaultChain: 'base',
+    }
+  })
+);
+
+const queryClient = new QueryClient();
 
 function App() {
   return (
     <WagmiProvider config={config}>
-      <RainbowKitProvider>
-        <YourExistingApp />
-        
-        {/* Add this one line */}
-        <UnicornAutoConnect
-          clientId={process.env.VITE_THIRDWEB_CLIENT_ID}
-          factoryAddress={process.env.VITE_THIRDWEB_FACTORY_ADDRESS}
-          defaultChain="base"
-        />
-      </RainbowKitProvider>
+      <QueryClientProvider client={queryClient}>
+        <RainbowKitProvider>
+          <YourApp />
+        </RainbowKitProvider>
+      </QueryClientProvider>
     </WagmiProvider>
   );
 }
 ```
 
-### 2. Update your components (optional but recommended)
-
-```jsx
-// Before:
-import { useAccount } from 'wagmi';
-const { address, isConnected } = useAccount();
-
-// After:
-import { useUniversalWallet } from '@unicorn.eth/autoconnect';
-const wallet = useUniversalWallet();
-// Now works with both Unicorn and standard wallets!
-```
-
-### 3. Add environment variables
+### 2. Add Environment Variables
 
 ```bash
-VITE_THIRDWEB_CLIENT_ID=your_client_id
-VITE_THIRDWEB_FACTORY_ADDRESS=0xD771615c873ba5a2149D5312448cE01D677Ee48A
+NEXT_PUBLIC_THIRDWEB_CLIENT_ID=your_client_id
+NEXT_PUBLIC_THIRDWEB_FACTORY_ADDRESS=0xD771615c873ba5a2149D5312448cE01D677Ee48A
 ```
 
-**That's it!** Your app now supports Unicorn AutoConnect.
+### 3. Use Universal Hooks (Recommended)
 
-## Configuration
+```jsx
+import { useUniversalTransaction } from '@unicorn.eth/autoconnect';
+import { parseEther } from 'viem';
 
-### UnicornAutoConnect Props
+function SendETH() {
+  const tx = useUniversalTransaction();
+  
+  const handleSend = async () => {
+    await tx.sendTransactionAsync({
+      to: '0x742d35Cc6634C0532925a3b844Bc454e4438f44e',
+      value: parseEther('0.001'),
+    });
+  };
+  
+  return (
+    <button onClick={handleSend} disabled={tx.isPending}>
+      {tx.isPending ? '⏳ Sending...' : '💸 Send 0.001 ETH'}
+    </button>
+  );
+}
+```
+
+**That's it!** Your app now supports Unicorn wallets alongside all your existing wallets.
+
+## 📖 Documentation
+
+### Configuration
+
+#### unicornConnector Options
 
 ```typescript
-interface UnicornAutoConnectProps {
+interface UnicornConnectorOptions {
   // Required: Your Thirdweb client ID
   clientId: string;
   
@@ -91,204 +140,452 @@ interface UnicornAutoConnectProps {
   // Optional: Enable debug logging (default: false)
   debug?: boolean;
   
-  // Optional: Callback when wallet connects
-  onConnect?: (wallet: any) => void;
-  
-  // Optional: Callback when connection fails
-  onError?: (error: Error) => void;
+  // Optional: Enable transaction approval dialogs (default: true)
+  enableTransactionApproval?: boolean;
 }
 ```
 
-### Usage Example with All Options
+#### Full Configuration Example
 
 ```jsx
-<UnicornAutoConnect
-  clientId={process.env.VITE_THIRDWEB_CLIENT_ID}
-  factoryAddress={process.env.VITE_THIRDWEB_FACTORY_ADDRESS}
-  defaultChain="polygon"
-  timeout={10000}
-  debug={true}
-  onConnect={(wallet) => {
-    console.log('Unicorn connected!', wallet);
-  }}
-  onError={(error) => {
-    console.log('AutoConnect failed, but other wallets still work');
-  }}
-/>
+config.connectors.push(
+  unicornConnector({
+    chains: [base, polygon, mainnet, arbitrum, optimism],
+    options: {
+      clientId: process.env.NEXT_PUBLIC_THIRDWEB_CLIENT_ID,
+      factoryAddress: process.env.NEXT_PUBLIC_THIRDWEB_FACTORY_ADDRESS,
+      defaultChain: 'base',
+      timeout: 10000,
+      debug: process.env.NODE_ENV === 'development',
+      enableTransactionApproval: true,
+    }
+  })
+);
 ```
 
-## useUniversalWallet Hook
+### Universal Hooks
 
-The `useUniversalWallet` hook provides a unified interface for both Unicorn and standard wallets.
+#### useUniversalTransaction
 
+Send transactions that work with **any wallet type**:
+
+```jsx
+import { useUniversalTransaction } from '@unicorn.eth/autoconnect';
+
+const tx = useUniversalTransaction();
+
+// Send ETH
+await tx.sendTransactionAsync({
+  to: '0x...',
+  value: parseEther('0.01'),
+});
+
+// Write to contract
+await tx.writeContractAsync({
+  address: '0x...',
+  abi: [...],
+  functionName: 'transfer',
+  args: ['0x...', 1000000],
+});
+
+// Read from contract
+const balance = await tx.readContractAsync({
+  address: '0x...',
+  abi: [...],
+  functionName: 'balanceOf',
+  args: ['0x...'],
+});
+```
+
+**API:**
+```typescript
+interface UniversalTransaction {
+  sendTransactionAsync: (params) => Promise<TransactionResult>;
+  writeContractAsync: (params) => Promise<TransactionResult>;
+  readContractAsync: (params) => Promise<any>;
+  isPending: boolean;
+  isLoading: boolean;
+  error: Error | null;
+  reset: () => void;
+}
+```
+
+#### useUniversalSignMessage
+
+Sign messages and verify signatures with **any wallet type**:
+
+```jsx
+import { useUniversalSignMessage } from '@unicorn.eth/autoconnect';
+
+const sign = useUniversalSignMessage();
+
+// Sign message
+const signature = await sign.signMessageAsync({
+  message: 'Hello Web3!',
+});
+
+// Sign typed data (EIP-712)
+const typedSig = await sign.signTypedDataAsync({
+  domain: { name: 'My dApp', version: '1', chainId: 8453 },
+  types: { Person: [{ name: 'name', type: 'string' }] },
+  primaryType: 'Person',
+  message: { name: 'Alice' },
+});
+
+// Verify signature (NEW in v1.2.0!)
+const result = await sign.verifyMessage({ message, signature });
+
+if (result.isSmartAccount) {
+  console.log('Smart account signature (ERC-1271)');
+  console.log('Cannot verify client-side, but IS valid on-chain');
+} else if (result.isValid) {
+  console.log('Valid EOA signature!');
+}
+```
+
+**API:**
+```typescript
+interface UniversalSignMessage {
+  signMessageAsync: (params) => Promise<string>;
+  signTypedDataAsync: (params) => Promise<string>;
+  verifyMessage: (params) => Promise<VerificationResult>;
+  isPending: boolean;
+  signature: string | null;
+  error: Error | null;
+  reset: () => void;
+}
+```
+
+**Verification Response (v1.2.0):**
+```typescript
+interface VerificationResult {
+  isValid: boolean;
+  isSmartAccount: boolean;
+  requiresOnChainVerification: boolean;
+  standard: 'ECDSA' | 'ERC-1271';
+  message: string;
+  error?: string;
+}
+```
+
+#### useUniversalWallet
+
+Get wallet information for **any connected wallet**:
+
+```jsx
+import { useUniversalWallet } from '@unicorn.eth/autoconnect';
+
+const wallet = useUniversalWallet();
+
+console.log(wallet.address);         // Current address
+console.log(wallet.isConnected);     // Connection status
+console.log(wallet.isUnicorn);       // True if Unicorn wallet
+console.log(wallet.chainId);         // Current chain ID
+console.log(wallet.connector?.name); // Connector name
+```
+
+**API:**
 ```typescript
 interface UniversalWallet {
-  // Connection state
   isConnected: boolean;
   address: string | undefined;
-  
-  // Wallet info
+  chain: string | undefined;
+  chainId: number | undefined;
+  isUnicorn: boolean;
+  isStandard: boolean;
   connector: { name: string; id: string } | null;
-  isUnicorn: boolean;    // True if using Unicorn (gasless)
-  isStandard: boolean;   // True if using standard wallet
-  
-  // Raw wallet objects
   wagmiAccount: Account;
   unicornWallet: any;
-  
-  // Methods
   disconnect: () => void;
 }
 ```
 
-### Example Usage
+## 💡 Common Patterns
+
+### Conditional UI Based on Wallet Type
 
 ```jsx
-import { useUniversalWallet } from '@unicorn.eth/autoconnect';
-import { useSendTransaction } from 'wagmi';
-
-function MyComponent() {
+function ConditionalFeatures() {
   const wallet = useUniversalWallet();
-  const { sendTransaction } = useSendTransaction();
   
-  const handleTransaction = async () => {
-    if (!wallet.isConnected) {
-      alert('Please connect wallet');
-      return;
-    }
-    
-    const tx = {
-      to: '0x...',
-      value: parseEther('0.01'),
-    };
-    
-    if (wallet.isUnicorn) {
-      // Unicorn wallet - gasless
-      await wallet.unicornWallet.sendTransaction(tx);
-    } else {
-      // Standard wallet - requires gas
-      await sendTransaction(tx);
-    }
-  };
+  if (!wallet.isConnected) {
+    return <ConnectButton />;
+  }
   
   return (
     <div>
-      {wallet.isConnected ? (
-        <div>
-          <p>Connected: {wallet.address}</p>
-          {wallet.isUnicorn && <p>⚡ Gasless enabled</p>}
-          <button onClick={handleTransaction}>
-            Send Transaction
-          </button>
-        </div>
-      ) : (
-        <ConnectButton />
+      <p>Address: {wallet.address}</p>
+      
+      {wallet.isUnicorn && (
+        <p style={{ color: 'green' }}>⚡ Gasless transactions enabled!</p>
+      )}
+      
+      {wallet.isStandard && (
+        <p style={{ color: 'orange' }}>⚠️ Gas fees apply</p>
       )}
     </div>
   );
 }
 ```
 
-## How It Works
+### ERC20 Token Transfer
 
-### Isolated React Root Pattern
+```jsx
+function SendUSDC() {
+  const tx = useUniversalTransaction();
+  
+  const USDC = '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913'; // Base
+  
+  const sendToken = async () => {
+    await tx.writeContractAsync({
+      address: USDC,
+      abi: [{
+        name: 'transfer',
+        type: 'function',
+        inputs: [
+          { name: 'to', type: 'address' },
+          { name: 'amount', type: 'uint256' }
+        ],
+      }],
+      functionName: 'transfer',
+      args: ['0x...', 1000000], // 1 USDC (6 decimals)
+    });
+  };
+  
+  return (
+    <button onClick={sendToken} disabled={tx.isPending}>
+      Send 1 USDC
+    </button>
+  );
+}
+```
 
-The package uses an **isolated React root** to avoid conflicts:
+### NFT Minting
 
-1. Creates a separate React tree for Thirdweb providers
-2. Communicates via custom events (no React state conflicts)
-3. Zero interference with existing wallet providers
-4. No React warnings or errors
+```jsx
+function MintNFT() {
+  const tx = useUniversalTransaction();
+  
+  const mint = async () => {
+    await tx.writeContractAsync({
+      address: '0xYourNFTContract',
+      abi: [{
+        name: 'mint',
+        type: 'function',
+        inputs: [{ name: 'quantity', type: 'uint256' }],
+        stateMutability: 'payable',
+      }],
+      functionName: 'mint',
+      args: [1],
+      value: parseEther('0.05'),
+    });
+  };
+  
+  return (
+    <button onClick={mint} disabled={tx.isPending}>
+      {tx.isPending ? '⏳ Minting...' : '🎨 Mint NFT'}
+    </button>
+  );
+}
+```
+
+## 🔧 How It Works
+
+### Standard Wagmi Connector
+
+The `unicornConnector` is a **standard Wagmi connector** - just like MetaMask or WalletConnect:
+
+1. **Detects Unicorn Environment** - Only activates when accessed via Unicorn portal
+2. **Registers as Connector** - Shows up in RainbowKit wallet list automatically
+3. **Works with Wagmi** - All standard Wagmi hooks work normally
+4. **Zero Conflicts** - No provider conflicts or React warnings
 
 ### Environment Detection
 
-AutoConnect only runs when accessed via Unicorn portal:
+The connector only activates when accessed via Unicorn portal:
 
 ```
-Normal: https://yourapp.com
+Normal:  https://yourapp.com
+         → Standard wallets only
+
 Unicorn: https://yourapp.com/?walletId=inApp&authCookie=...
+         → Unicorn + standard wallets
 ```
 
-In normal mode, your existing wallets work exactly as before.
+In normal mode, your app works exactly as before.
 
-## Testing
+## 🧪 Testing
 
 ### Test Normal Mode
-```
+```bash
 http://localhost:3000
 ```
-Expected: Existing wallet connections work normally
+**Expected:** Only standard wallets (MetaMask, WalletConnect, etc.) appear
 
 ### Test Unicorn Mode
-```
+```bash
 http://localhost:3000/?walletId=inApp&authCookie=test
 ```
-Expected: AutoConnect attempts in background
+**Expected:** Unicorn wallet appears in the wallet list alongside others
 
-## Migration Guide
-
-### From Manual Integration
-
-If you previously copied the files manually:
+### Test All Features
 
 ```jsx
-// Remove these files:
-// - src/components/UnicornAutoConnect.jsx
-// - src/hooks/useUniversalWallet.js
+// 1. Connect wallet (Unicorn or standard)
+// 2. Send ETH
+await tx.sendTransactionAsync({ to: '0x...', value: parseEther('0.001') });
 
-// Install package instead:
-npm install @unicorn.eth/autoconnect
+// 3. Read contract
+const balance = await tx.readContractAsync({ address: USDC, ... });
 
-// Update imports:
-import { UnicornAutoConnect, useUniversalWallet } from '@unicorn.eth/autoconnect';
+// 4. Write contract
+await tx.writeContractAsync({ address: USDC, ... });
 
-// Everything else stays the same!
+// 5. Sign message
+const sig = await sign.signMessageAsync({ message: 'Hello!' });
+
+// 6. Verify signature
+const result = await sign.verifyMessage({ message, signature: sig });
 ```
 
-## Peer Dependencies
+## 📚 Migration from v1.1.x
+
+### ⚠️ Breaking Change: Verification Response
+
+**Before (v1.1.x):**
+```jsx
+const isValid = await sign.verifyMessage({ message, signature });
+
+if (isValid) {
+  console.log('Valid!');
+}
+```
+
+**After (v1.2.0):**
+```jsx
+const result = await sign.verifyMessage({ message, signature });
+
+if (result.isSmartAccount) {
+  console.log('Smart account - cannot verify client-side');
+} else if (result.isValid) {
+  console.log('Valid EOA signature!');
+}
+```
+
+### Migration Steps
+
+1. **Update package:**
+   ```bash
+   npm install @unicorn.eth/autoconnect@1.2.0
+   ```
+
+2. **Search for `verifyMessage` in your code**
+
+3. **Update response handling:**
+   - Change `if (isValid)` to `if (result.isValid)`
+   - Add handling for `result.isSmartAccount` (optional but recommended)
+
+4. **Test with both wallet types**
+
+See [RELEASE_NOTES.md](./RELEASE_NOTES.md) for complete migration guide.
+
+## 🐛 Troubleshooting
+
+### Unicorn Connector Not Appearing
+
+**Problem:** Unicorn doesn't show in wallet list
+
+**Solution:** Make sure you added the connector:
+```jsx
+config.connectors.push(
+  unicornConnector({
+    chains: [base, polygon, mainnet],
+    options: { ... }
+  })
+);
+```
+
+### Transaction Fails with "invalid chain" Error
+
+**Fixed in v1.2.0!** Update to latest version.
+
+### Signature Shows as Invalid for Unicorn Wallets
+
+**This is expected!** Smart account signatures use ERC-1271:
+- Standard ECDSA verification doesn't work
+- Returns `isValid: false` with explanation
+- The signature **IS valid on-chain**
+- Check `result.isSmartAccount` in the response
+
+### TypeScript Errors
+
+Make sure you have the correct peer dependencies:
+```bash
+npm install --save-dev @types/react @types/react-dom
+```
+
+## 📦 Peer Dependencies
 
 This package requires:
-- `react` >= 18.0.0
-- `react-dom` >= 18.0.0
-- `thirdweb` >= 5.60.0
-- `wagmi` >= 2.0.0
 
-These should already be in your project.
-
-## TypeScript Support
-
-Full TypeScript definitions included:
-
-```typescript
-import type { UniversalWallet, UnicornConfig } from '@unicorn.eth/autoconnect';
+```json
+{
+  "react": "^18.0.0",
+  "react-dom": "^18.0.0",
+  "wagmi": "^2.0.0",
+  "viem": "^2.0.0",
+  "@tanstack/react-query": "^5.0.0",
+  "@rainbow-me/rainbowkit": "^2.0.0"
+}
 ```
 
-## Troubleshooting
+## 🎯 Best Practices
 
-### AutoConnect not running?
-Check URL parameters - must have `?walletId=inApp&authCookie=...`
+1. ✅ **Use unicornConnector** - Standard Wagmi connector approach
+2. ✅ **Use Universal Hooks** - They handle wallet detection automatically
+3. ✅ **Handle Smart Account Signatures** - Check `result.isSmartAccount` when verifying
+4. ✅ **Enable Approval Dialogs** - Better UX for Unicorn users
+5. ✅ **Error Handling** - Always wrap in try-catch
+6. ✅ **Loading States** - Use `isPending` to show feedback
+7. ✅ **Test Both Wallet Types** - Test with Unicorn AND MetaMask
 
-### React warnings?
-The isolated root pattern should prevent these. If you see warnings, please open an issue.
+## 📖 Additional Resources
 
-### Transactions not working?
-- **Unicorn**: Check Thirdweb configuration
-- **Standard**: Use Wagmi's `useSendTransaction` hook
+- 📄 [Quick Reference](./QUICK_REFERENCE.md) - Comprehensive API documentation
+- 📝 [Release Notes](./RELEASE_NOTES.md) - What's new in v1.2.0
+- 🔧 [Examples](./examples/) - Working code examples
+- 💬 [Discord](https://discord.gg/unicorn) - Community support
+- 🐛 [Issues](https://github.com/MyUnicornAccount/autoconnect/issues) - Bug reports
 
-## Support
+## 🤝 Contributing
 
-- **GitHub Issues**: [Report bugs](https://github.com/MyUnicornAccount/autoconnect/issues)
-- **Discord**: [Join #developers](https://discord.gg/unicorn)
-- **Docs**: [Full documentation](https://docs.unicorn.eth)
+Contributions welcome! Please see [CONTRIBUTING.md](./CONTRIBUTING.md) for guidelines.
 
-## Contributing
+### Development Setup
 
-Contributions welcome! See [CONTRIBUTING.md](CONTRIBUTING.md)
+```bash
+# Clone the repo
+git clone https://github.com/MyUnicornAccount/autoconnect.git
+cd autoconnect
 
-## License
+# Install dependencies
+npm install
 
-MIT License - see [LICENSE](LICENSE)
+# Build
+npm run build
+
+# Run examples
+cd examples/basic
+npm install
+npm run dev
+```
+
+## 📄 License
+
+MIT License - see [LICENSE](./LICENSE)
 
 ---
 
-**Built by Unicorn.eth - Enhance existing apps without breaking anything.**
+**Built with ❤️ by [@cryptowampum](https://github.com/cryptowampum) and Claude AI**
+
+Enhance your existing dApps without breaking anything 🦄✨

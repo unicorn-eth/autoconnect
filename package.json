@@ -1,6 +1,6 @@
 {
   "name": "@unicorn.eth/autoconnect",
-  "version": "1.1.1",
+  "version": "1.2.0",
   "description": "Drop-in Unicorn wallet integration for existing web3 apps. Works alongside your existing wallet setup (RainbowKit, Wagmi, etc.) without modifying any code.",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
@@ -32,7 +32,8 @@
     "thirdweb",
     "autoconnect",
     "gasless",
-    "smart-account"
+    "smart-account",
+    "web3 account"
   ],
   "author": "Unicorn.eth",
   "license": "MIT",
@@ -51,6 +52,8 @@
     "wagmi": "^2.17.0"
   },
   "devDependencies": {
+    "@rollup/rollup-linux-x64-gnu": "^4.52.5",
+    "rollup": "^4.52.5",
     "tsup": "^8.0.0"
   },
   "publishConfig": {
