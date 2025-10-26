@@ -43,7 +43,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pnpm-store-v2-
       
-              - name: Debug pnpm config
+      - name: Debug pnpm config
         run: |
           echo "=== .npmrc content ==="
           cat .npmrc
