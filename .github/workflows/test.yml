@@ -43,8 +43,8 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pnpm-store-
       
-      - name: Install dependencies
-        run: pnpm install --shamefully-hoist --frozen-lockfile
+      - name: Install dependencies (with shamefully-hoist to fix rollup)
+        run: pnpm install --frozen-lockfile --shamefully-hoist
       
       - name: Run linter
         run: pnpm lint || echo "Linting not configured yet"
@@ -82,8 +82,8 @@ jobs:
         with:
           version: 10.17.1
       
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+      - name: Install dependencies (with shamefully-hoist to fix rollup)
+        run: pnpm install --frozen-lockfile --shamefully-hoist
       
       - name: Run ESLint
         run: pnpm lint || echo "ESLint not configured yet"
@@ -111,15 +111,20 @@ jobs:
       
       - name: Build package
         run: |
-          pnpm install --frozen-lockfile
+          pnpm install --frozen-lockfile --shamefully-hoist
           pnpm run build
       
       - name: Build basic example
-        working-directory: src/examples/basic
+        working-directory: examples/basic
         run: |
-          pnpm install --frozen-lockfile
+          pnpm install --frozen-lockfile --shamefully-hoist
           pnpm run build
       
+      - name: Build advanced example
+        working-directory: examples/advanced
+        run: |
+          pnpm install --frozen-lockfile --shamefully-hoist
+          pnpm run build
       
       - name: Upload example artifacts
         uses: actions/upload-artifact@v4
