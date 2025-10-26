@@ -1,0 +1,15 @@
+src//connectors/UnicornConnector.js
+src//types/index.d.ts
+src//index.js
+src//utils/unicornWalletWrapper.js
+src//utils/environment.js
+src//components/UnicornAutoConnect.jsx
+src//components/UnicornTransactionApproval.jsx
+src//components/UnicornTransactionButton.jsx
+src//components/UnicornSignButton.jsx
+src//hooks/useUnicornTransaction.js
+src//hooks/useUniversalTransaction.js
+src//hooks/useUniversalWallet.js
+src//hooks/useUnicornSignMessage.js
+src//hooks/useUniversalSignMessage.js
+src//index.d.ts

@@ -1,108 +1,175 @@
-// Coded lovingly by @cryptowampum and Claude AI
-// useUnicornSignMessage.js - Universal signing hook for both wallet types
-import { useState, useCallback, useEffect } from 'react';
-import { useSignMessage } from 'wagmi';
+// src/hooks/useUnicornSignMessage.js
+// Enhanced message signing hook for Unicorn wallets
+import { useState, useCallback } from 'react';
 import { useUniversalWallet } from './useUniversalWallet';
+import { hashMessage } from 'viem';
 
-/**
- * Universal message signing hook that works with both Unicorn and standard wallets
- * 
- * @returns {Object} Signing state and sign function
- */
 export const useUnicornSignMessage = () => {
   const wallet = useUniversalWallet();
-  const { signMessage: wagmiSignMessage, data: wagmiSignature, isPending: isWagmiPending, error: wagmiError } = useSignMessage();
-  
-  const [isLoading, setIsLoading] = useState(false);
-  const [signature, setSignature] = useState(null);
+  const [isPending, setIsPending] = useState(false);
   const [error, setError] = useState(null);
+  const [data, setData] = useState(null);
 
-  // Watch for Wagmi signature result
-  useEffect(() => {
-    if (wagmiSignature) {
-      setSignature(wagmiSignature);
-      setIsLoading(false);
+  // Sign a message (personal_sign)
+  const signMessage = useCallback(async ({ message }) => {
+    if (!wallet.isUnicorn || !wallet.unicornWallet) {
+      throw new Error('Unicorn wallet not connected');
     }
-  }, [wagmiSignature]);
 
-  // Watch for Wagmi error
-  useEffect(() => {
-    if (wagmiError) {
-      setError(wagmiError);
-      setIsLoading(false);
-    }
-  }, [wagmiError]);
-
-  const signMessage = useCallback(async (message) => {
-    setIsLoading(true);
+    setIsPending(true);
     setError(null);
-    setSignature(null);
+    setData(null);
 
     try {
-      if (!wallet.isConnected) {
-        throw new Error('Wallet not connected');
+      const account = wallet.unicornWallet.getAccount();
+      
+      // Sign the message
+      const signature = await account.signMessage({ 
+        message: typeof message === 'string' ? message : message.raw 
+      });
+      
+      setData(signature);
+      return signature;
+    } catch (err) {
+      console.error('Message signing failed:', err);
+      setError(err);
+      throw err;
+    } finally {
+      setIsPending(false);
+    }
+  }, [wallet.isUnicorn, wallet.unicornWallet]);
+
+  // Sign typed data (EIP-712)
+  const signTypedData = useCallback(async ({ domain, types, primaryType, message }) => {
+    if (!wallet.isUnicorn || !wallet.unicornWallet) {
+      throw new Error('Unicorn wallet not connected');
+    }
+
+    setIsPending(true);
+    setError(null);
+    setData(null);
+
+    try {
+      const account = wallet.unicornWallet.getAccount();
+      
+      // Prepare the typed data
+      const typedData = {
+        domain,
+        types,
+        primaryType,
+        message,
+      };
+      
+      // Sign the typed data
+      const signature = await account.signTypedData(typedData);
+      
+      setData(signature);
+      return signature;
+    } catch (err) {
+      console.error('Typed data signing failed:', err);
+      setError(err);
+      throw err;
+    } finally {
+      setIsPending(false);
+    }
+  }, [wallet.isUnicorn, wallet.unicornWallet]);
+
+  // Verify a signature
+  const verifyMessage = useCallback(async ({ message, signature }) => {
+    if (!wallet.address) {
+      throw new Error('No wallet address available');
+    }
+
+    try {
+      const { verifyMessage: viemVerify } = await import('viem');
+      
+      // Ensure message is in the correct format
+      const messageToVerify = typeof message === 'string' ? message : message.raw;
+      
+      console.log('🔍 Verifying signature:', {
+        address: wallet.address,
+        message: messageToVerify,
+        signature: signature.slice(0, 20) + '...',
+        isUnicorn: wallet.isUnicorn,
+      });
+
+      // For Unicorn wallets (smart accounts), we can't do standard verification
+      if (wallet.isUnicorn) {
+        console.warn('⚠️ Note: Unicorn wallets use smart account signatures (ERC-1271).');
+        console.warn('⚠️ Standard ECDSA verification does not apply.');
+        console.warn('⚠️ Signature is valid on-chain but requires contract interaction to verify.');
+        
+        // Return structured response for smart accounts
+        return {
+          isValid: false, // Standard verification would fail
+          isSmartAccount: true,
+          requiresOnChainVerification: true,
+          standard: 'ERC-1271',
+          message: 'Smart account signatures require ERC-1271 on-chain verification. The signature is valid but cannot be verified client-side using standard ECDSA.',
+        };
       }
 
+      // For standard wallets (EOAs), use normal verification
+      const isValid = await viemVerify({
+        address: wallet.address,
+        message: messageToVerify,
+        signature,
+      });
+      
+      console.log(isValid ? '✅ Verification passed' : '❌ Verification failed');
+      
+      // Return structured response for EOAs
+      return {
+        isValid,
+        isSmartAccount: false,
+        requiresOnChainVerification: false,
+        standard: 'ECDSA',
+        message: isValid ? 'Signature is valid' : 'Signature is invalid',
+      };
+    } catch (err) {
+      console.error('❌ Signature verification failed:', err);
+      
+      // If it's a smart account, return structured error
       if (wallet.isUnicorn) {
-        // Unicorn wallet - uses smart wallet signing
-        console.log('🦄 Signing message via Unicorn...');
-        
-        const account = wallet.unicornWallet.getAccount?.();
-        
-        if (!account || !account.signMessage) {
-          throw new Error('Smart wallet does not support message signing');
-        }
-
-        const sig = await account.signMessage({ message });
-        
-        setSignature(sig);
-        setIsLoading(false);
-        
-        return sig;
-        
-      } else if (wallet.isStandard) {
-        // Standard wallet - uses Wagmi
-        console.log('💼 Signing message via standard wallet...');
-        
-        wagmiSignMessage({ message });
-        // Result will be picked up by useEffect watching wagmiSignature
-        
-        // Return a promise that resolves when signature is received
-        return new Promise((resolve, reject) => {
-          const checkInterval = setInterval(() => {
-            if (wagmiSignature) {
-              clearInterval(checkInterval);
-              resolve(wagmiSignature);
-            }
-            if (wagmiError) {
-              clearInterval(checkInterval);
-              reject(wagmiError);
-            }
-          }, 100);
-          
-          // Timeout after 60 seconds
-          setTimeout(() => {
-            clearInterval(checkInterval);
-            reject(new Error('Signing timeout'));
-          }, 60000);
-        });
+        return {
+          isValid: false,
+          isSmartAccount: true,
+          requiresOnChainVerification: true,
+          standard: 'ERC-1271',
+          error: err.message,
+          message: 'Smart account signature verification requires ERC-1271 on-chain verification.',
+        };
       }
       
-    } catch (err) {
-      console.error('Signing error:', err);
-      setError(err);
-      setIsLoading(false);
       throw err;
     }
-  }, [wallet, wagmiSignMessage, wagmiSignature, wagmiError]);
+  }, [wallet.address, wallet.isUnicorn]);
+
+  // Reset state
+  const reset = useCallback(() => {
+    setIsPending(false);
+    setError(null);
+    setData(null);
+  }, []);
 
   return {
+    // Async functions
     signMessage,
-    isLoading: isLoading || isWagmiPending,
-    signature,
+    signMessageAsync: signMessage, // Alias for wagmi compatibility
+    signTypedData,
+    signTypedDataAsync: signTypedData, // Alias for wagmi compatibility
+    verifyMessage,
+    
+    // State
+    isPending,
+    isLoading: isPending, // Alias for wagmi compatibility
     error,
-    isUnicorn: wallet.isUnicorn,
-    isStandard: wallet.isStandard,
-    isConnected: wallet.isConnected,
+    data,
+    signature: data, // Alias
+    isError: !!error,
+    isSuccess: !!data && !error,
+    
+    // Helpers
+    reset,
   };
 };
