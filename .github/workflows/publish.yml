@@ -197,6 +197,14 @@ jobs:
 
             await github.rest.repos.updateRelease({ owner, repo, release_id, body });
 
+      - name: Upload published package
+        if: steps.already.outputs.exists == 'false'
+        uses: actions/upload-artifact@v4
+        with:
+          name: npm-package-${{ steps.meta.outputs.version }}
+          path: '*.tgz'
+          retention-days: 90
+
       - name: Summary
         if: always()
         run: |

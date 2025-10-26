@@ -25,9 +25,9 @@ jobs:
           node-version: ${{ matrix.node-version }}
       
       - name: Install pnpm
-        uses: pnpm/action-setup@v2
+        uses: pnpm/action-setup@v4
         with:
-          version: 8
+          version: 10.17.1
       
       - name: Get pnpm store directory
         id: pnpm-cache
@@ -36,7 +36,7 @@ jobs:
           echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
       
       - name: Setup pnpm cache
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
           key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
@@ -78,9 +78,9 @@ jobs:
           node-version: '20'
       
       - name: Install pnpm
-        uses: pnpm/action-setup@v2
+        uses: pnpm/action-setup@v4
         with:
-          version: 8
+          version: 10.17.1
       
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -105,9 +105,9 @@ jobs:
           node-version: '20'
       
       - name: Install pnpm
-        uses: pnpm/action-setup@v2
+        uses: pnpm/action-setup@v4
         with:
-          version: 8
+          version: 10.17.1
       
       - name: Build package
         run: |
@@ -127,7 +127,8 @@ jobs:
           pnpm run build
       
       - name: Upload example artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: example-builds
+          name: example-builds-${{ github.run_id }}
           path: examples/*/dist
+          retention-days: 7
