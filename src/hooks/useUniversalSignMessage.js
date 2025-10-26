@@ -1,6 +1,7 @@
 // src/hooks/useUniversalSignMessage.js
 // Universal signing hook that works with BOTH Unicorn and standard wallets
 import { useSignMessage, useSignTypedData } from 'wagmi';
+import { verifyMessage as viemVerifyMessage } from 'viem';
 import { useUnicornSignMessage } from './useUnicornSignMessage';
 import { useUniversalWallet } from './useUniversalWallet';
 
@@ -36,13 +37,21 @@ export const useUniversalSignMessage = () => {
     if (isUnicorn) {
       return await unicornSign.verifyMessage(params);
     } else {
-      // For standard wallets, use viem directly
-      const { verifyMessage: viemVerify } = await import('viem');
-      return await viemVerify({
+      // For standard wallets, use viem's verifyMessage directly
+      const isValid = await viemVerifyMessage({
         address: wallet.address,
         message: params.message,
         signature: params.signature,
       });
+      
+      // Return in the same structured format as Unicorn
+      return {
+        isValid,
+        isSmartAccount: false,
+        requiresOnChainVerification: false,
+        standard: 'ECDSA',
+        message: isValid ? 'Valid ECDSA signature' : 'Invalid signature',
+      };
     }
   };
 
@@ -53,23 +62,24 @@ export const useUniversalSignMessage = () => {
     signTypedData,
     signTypedDataAsync: signTypedData,
     verifyMessage,
-
-    // State (combine from both sources)
+    
+    // Loading states
     isPending: isUnicorn ? unicornSign.isPending : (wagmiSign.isPending || wagmiTypedData.isPending),
-    isLoading: isUnicorn ? unicornSign.isLoading : (wagmiSign.isPending || wagmiTypedData.isPending),
-    error: isUnicorn ? unicornSign.error : (wagmiSign.error || wagmiTypedData.error),
-    data: isUnicorn ? unicornSign.data : (wagmiSign.data || wagmiTypedData.data),
+    
+    // Signature (from wagmi or unicorn)
     signature: isUnicorn ? unicornSign.signature : (wagmiSign.data || wagmiTypedData.data),
-    isError: isUnicorn ? unicornSign.isError : (wagmiSign.isError || wagmiTypedData.isError),
-    isSuccess: isUnicorn ? unicornSign.isSuccess : (wagmiSign.isSuccess || wagmiTypedData.isSuccess),
-
-    // Helpers
-    reset: isUnicorn ? unicornSign.reset : () => {
-      wagmiSign.reset();
-      wagmiTypedData.reset();
+    
+    // Error handling
+    error: isUnicorn ? unicornSign.error : (wagmiSign.error || wagmiTypedData.error),
+    
+    // Reset
+    reset: () => {
+      if (isUnicorn) {
+        unicornSign.reset();
+      } else {
+        wagmiSign.reset();
+        wagmiTypedData.reset();
+      }
     },
-
-    // Metadata
-    isUnicorn,
   };
 };
