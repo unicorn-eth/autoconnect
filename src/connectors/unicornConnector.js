@@ -1,8 +1,9 @@
 // src/connectors/unicornConnector.js
-// Wagmi connector for Unicorn wallet integration - why is this so weird??
+// Wagmi connector for Unicorn wallet integration - FIXED for proper state sync
 import { createConnector } from 'wagmi';
 import { createThirdwebClient } from 'thirdweb';
 import { inAppWallet } from 'thirdweb/wallets';
+import { SwitchChainError, getAddress } from 'viem';
 
 /**
  * Unicorn Wallet Connector for Wagmi v2
@@ -37,6 +38,8 @@ export function unicornConnector(options = {}) {
     type: 'injected',
     
     async setup() {
+      console.log('🦄 unicornConnector: setup() called');
+      
       // Initialize Thirdweb client
       this.client = createThirdwebClient({ clientId });
       
@@ -51,97 +54,179 @@ export function unicornConnector(options = {}) {
           gasless: true,
         },
       });
+
+      console.log('🦄 unicornConnector: setup complete');
     },
 
     async connect({ chainId } = {}) {
+      console.log('🦄 unicornConnector: connect() called', { chainId });
+      
       try {
+        // Ensure setup is called
+        if (!this.client || !this.wallet) {
+          await this.setup();
+        }
+
         const targetChain = config.chains.find(c => c.id === chainId) || 
                            config.chains.find(c => c.id === defaultChain) ||
                            config.chains[0];
 
+        console.log('🦄 unicornConnector: Connecting to chain', targetChain);
+
+        // Check if already connected via autoconnect
+        let account;
+        try {
+          account = this.wallet.getAccount();
+          if (account?.address) {
+            console.log('🦄 unicornConnector: Already connected via autoconnect!', account.address);
+            
+            const address = getAddress(account.address);
+            const chain = { id: targetChain.id, unsupported: false };
+
+            return {
+              accounts: [address],
+              chainId: targetChain.id,
+            };
+          }
+        } catch (e) {
+          console.log('🦄 unicornConnector: Not yet connected, proceeding with connection');
+        }
+
         // Connect the wallet
-        const account = await this.wallet.connect({
+        account = await this.wallet.connect({
           client: this.client,
           chain: targetChain,
         });
 
-        const address = account.address;
+        console.log('🦄 unicornConnector: Connected!', account.address);
+
+        const address = getAddress(account.address);
         const chain = { id: targetChain.id, unsupported: false };
 
+        // Store for future reference
+        this._currentAccount = account;
+        this._currentChainId = targetChain.id;
+
         return {
-          account: address,
-          chain,
+          accounts: [address],
+          chainId: targetChain.id,
         };
       } catch (error) {
-        console.error('Unicorn connector: Connection failed', error);
+        console.error('🦄 unicornConnector: Connection failed', error);
         throw error;
       }
     },
 
     async disconnect() {
+      console.log('🦄 unicornConnector: disconnect() called');
+      
       try {
-        await this.wallet.disconnect();
+        if (this.wallet) {
+          await this.wallet.disconnect();
+        }
+        
+        this._currentAccount = null;
+        this._currentChainId = null;
+        
+        console.log('🦄 unicornConnector: Disconnected');
       } catch (error) {
-        console.error('Unicorn connector: Disconnect failed', error);
+        console.error('🦄 unicornConnector: Disconnect failed', error);
       }
     },
 
-    async getAccount() {
+    async getAccounts() {
+      console.log('🦄 unicornConnector: getAccounts() called');
+      
       try {
-        const account = await this.wallet.getAccount();
-        return account?.address;
+        const account = this.wallet?.getAccount();
+        if (account?.address) {
+          const address = getAddress(account.address);
+          console.log('🦄 unicornConnector: getAccounts returning', [address]);
+          return [address];
+        }
+        
+        console.log('🦄 unicornConnector: getAccounts returning []');
+        return [];
       } catch (error) {
-        return undefined;
+        console.log('🦄 unicornConnector: getAccounts error', error);
+        return [];
       }
     },
 
     async getChainId() {
+      console.log('🦄 unicornConnector: getChainId() called');
+      
       try {
-        const account = await this.wallet.getAccount();
-        return account?.chain?.id || defaultChain;
+        const account = this.wallet?.getAccount();
+        const chainId = account?.chain?.id || this._currentChainId || defaultChain;
+        console.log('🦄 unicornConnector: getChainId returning', chainId);
+        return chainId;
       } catch (error) {
+        console.log('🦄 unicornConnector: getChainId error, returning default', defaultChain);
         return defaultChain;
       }
     },
 
     async isAuthorized() {
+      console.log('🦄 unicornConnector: isAuthorized() called');
+      
       try {
-        const account = await this.wallet.getAccount();
-        return !!account?.address;
+        const account = this.wallet?.getAccount();
+        const authorized = !!account?.address;
+        console.log('🦄 unicornConnector: isAuthorized returning', authorized);
+        return authorized;
       } catch (error) {
+        console.log('🦄 unicornConnector: isAuthorized error', error);
         return false;
       }
     },
 
     async switchChain({ chainId }) {
+      console.log('🦄 unicornConnector: switchChain() called', { chainId });
+      
       try {
         const targetChain = config.chains.find(c => c.id === chainId);
         if (!targetChain) {
-          throw new Error(`Chain ${chainId} not supported`);
+          throw new SwitchChainError(new Error(`Chain ${chainId} not supported`));
         }
 
         await this.wallet.switchChain(targetChain);
+        this._currentChainId = chainId;
+        
+        console.log('🦄 unicornConnector: switchChain complete');
         return targetChain;
       } catch (error) {
-        console.error('Unicorn connector: Chain switch failed', error);
-        throw error;
+        console.error('🦄 unicornConnector: Chain switch failed', error);
+        throw new SwitchChainError(error);
       }
     },
 
     async getProvider() {
+      console.log('🦄 unicornConnector: getProvider() called');
       return this.wallet;
     },
 
-    onAccountsChanged() {
-      // Handle account changes
+    onAccountsChanged(accounts) {
+      console.log('🦄 unicornConnector: onAccountsChanged', accounts);
+      if (accounts.length === 0) {
+        this.onDisconnect();
+      } else {
+        config.emitter.emit('change', { accounts: accounts.map(getAddress) });
+      }
     },
 
-    onChainChanged() {
-      // Handle chain changes
+    onChainChanged(chainId) {
+      console.log('🦄 unicornConnector: onChainChanged', chainId);
+      const id = Number(chainId);
+      this._currentChainId = id;
+      config.emitter.emit('change', { chainId: id });
     },
 
-    onDisconnect() {
-      // Handle disconnect
+    onDisconnect(error) {
+      console.log('🦄 unicornConnector: onDisconnect', error);
+      config.emitter.emit('disconnect');
+      this._currentAccount = null;
+      this._currentChainId = null;
     },
   }));
 }
