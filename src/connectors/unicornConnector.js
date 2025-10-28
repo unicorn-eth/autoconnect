@@ -1,27 +1,29 @@
-// src/connectors/unicornConnector.js
-// Wagmi connector for Unicorn wallet integration - FIXED for proper state sync
+// unicornConnector.js
+// Wagmi connector for Unicorn wallet - clean version for zero-impact integration
+// The connector just handles connection logic - autoconnect is done by UnicornAutoConnect component
+
 import { createConnector } from 'wagmi';
 import { createThirdwebClient } from 'thirdweb';
 import { inAppWallet } from 'thirdweb/wallets';
-import { SwitchChainError, getAddress } from 'viem';
 
 /**
  * Unicorn Wallet Connector for Wagmi v2
  * 
- * Creates a wagmi-compatible connector that wraps Thirdweb's inAppWallet
- * for seamless integration with existing wagmi setups.
+ * Standard wagmi connector - works like any other wallet connector.
+ * Autoconnect is handled separately by UnicornAutoConnect component.
  * 
  * @param {Object} options - Connector options
  * @param {string} options.clientId - Thirdweb client ID
- * @param {string} options.factoryAddress - Smart account factory address
- * @param {number} options.defaultChain - Default chain ID (e.g., 137 for Polygon)
- * @returns {Function} Wagmi connector function
+ * @param {string} options.factoryAddress - Smart account factory address  
+ * @param {number} options.defaultChain - Default chain ID (8453 for Base)
+ * @param {string} [options.icon] - Optional wallet icon URL
  */
 export function unicornConnector(options = {}) {
   const {
     clientId,
     factoryAddress,
     defaultChain,
+    icon = 'https://cdn.prod.website-files.com/66530e16a1530eb2c5731631/66532b163a3d036984005867_favicon.png',
   } = options;
 
   if (!clientId) {
@@ -36,17 +38,17 @@ export function unicornConnector(options = {}) {
     id: 'unicorn',
     name: 'Unicorn Wallet',
     type: 'injected',
+    icon,
+    rdns: 'eth.unicorn',
     
     async setup() {
-      console.log('🦄 unicornConnector: setup() called');
+      console.log('[UnicornConnector] Setup');
       
-      // Initialize Thirdweb client
       this.client = createThirdwebClient({ clientId });
       
-      // Create in-app wallet instance
       this.wallet = inAppWallet({
         auth: {
-          options: ['email', 'google', 'apple', 'phone'],
+          options: ['email', 'google', 'apple', 'phone']
         },
         smartAccount: {
           chain: config.chains.find(c => c.id === defaultChain) || config.chains[0],
@@ -55,178 +57,156 @@ export function unicornConnector(options = {}) {
         },
       });
 
-      console.log('🦄 unicornConnector: setup complete');
+      this.account = null;
+      this.eip1193Provider = null;
+
+      // NOTE: No autoconnect here!
+      // Autoconnect is handled by UnicornAutoConnect component
+      // which calls connect() through wagmi's state management
     },
 
     async connect({ chainId } = {}) {
-      console.log('🦄 unicornConnector: connect() called', { chainId });
+      console.log('[UnicornConnector] Connect called ');
       
-      try {
-        // Ensure setup is called
-        if (!this.client || !this.wallet) {
-          await this.setup();
-        }
+      const targetChain = config.chains.find(c => c.id === chainId) || 
+                         config.chains.find(c => c.id === defaultChain) ||
+                         config.chains[0];
 
-        const targetChain = config.chains.find(c => c.id === chainId) || 
-                           config.chains.find(c => c.id === defaultChain) ||
-                           config.chains[0];
+      console.log('[UnicornConnector] Target chain:', targetChain);
 
-        console.log('🦄 unicornConnector: Connecting to chain', targetChain);
+      this.account = await this.wallet.connect({
+        client: this.client,
+        chain: targetChain,
+      });
 
-        // Check if already connected via autoconnect
-        let account;
-        try {
-          account = this.wallet.getAccount();
-          if (account?.address) {
-            console.log('🦄 unicornConnector: Already connected via autoconnect!', account.address);
-            
-            const address = getAddress(account.address);
-            const chain = { id: targetChain.id, unsupported: false };
+      console.log('[UnicornConnector] Connected:', this.account.address);
 
-            return {
-              accounts: [address],
-              chainId: targetChain.id,
-            };
-          }
-        } catch (e) {
-          console.log('🦄 unicornConnector: Not yet connected, proceeding with connection');
-        }
+      const address = this.account.address;
 
-        // Connect the wallet
-        account = await this.wallet.connect({
-          client: this.client,
-          chain: targetChain,
-        });
+      config.emitter.emit('connect', { 
+        accounts: [address], 
+        chainId: targetChain.id 
+      });
 
-        console.log('🦄 unicornConnector: Connected!', account.address);
-
-        const address = getAddress(account.address);
-        const chain = { id: targetChain.id, unsupported: false };
-
-        // Store for future reference
-        this._currentAccount = account;
-        this._currentChainId = targetChain.id;
-
-        return {
-          accounts: [address],
-          chainId: targetChain.id,
-        };
-      } catch (error) {
-        console.error('🦄 unicornConnector: Connection failed', error);
-        throw error;
-      }
+      return {
+        account: address,
+        chain: { id: targetChain.id, unsupported: false },
+      };
     },
 
     async disconnect() {
-      console.log('🦄 unicornConnector: disconnect() called');
-      
-      try {
-        if (this.wallet) {
-          await this.wallet.disconnect();
-        }
-        
-        this._currentAccount = null;
-        this._currentChainId = null;
-        
-        console.log('🦄 unicornConnector: Disconnected');
-      } catch (error) {
-        console.error('🦄 unicornConnector: Disconnect failed', error);
+      console.log('[UnicornConnector] Disconnect');
+      await this.wallet.disconnect();
+      this.account = null;
+      this.eip1193Provider = null;
+      config.emitter.emit('disconnect');
+    },
+
+    async getAccount() {
+      if (this.account?.address) {
+        return this.account.address;
       }
+      
+      const account = await this.wallet.getAccount();
+      if (account) {
+        this.account = account;
+        return account.address;
+      }
+      
+      return undefined;
     },
 
     async getAccounts() {
-      console.log('🦄 unicornConnector: getAccounts() called');
-      
-      try {
-        const account = this.wallet?.getAccount();
-        if (account?.address) {
-          const address = getAddress(account.address);
-          console.log('🦄 unicornConnector: getAccounts returning', [address]);
-          return [address];
-        }
-        
-        console.log('🦄 unicornConnector: getAccounts returning []');
-        return [];
-      } catch (error) {
-        console.log('🦄 unicornConnector: getAccounts error', error);
-        return [];
-      }
+      const address = await this.getAccount();
+      return address ? [address] : [];
     },
 
     async getChainId() {
-      console.log('🦄 unicornConnector: getChainId() called');
-      
-      try {
-        const account = this.wallet?.getAccount();
-        const chainId = account?.chain?.id || this._currentChainId || defaultChain;
-        console.log('🦄 unicornConnector: getChainId returning', chainId);
-        return chainId;
-      } catch (error) {
-        console.log('🦄 unicornConnector: getChainId error, returning default', defaultChain);
-        return defaultChain;
+      if (this.account?.chain?.id) {
+        return this.account.chain.id;
       }
+      
+      const account = await this.wallet.getAccount();
+      if (account?.chain?.id) {
+        this.account = account;
+        return account.chain.id;
+      }
+      
+      return defaultChain;
     },
 
     async isAuthorized() {
-      console.log('🦄 unicornConnector: isAuthorized() called');
-      
-      try {
-        const account = this.wallet?.getAccount();
-        const authorized = !!account?.address;
-        console.log('🦄 unicornConnector: isAuthorized returning', authorized);
-        return authorized;
-      } catch (error) {
-        console.log('🦄 unicornConnector: isAuthorized error', error);
-        return false;
-      }
-    },
-
-    async switchChain({ chainId }) {
-      console.log('🦄 unicornConnector: switchChain() called', { chainId });
-      
-      try {
-        const targetChain = config.chains.find(c => c.id === chainId);
-        if (!targetChain) {
-          throw new SwitchChainError(new Error(`Chain ${chainId} not supported`));
-        }
-
-        await this.wallet.switchChain(targetChain);
-        this._currentChainId = chainId;
-        
-        console.log('🦄 unicornConnector: switchChain complete');
-        return targetChain;
-      } catch (error) {
-        console.error('🦄 unicornConnector: Chain switch failed', error);
-        throw new SwitchChainError(error);
-      }
+      const address = await this.getAccount();
+      return !!address;
     },
 
     async getProvider() {
-      console.log('🦄 unicornConnector: getProvider() called');
-      return this.wallet;
+      if (!this.eip1193Provider) {
+        const { EIP1193 } = await import('thirdweb/wallets');
+        const account = this.account || await this.wallet.getAccount();
+        
+        if (!account) {
+          return {
+            request: async () => {
+              throw new Error('Wallet not connected');
+            },
+          };
+        }
+        
+        this.eip1193Provider = await EIP1193.toProvider({
+          client: this.client,
+          chain: account.chain,
+          account,
+        });
+      }
+      
+      return this.eip1193Provider;
+    },
+
+    async switchChain({ chainId }) {
+      console.log('[UnicornConnector] Switch chain:', chainId);
+      
+      const targetChain = config.chains.find(c => c.id === chainId);
+      if (!targetChain) {
+        throw new Error(`Chain ${chainId} not supported`);
+      }
+
+      this.account = await this.wallet.connect({
+        client: this.client,
+        chain: targetChain,
+      });
+      
+      this.eip1193Provider = null;
+      config.emitter.emit('change', { chainId });
+      
+      return targetChain;
     },
 
     onAccountsChanged(accounts) {
-      console.log('🦄 unicornConnector: onAccountsChanged', accounts);
       if (accounts.length === 0) {
-        this.onDisconnect();
+        this.account = null;
+        config.emitter.emit('disconnect');
       } else {
-        config.emitter.emit('change', { accounts: accounts.map(getAddress) });
+        config.emitter.emit('change', { accounts });
       }
     },
 
     onChainChanged(chainId) {
-      console.log('🦄 unicornConnector: onChainChanged', chainId);
-      const id = Number(chainId);
-      this._currentChainId = id;
+      const id = typeof chainId === 'string' ? Number(chainId) : chainId;
+      if (this.account) {
+        this.account.chain = { id };
+      }
       config.emitter.emit('change', { chainId: id });
     },
 
-    onDisconnect(error) {
-      console.log('🦄 unicornConnector: onDisconnect', error);
+    onConnect(connectInfo) {
+      config.emitter.emit('connect', connectInfo);
+    },
+
+    onDisconnect() {
+      this.account = null;
+      this.eip1193Provider = null;
       config.emitter.emit('disconnect');
-      this._currentAccount = null;
-      this._currentChainId = null;
     },
   }));
 }

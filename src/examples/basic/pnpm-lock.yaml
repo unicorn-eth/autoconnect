@@ -12,7 +12,7 @@ importers:
   .:
     dependencies:
       '@rainbow-me/rainbowkit':
-        specifier: ^2.2.8
+        specifier: 2.2.8
         version: 2.2.8(@tanstack/react-query@5.90.5(react@18.3.1))(babel-plugin-macros@3.1.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.2)(viem@2.37.9(bufferutil@4.0.9)(typescript@5.9.2)(utf-8-validate@5.0.10)(zod@4.1.11))(wagmi@2.17.5(@tanstack/query-core@5.90.5)(@tanstack/react-query@5.90.5(react@18.3.1))(bufferutil@4.0.9)(react@18.3.1)(typescript@5.9.2)(utf-8-validate@5.0.10)(viem@2.37.9(bufferutil@4.0.9)(typescript@5.9.2)(utf-8-validate@5.0.10)(zod@4.1.11))(zod@4.1.11))
       '@tanstack/react-query':
         specifier: ^5.90.5

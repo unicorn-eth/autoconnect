@@ -7,7 +7,6 @@ import { base, polygon } from 'wagmi/chains';
 import { injected, walletConnect } from 'wagmi/connectors';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { RainbowKitProvider, ConnectButton } from '@rainbow-me/rainbowkit';
-import '@rainbow-me/rainbowkit/styles.css';
 
 // Import from source code
 import { unicornConnector } from '../../../connectors/unicornConnector.js';
@@ -18,6 +17,14 @@ import { WalletStatus } from './components/WalletStatus.jsx';
 import { ConnectorFunctionTests } from './components/ConnectorFunctionTests.jsx';
 import { SeamlessWagmiTests } from './components/SeamlessWagmiTests.jsx';
 import { StressTests } from './components/StressTests.jsx';
+import { ConnectionDiagnostic } from './components/ConnectionDiagnostic.jsx';
+import { useState } from 'react';
+
+const ClientID = import.meta.env.VITE_THIRDWEB_CLIENT_ID || 'Fuck';
+const FactoryAddress = import.meta.env.VITE_THIRDWEB_FACTORY_ADDRESS || '0xD771615c873ba5a2149D5312448cE01D677Ee48A';
+const ProjectId = import.meta.env.VITE_WALLETCONNECT_PROJECT_ID | '129c01c8ead0c5162747118a048279c6';
+
+console.log('props ', ClientID + ' ' + FactoryAddress + ' ' + ProjectId);
 
 // Wagmi config with unicornConnector
 const config = createConfig({
@@ -25,7 +32,7 @@ const config = createConfig({
   connectors: [
     injected({ target: 'metaMask' }),
     walletConnect({
-      projectId: import.meta.env.VITE_WALLETCONNECT_PROJECT_ID || 'YOUR_PROJECT_ID',
+      projectId: ProjectId,
     }),
     unicornConnector({
       clientId: import.meta.env.VITE_THIRDWEB_CLIENT_ID,
@@ -40,6 +47,53 @@ const config = createConfig({
 });
 
 const queryClient = new QueryClient();
+
+// Force Sync Button - helps when autoconnect completes before UI mounts
+function ForceSyncButton() {
+  const [syncing, setSyncing] = useState(false);
+
+  const handleForceSync = () => {
+    setSyncing(true);
+    
+    // Check if there's global state
+    if (typeof window !== 'undefined' && window.__UNICORN_WALLET_STATE__) {
+      console.log('🔄 Force syncing with global state:', window.__UNICORN_WALLET_STATE__);
+      
+      // Re-dispatch the connection event to trigger hook updates
+      const event = new CustomEvent('unicorn-wallet-connected', {
+        detail: window.__UNICORN_WALLET_STATE__
+      });
+      window.dispatchEvent(event);
+      
+      setTimeout(() => {
+        setSyncing(false);
+      }, 500);
+    } else {
+      console.log('⚠️ No global state found to sync');
+      setSyncing(false);
+    }
+  };
+
+  return (
+    <button
+      onClick={handleForceSync}
+      disabled={syncing}
+      style={{
+        padding: '8px 16px',
+        fontSize: '13px',
+        fontWeight: 'bold',
+        color: 'white',
+        background: '#17a2b8',
+        border: 'none',
+        borderRadius: '6px',
+        cursor: syncing ? 'not-allowed' : 'pointer',
+        opacity: syncing ? 0.6 : 1,
+      }}
+    >
+      {syncing ? '🔄 Syncing...' : '🔄 Force Sync State'}
+    </button>
+  );
+}
 
 function TestApp() {
   return (
@@ -82,7 +136,10 @@ function TestApp() {
             Test with MetaMask, Coinbase Wallet, or Unicorn
           </p>
         </div>
-        <ConnectButton />
+        <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+          <ForceSyncButton />
+          <ConnectButton />
+        </div>
       </div>
 
       {/* Test Info Banner */}
@@ -260,6 +317,9 @@ function TestApp() {
           <div><strong>🔄 Testing:</strong> Automated test running</div>
         </div>
       </div>
+
+      {/* Connection Diagnostic - only shows in development */}
+
     </div>
   );
 }
