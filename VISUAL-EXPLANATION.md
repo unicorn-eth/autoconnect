@@ -1,280 +1,550 @@
-# Wagmi State Sync - Visual Explanation
+# AutoConnect v1.3 - Visual Explanation
 
-## 🔴 The Problem (Current Code)
+## 🎯 The v1.3 Goal: True Zero-Code Integration
+
+**Mission:** Use standard wagmi hooks without ANY custom wrappers.
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│              UnicornAutoConnect Component                   │
-│                                                             │
-│  1. Detect Unicorn environment ✅                           │
-│  2. Create Thirdweb client                                  │
-│  3. Create inAppWallet                                      │
-│  4. Call wallet.connect() DIRECTLY ⚠️                       │
-│                                                             │
-└─────────────────────────────────────────────────────────────┘
-                            │
-                            ▼
-┌─────────────────────────────────────────────────────────────┐
-│                    Thirdweb SDK                             │
-│                                                             │
-│  • Connects to smart account                                │
-│  • Returns wallet object                                    │
-│  • Account is ready to use                                  │
-│                                                             │
-└─────────────────────────────────────────────────────────────┘
-                            │
-                            ▼
-┌─────────────────────────────────────────────────────────────┐
-│               Custom Event System                           │
-│                                                             │
-│  • Stores in window.__UNICORN_WALLET_STATE__ ✅             │
-│  • Dispatches 'unicorn-wallet-connected' event ✅           │
-│  • useUniversalWallet() listens and updates ✅              │
-│                                                             │
-└─────────────────────────────────────────────────────────────┘
-                            │
-                            ▼
-┌─────────────────────────────────────────────────────────────┐
-│                    The Problem                              │
-│                                                             │
-│  Wagmi's state is NEVER updated! ❌                         │
-│                                                             │
-│  • wagmi.useAccount() shows isConnected: false ❌           │
-│  • RainbowKit button shows "Connect Wallet" ❌              │
-│  • Test components disabled ❌                              │
-│  • useConnect() doesn't know about connection ❌            │
-│                                                             │
-└─────────────────────────────────────────────────────────────┘
+❌ OLD WAY (v1.2):
+import { useUniversalTransaction } from '@unicorn.eth/autoconnect';
+const tx = useUniversalTransaction(); // Custom wrapper
 
-The wallet is connected, but wagmi doesn't know!
+✅ NEW WAY (v1.3):
+import { useSendTransaction } from 'wagmi';
+const { sendTransaction } = useSendTransaction(); // Standard wagmi!
 ```
 
 ---
 
-## 🟢 The Solution (Fixed Code)
+## 🏗️ Architecture Overview
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│              UnicornAutoConnect Component                   │
-│                                                             │
-│  1. Detect Unicorn environment ✅                           │
-│  2. Find unicornConnector from wagmi config ✅              │
-│  3. Call wagmi.connect({ connector }) ✅                    │
-│                                                             │
-└─────────────────────────────────────────────────────────────┘
-                            │
-                            ▼
+│                    Your dApp Code                            │
+│                                                              │
+│  • useSendTransaction() from wagmi                           │
+│  • useSignMessage() from wagmi                               │
+│  • useAccount() from wagmi                                   │
+│  • NO custom hooks!                                          │
+│                                                              │
+└──────────────────────┬───────────────────────────────────────┘
+                       │
+                       ▼
 ┌─────────────────────────────────────────────────────────────┐
-│                  Wagmi Connection System                    │
-│                                                             │
-│  • wagmi.connect() is called ✅                             │
-│  • Routes to unicornConnector.connect() ✅                  │
-│  • Manages connection state ✅                              │
-│                                                             │
-└─────────────────────────────────────────────────────────────┘
-                            │
-                            ▼
-┌─────────────────────────────────────────────────────────────┐
-│                 unicornConnector.connect()                  │
-│                                                             │
-│  1. Check if wallet already exists (autoconnect)            │
-│  2. If exists: return account info to wagmi ✅              │
-│  3. If not: connect normally ✅                             │
-│  4. Return { accounts: [...], chainId: ... } ✅             │
-│                                                             │
-└─────────────────────────────────────────────────────────────┘
-                            │
-                            ▼
-┌─────────────────────────────────────────────────────────────┐
-│                    Thirdweb SDK                             │
-│                                                             │
-│  • Wallet already connected (from autoconnect) ✅           │
-│  • OR connects now ✅                                       │
-│  • Returns account object ✅                                │
-│                                                             │
-└─────────────────────────────────────────────────────────────┘
-                            │
-                            ▼
-┌─────────────────────────────────────────────────────────────┐
-│            Wagmi State Updated! 🎉                          │
-│                                                             │
-│  • wagmi.store updates ✅                                   │
-│  • useAccount() shows isConnected: true ✅                  │
-│  • RainbowKit shows connected address ✅                    │
-│  • All hooks synchronized ✅                                │
-│                                                             │
-└─────────────────────────────────────────────────────────────┘
-                            │
-                            ▼
-┌─────────────────────────────────────────────────────────────┐
-│          Custom Event (Still Dispatched) ✅                 │
-│                                                             │
-│  • window.__UNICORN_WALLET_STATE__ ✅                       │
-│  • 'unicorn-wallet-connected' event ✅                      │
-│  • useUniversalWallet() works ✅                            │
-│                                                             │
-└─────────────────────────────────────────────────────────────┘
-
-Everything is synchronized! 🎉
+│                   Wagmi v2 Core                              │
+│                                                              │
+│  • Manages all wallet connections                            │
+│  • Routes requests to active connector                       │
+│  • Handles state synchronization                             │
+│                                                              │
+└──────────┬────────────────────┬──────────────────────────────┘
+           │                    │
+           ▼                    ▼
+  ┌────────────────┐   ┌────────────────────┐
+  │  MetaMask      │   │  unicornConnector  │ 
+  │  Connector     │   │  (Our Code)        │
+  └────────────────┘   └─────────┬──────────┘
+                                 │
+                                 ▼
+                    ┌──────────────────────┐
+                    │  Provider Wrapper     │
+                    │  with Interceptor     │
+                    └───────────┬───────────┘
+                                │
+                    ┌───────────┴───────────┐
+                    │                       │
+                    ▼                       ▼
+          ┌──────────────────┐   ┌──────────────────┐
+          │ Approval Dialog  │   │ Thirdweb SDK     │
+          │ (UI Component)   │   │ (Smart Accounts) │
+          └──────────────────┘   └──────────────────┘
 ```
 
 ---
 
-## 🔑 Key Changes
+## 🔄 Request Flow: Send Transaction
 
-### Before (Broken)
+### For Standard Wallets (MetaMask, WalletConnect)
+
+```
+1. User clicks "Send ETH"
+        ↓
+2. useSendTransaction() called
+        ↓
+3. Wagmi routes to MetaMask connector
+        ↓
+4. MetaMask connector calls provider.request()
+        ↓
+5. MetaMask popup appears (native)
+        ↓
+6. User confirms in MetaMask
+        ↓
+7. Transaction sent with gas
+        ↓
+8. Result returned to wagmi hook
+        ↓
+9. UI updates (isPending → isSuccess)
+```
+
+### For Unicorn Wallets (Smart Accounts)
+
+```
+1. User clicks "Send ETH"
+        ↓
+2. useSendTransaction() called
+        ↓
+3. Wagmi routes to unicornConnector
+        ↓
+4. unicornConnector.getProvider() wraps provider
+        ↓
+5. Provider wrapper intercepts request
+        ↓
+6. Checks method === 'eth_sendTransaction'
+        ↓
+7. Loads approval dialog UI
+        ↓
+8. Shows beautiful approval dialog
+        ↓
+9. User confirms in approval dialog
+        ↓
+10. Calls Thirdweb SDK (gasless!)
+        ↓
+11. Transaction sent (no gas required)
+        ↓
+12. Result returned to wagmi hook
+        ↓
+13. UI updates (isPending → isSuccess)
+```
+
+---
+
+## 🔑 Key Architectural Decisions
+
+### 1. Standard Wagmi Connector
+
 ```javascript
-// UnicornAutoConnect.jsx - OLD
-const wallet = inAppWallet({ ... });
-await wallet.connect({ ... }); // ❌ Bypasses wagmi!
+// NOT a custom hook system!
+// It's a standard wagmi connector
 
-// Wagmi doesn't know about this connection
+export function unicornConnector(options) {
+  return createConnector((config) => ({
+    id: 'unicorn',
+    name: 'Unicorn Wallet',
+    type: 'injected',
+    
+    // Standard connector interface
+    connect() { ... },
+    disconnect() { ... },
+    getProvider() { ... },  // ← This is where the magic happens
+    // ... other connector methods
+  }));
+}
 ```
 
-### After (Fixed)
+### 2. Provider Wrapping with Interceptor
+
 ```javascript
-// UnicornAutoConnect.jsx - NEW
-import { useConnect } from 'wagmi';
-
-const { connect, connectors } = useConnect();
-const unicornConnector = connectors.find(c => c.id === 'unicorn');
-
-await connect({ connector: unicornConnector }); // ✅ Goes through wagmi!
-
-// Wagmi manages the connection properly
+async getProvider() {
+  // Get base provider from Thirdweb
+  const baseProvider = await EIP1193.toProvider({
+    client: this.client,
+    chain: account.chain,
+    account,
+  });
+  
+  // Wrap the request method
+  const originalRequest = baseProvider.request.bind(baseProvider);
+  
+  baseProvider.request = async (args) => {
+    // Intercept eth_sendTransaction
+    if (args.method === 'eth_sendTransaction') {
+      // Show approval dialog
+      await approvalHandler(args.params[0]);
+      
+      // User confirmed - continue
+      return await originalRequest(args);
+    }
+    
+    // Intercept personal_sign
+    if (args.method === 'personal_sign') {
+      await approvalHandler({
+        method: 'personal_sign',
+        message: args.params[0]
+      });
+      
+      // Sign with account
+      return await this.account.signMessage(...);
+    }
+    
+    // All other methods pass through
+    return await originalRequest(args);
+  };
+  
+  return baseProvider;
+}
 ```
 
----
+### 3. Centralized Chain Map
 
-## 📊 State Flow Comparison
-
-### Problem: Two Separate State Systems
-
-```
-Custom State (useUniversalWallet)     Wagmi State (useAccount)
-            ✅                                  ❌
-            │                                   │
-            │                                   │
-    Shows connected                     Shows NOT connected
-            │                                   │
-            │                                   │
-    WalletStatus ✅                   RainbowKit ❌
-                                      Tests ❌
-```
-
-### Solution: Single Unified State
-
-```
-                    Wagmi State
-                        ✅
-                        │
-        ┌───────────────┼───────────────┐
-        │               │               │
-        ▼               ▼               ▼
-    useAccount()   RainbowKit    Custom Event
-        ✅             ✅              ✅
-        │               │               │
-        ▼               ▼               ▼
-    All Tests    Connect Btn   useUniversalWallet
-        ✅             ✅              ✅
-```
-
----
-
-## 🎯 The Fix in One Sentence
-
-**Instead of connecting the wallet directly, we connect it THROUGH wagmi's connector system, which automatically updates all wagmi state.**
-
----
-
-## 🔍 How to Verify
-
-### Check Console
-```
-✅ Should see:
-"🦄 unicornConnector: connect() called"
-"🦄 unicornConnector: Already connected via autoconnect!"
-"🦄 UnicornAutoConnect: Connected via wagmi connector!"
-
-❌ Should NOT see:
-Just "Unicorn autoconnected!" without connector logs
-```
-
-### Check UI
-```
-✅ Should work:
-- RainbowKit shows address
-- Tests are enabled
-- Transactions work
-- No "Connect wallet" warnings
-
-❌ Should NOT happen:
-- Button still says "Connect Wallet"
-- Tests say "Connect a wallet first"
-- Need to click "Force Sync"
-```
-
-### Check State
 ```javascript
-// In browser console:
+// Single source of truth for chain mappings
+const THIRDWEB_CHAIN_MAP = {
+  8453: base,       // Base
+  137: polygon,     // Polygon
+  42161: arbitrum,  // Arbitrum
+  10: optimism,     // Optimism
+  100: gnosis,      // Gnosis Chain
+  42220: celo       // Celo
+};
 
-// This should show the connection:
-window.wagmiStore.getState().connections
-// ✅ Should return: [{ connector: { id: 'unicorn' }, accounts: [...] }]
+// Used everywhere - no duplicates!
+setup() {
+  const chain = THIRDWEB_CHAIN_MAP[defaultChain];
+}
 
-// This should also show:
-window.__UNICORN_WALLET_STATE__
-// ✅ Should return: { wallet: {...}, address: '0x...' }
+connect() {
+  const chain = THIRDWEB_CHAIN_MAP[chainId];
+}
+
+switchChain() {
+  const chain = THIRDWEB_CHAIN_MAP[chainId];
+}
 ```
 
 ---
 
-## 🚀 Migration Guide
+## 📊 State Synchronization
 
-### Files to Update
+### The Problem (v1.2)
 
-1. **CRITICAL**: `src/connectors/unicornConnector.js`
-   - Handles case where wallet already connected
-   - Returns proper format to wagmi
+```
+Custom State             Wagmi State
+(useUniversalWallet)     (useAccount)
+        ✅                      ❌
+        │                       │
+        │                       │
+  wallet.isConnected      isConnected = false
+        │                       │
+        │                       │
+  Tests work              Tests broken
+```
 
-2. **CRITICAL**: `src/components/UnicornAutoConnect.jsx`
-   - Uses wagmi's `connect()` instead of direct connection
-   - Goes through connector system
+### The Solution (v1.3)
 
-3. **Optional**: Test components
-   - Can simplify to use pure wagmi hooks
-   - No need for useUniversalWallet
+```
+              Wagmi State
+                  ✅
+                  │
+     ┌────────────┼────────────┐
+     │            │            │
+     ▼            ▼            ▼
+useAccount()  Connector   Provider
+    ✅            ✅            ✅
+     │            │            │
+     ▼            ▼            ▼
+All hooks    Auto-connect  Transactions
+  work!        works!         work!
+```
 
-### Migration Steps
+**Key insight:** By going through wagmi's connector system, ALL wagmi state automatically synchronizes.
 
-```bash
-# 1. Backup current files
-cp src/connectors/unicornConnector.js src/connectors/unicornConnector.js.backup
-cp src/components/UnicornAutoConnect.jsx src/components/UnicornAutoConnect.jsx.backup
+---
 
-# 2. Copy fixed files
-cp unicornConnector-FIXED.js src/connectors/unicornConnector.js
-cp UnicornAutoConnect-FIXED.jsx src/components/UnicornAutoConnect.jsx
+## 🎨 Approval Dialog System
 
-# 3. Test
-pnpm run dev
+### Dialog Types
 
-# 4. If it works, delete backups
-# If it doesn't work, restore backups and debug
+```
+┌─────────────────────────────────────────────┐
+│  Transaction Approval                       │
+├─────────────────────────────────────────────┤
+│                                             │
+│  🦄 Confirm Transaction                     │
+│  Unicorn Smart Wallet                       │
+│                                             │
+│  ┌───────────────────────────────────────┐ │
+│  │ To: 0x742d35Cc...                     │ │
+│  │ Value: 0.001 ETH                      │ │
+│  │ Data: 0x...                           │ │
+│  └───────────────────────────────────────┘ │
+│                                             │
+│  ⚡ Gasless Transaction                     │
+│  No gas fees required                       │
+│                                             │
+│  [ Reject ]            [ Confirm ]          │
+└─────────────────────────────────────────────┘
+```
+
+```
+┌─────────────────────────────────────────────┐
+│  Sign Message Approval                      │
+├─────────────────────────────────────────────┤
+│                                             │
+│  🦄 Sign Message                            │
+│  Unicorn Smart Wallet                       │
+│                                             │
+│  ┌───────────────────────────────────────┐ │
+│  │ Message:                              │ │
+│  │ Hello Web3! Welcome to...             │ │
+│  │ (scrollable)                          │ │
+│  └───────────────────────────────────────┘ │
+│                                             │
+│  ✍️ Signature Request                       │
+│  This signature proves account ownership    │
+│                                             │
+│  [ Reject ]            [ Confirm ]          │
+└─────────────────────────────────────────────┘
 ```
 
 ---
 
-## 💡 Why This Matters for v1.3
+## 🔄 AutoConnect Flow
 
-v1.3 is all about **seamless wagmi integration**. The whole point is that you can use native wagmi hooks without wrappers.
+### URL Detection
 
-But if wagmi doesn't know about the connection, none of that works!
+```
+Normal URL:
+https://yourapp.com
+    ↓
+No URL params detected
+    ↓
+AutoConnect does nothing
+    ↓
+Only standard wallets available
 
-This fix ensures:
-- ✅ Native wagmi hooks work
-- ✅ RainbowKit integration works
-- ✅ No custom wrapper hooks needed
-- ✅ True "seamless" experience
 
-**This is the final piece to make v1.3 truly seamless!** 🎉
+Unicorn URL:
+https://yourapp.com/?walletId=inApp&authCookie=abc123
+    ↓
+URL params detected!
+    ↓
+AutoConnect activates
+    ↓
+Finds unicornConnector from wagmi config
+    ↓
+Calls wagmi.connectAsync({ connector })
+    ↓
+Connector.connect() called
+    ↓
+Checks for existing auth
+    ↓
+wallet.autoConnect({ client })
+    ↓
+Connection established
+    ↓
+Wagmi state updated
+    ↓
+UI shows connected!
+```
+
+### Component Simplicity
+
+```jsx
+// UnicornAutoConnect.jsx - The entire component!
+
+function UnicornAutoConnect({ onConnect, onError, debug }) {
+  const { connectAsync, connectors } = useConnect();
+  const { isConnected, connector } = useAccount();
+  
+  useEffect(() => {
+    // Only run once
+    if (attemptedRef.current) return;
+    if (isConnected && connector?.id === 'unicorn') return;
+    
+    // Check URL params
+    if (!isUnicornUrl()) return;
+    
+    // Find connector
+    const unicornConnector = connectors.find(c => c.id === 'unicorn');
+    if (!unicornConnector) throw new Error('Connector not found');
+    
+    // Connect via wagmi!
+    await connectAsync({ connector: unicornConnector });
+    
+    attemptedRef.current = true;
+  }, []);
+  
+  return null; // Invisible component!
+}
+```
+
+---
+
+## 🌐 Multi-Chain Support
+
+### How Chain Switching Works
+
+```
+User clicks "Switch to Polygon"
+    ↓
+useSwitchChain() called with chainId: 137
+    ↓
+Wagmi routes to unicornConnector
+    ↓
+unicornConnector.switchChain({ chainId: 137 })
+    ↓
+Looks up chain in THIRDWEB_CHAIN_MAP[137] → polygon
+    ↓
+Updates account.chain reference
+    ↓
+Clears provider (forces recreation with new chain)
+    ↓
+Emits 'change' event to wagmi
+    ↓
+Wagmi updates all hooks
+    ↓
+UI updates to show Polygon
+    ↓
+Next transaction uses Polygon network
+```
+
+**Why this works:**
+Smart accounts don't "switch" chains like EOAs. They just update which chain to use for the next operation.
+
+---
+
+## 🛠️ Developer Experience
+
+### What Developers Write
+
+```jsx
+// Standard wagmi tutorial code - copy/paste!
+import { useSendTransaction } from 'wagmi';
+import { parseEther } from 'viem';
+
+function SendETH() {
+  const { sendTransaction, isPending } = useSendTransaction();
+  
+  return (
+    <button 
+      onClick={() => sendTransaction({
+        to: '0x...',
+        value: parseEther('0.01')
+      })}
+      disabled={isPending}
+    >
+      Send ETH
+    </button>
+  );
+}
+```
+
+### What Actually Happens
+
+```
+For MetaMask users:
+1. sendTransaction() → wagmi → MetaMask connector
+2. MetaMask popup (native)
+3. User pays gas
+4. Transaction sent
+
+For Unicorn users:
+1. sendTransaction() → wagmi → unicornConnector
+2. Beautiful approval dialog (our UI)
+3. No gas required!
+4. Gasless transaction sent
+
+SAME CODE - Different execution paths!
+```
+
+---
+
+## 📦 Package Structure
+
+```
+@unicorn.eth/autoconnect/
+│
+├── src/
+│   ├── connectors/
+│   │   └── unicornConnector.js      # Wagmi connector (300 lines)
+│   │       • createConnector() wrapper
+│   │       • Provider interceptor
+│   │       • THIRDWEB_CHAIN_MAP
+│   │       • Approval flow logic
+│   │
+│   ├── components/
+│   │   ├── UnicornAutoConnect.jsx   # Auto-connect component (150 lines)
+│   │   │   • URL detection
+│   │   │   • Wagmi integration
+│   │   │   • Zero UI
+│   │   │
+│   │   └── UnicornTransactionApproval.jsx  # Approval dialog (350 lines)
+│   │       • Beautiful UI
+│   │       • Transaction display
+│   │       • Message/TypedData support
+│   │       • Responsive design
+│   │
+│   └── index.js                      # Exports
+│
+└── examples/
+    └── test-app/
+        └── App.jsx                   # Complete test suite
+            • 9 test components
+            • All standard wagmi hooks
+            • Zero custom code
+```
+
+---
+
+## 🎯 Key Takeaways
+
+### 1. It's Just a Connector
+
+unicornConnector is not special - it follows wagmi's standard connector interface. This means:
+- ✅ Works with all wagmi hooks
+- ✅ Shows up in RainbowKit
+- ✅ No conflicts with other connectors
+- ✅ Can be used alongside MetaMask, WalletConnect, etc.
+
+### 2. Provider Wrapping is the Magic
+
+The connector wraps the provider's `request` method. This allows us to:
+- Intercept specific methods (transactions, signing)
+- Show approval dialogs
+- Use Thirdweb for execution
+- Return results to wagmi seamlessly
+
+### 3. Centralized Configuration
+
+One chain map, used everywhere:
+- Easier to maintain
+- No duplicate code
+- Consistent behavior
+- Simple to add chains
+
+### 4. Zero Breaking Changes
+
+Existing code keeps working:
+- Standard wallets unaffected
+- Wagmi hooks work normally
+- No refactoring needed
+- Add Unicorn support incrementally
+
+---
+
+## 🚀 The Result
+
+```
+Before AutoConnect v1.3:
+- Custom hooks (useUniversalTransaction)
+- Wrapper patterns
+- Dual state systems
+- Complex integration
+
+After AutoConnect v1.3:
+- Standard wagmi hooks
+- Single connector
+- Unified state
+- Copy/paste integration
+```
+
+**Mission accomplished:** True zero-code integration! 🎉
+
+---
+
+## 📚 Additional Resources
+
+- [README.md](./README.md) - Package overview
+- [QUICK_REFERENCE.md](./QUICK_REFERENCE.md) - API docs
+- [CONTINUATION-PROMPT.md](./CONTINUATION-PROMPT.md) - Developer guide
+- [Test App (App.jsx)](../examples/test-app/App.jsx) - Live examples
