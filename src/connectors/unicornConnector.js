@@ -5,7 +5,31 @@
 import { createConnector } from 'wagmi';
 import { createThirdwebClient } from 'thirdweb';
 import { inAppWallet } from 'thirdweb/wallets';
-import { base, polygon } from 'thirdweb/chains'; // Import Thirdweb chains
+import { base, polygon } from 'thirdweb/chains';
+
+// Transaction approval dialog (dynamically imported when needed)
+let requestTransactionApproval = null;
+
+// Allow setting the approval handler externally
+export function setTransactionApprovalHandler(handler) {
+  requestTransactionApproval = handler;
+}
+
+// Load the approval UI component dynamically
+async function loadApprovalUI() {
+  if (!requestTransactionApproval) {
+    try {
+      const module = await import('./UnicornTransactionApproval.jsx');
+      requestTransactionApproval = module.requestTransactionApproval || module.default;
+      console.log('[UnicornConnector] Transaction approval UI loaded');
+    } catch (error) {
+      console.warn('[UnicornConnector] Transaction approval UI not found, transactions will execute without confirmation');
+      // Return a pass-through function if approval UI isn't available
+      requestTransactionApproval = async () => true;
+    }
+  }
+  return requestTransactionApproval;
+}
 
 /**
  * Unicorn Wallet Connector for Wagmi v2
@@ -386,13 +410,63 @@ export function unicornConnector(options = {}) {
           baseProvider.request = async (args) => {
             console.log('[UnicornConnector] Provider request:', args.method, args.params);
             
+            // Intercept wallet_watchAsset - not all RPCs support this
+            if (args.method === 'wallet_watchAsset') {
+              console.log('[UnicornConnector] Intercepting wallet_watchAsset');
+              console.log('[UnicornConnector] Params:', JSON.stringify(args.params, null, 2));
+              
+              // This is a UI-only feature that tells the wallet to show a token
+              // Smart accounts and some wallets don't support this via RPC
+              // Return true to indicate "success" (non-blocking)
+              console.log('[UnicornConnector] wallet_watchAsset - returning true (feature not required for smart accounts)');
+              return true;
+            }
+            
+            // Intercept eth_sendTransaction to show approval dialog
+            if (args.method === 'eth_sendTransaction') {
+              console.log('[UnicornConnector] Intercepting eth_sendTransaction for approval');
+              console.log('[UnicornConnector] Transaction:', args.params[0]);
+              
+              try {
+                // Dynamically load and show approval dialog
+                const approvalHandler = await loadApprovalUI();
+                
+                // Show approval dialog and wait for user confirmation
+                await approvalHandler(args.params[0]);
+                console.log('[UnicornConnector] Transaction approved by user');
+                
+                // Continue with the transaction
+                const result = await originalRequest(args);
+                console.log('[UnicornConnector] Transaction sent:', result);
+                return result;
+              } catch (error) {
+                // User rejected or error occurred
+                if (error.message.includes('rejected')) {
+                  console.log('[UnicornConnector] Transaction rejected by user');
+                } else {
+                  console.error('[UnicornConnector] Transaction approval error:', error);
+                }
+                throw error;
+              }
+            }
+            
             // Intercept signing methods and use account's methods directly
             if (args.method === 'personal_sign' && this.account) {
               try {
                 const [message, address] = args.params;
                 console.log('[UnicornConnector] Intercepting personal_sign, using account.signMessage');
+                console.log('[UnicornConnector] Account has signMessage:', typeof this.account.signMessage);
+                console.log('[UnicornConnector] Account keys:', Object.keys(this.account));
+                
                 const signature = await this.account.signMessage({ message });
-                console.log('[UnicornConnector] Signature from account:', signature.slice(0, 20) + '...');
+                console.log('[UnicornConnector] Signature from account (length:', signature.length, ')');
+                console.log('[UnicornConnector] Full signature:', signature);
+                
+                if (!signature || signature === '0x') {
+                  console.warn('[UnicornConnector] Got empty signature');
+                  throw new Error('Failed to generate signature');
+                }
+                
                 return signature;
               } catch (error) {
                 console.error('[UnicornConnector] personal_sign failed:', error);
@@ -405,8 +479,17 @@ export function unicornConnector(options = {}) {
                 const [address, dataString] = args.params;
                 const typedData = JSON.parse(dataString);
                 console.log('[UnicornConnector] Intercepting eth_signTypedData_v4, using account.signTypedData');
+                console.log('[UnicornConnector] Account has signTypedData:', typeof this.account.signTypedData);
+                
                 const signature = await this.account.signTypedData(typedData);
-                console.log('[UnicornConnector] Signature from account:', signature.slice(0, 20) + '...');
+                console.log('[UnicornConnector] Signature from account (length:', signature.length, ')');
+                console.log('[UnicornConnector] Full signature:', signature);
+                
+                if (!signature || signature === '0x') {
+                  console.warn('[UnicornConnector] Got empty signature');
+                  throw new Error('Failed to generate signature');
+                }
+                
                 return signature;
               } catch (error) {
                 console.error('[UnicornConnector] eth_signTypedData_v4 failed:', error);
@@ -506,6 +589,10 @@ export function unicornConnector(options = {}) {
       const thirdwebChainMap = {
         8453: base,
         137: polygon,
+        42161: arbitrum,
+        10: optimism,
+        100: gnosis,
+        42220: celo
       };
       const targetThirdwebChain = thirdwebChainMap[chainId];
       
