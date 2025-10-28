@@ -31,9 +31,18 @@ const UnicornAutoConnect = ({
   onError,
   debug = false,
 }) => {
-  const { connect, connectors } = useConnect();
-  const { isConnected, connector } = useAccount();
+  const { connectAsync, connectors } = useConnect();
+  const { isConnected, connector, address } = useAccount();
   const attemptedRef = React.useRef(false);
+
+  // Monitor when account state changes after connection
+  React.useEffect(() => {
+    if (isConnected && connector?.id === 'unicorn' && address) {
+      if (debug) {
+        console.log('[UnicornAutoConnect] ✅ Wagmi state confirmed:', { address: address.slice(0, 10), connector: connector.id });
+      }
+    }
+  }, [isConnected, connector, address, debug]);
 
   React.useEffect(() => {
     // Skip if already attempted
@@ -57,7 +66,7 @@ const UnicornAutoConnect = ({
       const walletId = params.get('walletId');
       const authCookie = params.get('authCookie');
 
-      console.debug('found args');
+      if (debug) console.log('[UnicornAutoConnect] Checking URL params:', { walletId, authCookie: !!authCookie });
       return walletId === 'inApp' && !!authCookie;
     };
 
@@ -65,7 +74,6 @@ const UnicornAutoConnect = ({
     if (!isUnicornUrl()) {
       if (debug) console.log('[UnicornAutoConnect] Not a Unicorn URL');
       attemptedRef.current = true;
-      console.debug('no connection args');
       return;
     }
 
@@ -87,14 +95,25 @@ const UnicornAutoConnect = ({
         }
 
         if (debug) {
+          console.log('[UnicornAutoConnect] Found Unicorn connector:', unicornConnector);
+          console.log('[UnicornAutoConnect] Connector ready:', unicornConnector.ready);
           console.log('[UnicornAutoConnect] Connecting via wagmi...');
         }
 
-        // Connect through wagmi - this updates all wagmi state
-        await connect({ connector: unicornConnector });
+        // Connect through wagmi using connectAsync for proper promise handling
+        const connectResult = await connectAsync({ connector: unicornConnector });
 
         if (debug) {
-          console.log('[UnicornAutoConnect] ✅ Connected! All wagmi hooks should now work.');
+          console.log('[UnicornAutoConnect] ✅ Connect result from wagmi:', connectResult);
+          console.log('[UnicornAutoConnect] ✅ Connect call completed');
+        }
+
+        // CRITICAL FIX: Wait for wagmi's internal state to propagate
+        // Wagmi uses React state updates which are async and batched
+        await new Promise(resolve => setTimeout(resolve, 100));
+
+        if (debug) {
+          console.log('[UnicornAutoConnect] ✅ Wagmi state propagation complete - all hooks should now work');
         }
 
         // Optional: Call onConnect callback
@@ -120,12 +139,12 @@ const UnicornAutoConnect = ({
       }
     };
 
-    // Small delay to ensure wagmi is ready
+    // Small delay to ensure wagmi providers are ready
     const timer = setTimeout(autoConnect, 100);
 
     return () => clearTimeout(timer);
 
-  }, [connect, connectors, isConnected, connector, onConnect, onError, debug]);
+  }, [connectAsync, connectors, isConnected, connector, onConnect, onError, debug]);
 
   // This component doesn't render anything
   return null;

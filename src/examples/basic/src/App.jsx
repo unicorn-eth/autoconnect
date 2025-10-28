@@ -1,44 +1,69 @@
-// src/examples/basic/src/App.jsx
-// Comprehensive test app for @unicorn.eth/autoconnect v1.3.0
-// Tests ALL unicornConnector functions + seamless wagmi compatibility
+// TestApp-v1.3-Complete.jsx
+// Comprehensive test suite for @unicorn.eth/autoconnect v1.3
+// Tests BOTH unicornConnector functions AND seamless wagmi integration
 
+import { useState, useEffect } from 'react';
 import { WagmiProvider, createConfig, http } from 'wagmi';
 import { base, polygon } from 'wagmi/chains';
 import { injected, walletConnect } from 'wagmi/connectors';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { RainbowKitProvider, ConnectButton } from '@rainbow-me/rainbowkit';
+import '@rainbow-me/rainbowkit/styles.css';
 
-// Import from source code
+// Standard Wagmi hooks - NO custom hooks!
+import { 
+  useAccount, 
+  useSendTransaction, 
+  useSignMessage,
+  useSignTypedData,
+  useSwitchChain,
+  useDisconnect,
+  useBalance,
+  useReadContract,
+  useWriteContract,
+  useWatchAsset
+} from 'wagmi';
+import { parseEther, formatEther } from 'viem';
+
+// Import connector and component
 import { unicornConnector } from '../../../connectors/unicornConnector.js';
 import UnicornAutoConnect from '../../../components/UnicornAutoConnect.jsx';
 
-// Import test components
-import { WalletStatus } from './components/WalletStatus.jsx';
-import { ConnectorFunctionTests } from './components/ConnectorFunctionTests.jsx';
-import { SeamlessWagmiTests } from './components/SeamlessWagmiTests.jsx';
-import { StressTests } from './components/StressTests.jsx';
-import { ConnectionDiagnostic } from './components/ConnectionDiagnostic.jsx';
-import { useState } from 'react';
+// Test constants
+const TEST_ADDRESS = '0x742d35Cc6634C0532925a3b844Bc454e4438f44e';
+const USDC_BASE = '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913';
 
-const ClientID = import.meta.env.VITE_THIRDWEB_CLIENT_ID || '4e8c81182c3709ee441e30d776223354';
-const FactoryAddress = import.meta.env.VITE_THIRDWEB_FACTORY_ADDRESS || '0xD771615c873ba5a2149D5312448cE01D677Ee48A';
-const ProjectId = import.meta.env.VITE_WALLETCONNECT_PROJECT_ID || '129c01c8ead0c5162747118a048279c6';
+const ERC20_ABI = [
+  {
+    type: 'function',
+    name: 'balanceOf',
+    stateMutability: 'view',
+    inputs: [{ name: 'account', type: 'address' }],
+    outputs: [{ name: '', type: 'uint256' }],
+  },
+  {
+    type: 'function',
+    name: 'transfer',
+    stateMutability: 'nonpayable',
+    inputs: [
+      { name: 'to', type: 'address' },
+      { name: 'amount', type: 'uint256' }
+    ],
+    outputs: [{ name: '', type: 'bool' }],
+  }
+];
 
-console.log('ClientID:', ClientID);
-console.log('FactoryAddress:', FactoryAddress);
-console.log('ProjectId:', ProjectId);
-
-// Wagmi config with unicornConnector
+// Wagmi config
 const config = createConfig({
   chains: [base, polygon],
   connectors: [
     injected({ target: 'metaMask' }),
     walletConnect({
-      projectId: ProjectId
+      projectId: import.meta.env.VITE_WALLETCONNECT_PROJECT_ID || 'YOUR_PROJECT_ID',
     }),
     unicornConnector({
-      clientId: ClientID,
-      factoryAddress: FactoryAddress,
+      clientId: import.meta.env.VITE_THIRDWEB_CLIENT_ID,
+      factoryAddress: import.meta.env.VITE_THIRDWEB_FACTORY_ADDRESS,
       defaultChain: base.id,
     }),
   ],
@@ -50,305 +75,649 @@ const config = createConfig({
 
 const queryClient = new QueryClient();
 
-// Force Sync Button - helps when autoconnect completes before UI mounts
-function ForceSyncButton() {
-  const [syncing, setSyncing] = useState(false);
+// ============================================================================
+// TEST COMPONENTS - Each tests a specific wagmi hook
+// ============================================================================
 
-  const handleForceSync = () => {
-    setSyncing(true);
-    
-    // Check if there's global state
-    if (typeof window !== 'undefined' && window.__UNICORN_WALLET_STATE__) {
-      console.log('🔄 Force syncing with global state:', window.__UNICORN_WALLET_STATE__);
-      
-      // Re-dispatch the connection event to trigger hook updates
-      const event = new CustomEvent('unicorn-wallet-connected', {
-        detail: window.__UNICORN_WALLET_STATE__
-      });
-      window.dispatchEvent(event);
-      
-      setTimeout(() => {
-        setSyncing(false);
-      }, 500);
-    } else {
-      console.log('⚠️ No global state found to sync');
-      setSyncing(false);
-    }
-  };
+function WalletStatus() {
+  const { address, isConnected, connector, chain } = useAccount();
+  const { disconnect } = useDisconnect();
 
   return (
-    <button
-      onClick={handleForceSync}
-      disabled={syncing}
-      style={{
-        padding: '8px 16px',
-        fontSize: '13px',
-        fontWeight: 'bold',
-        color: 'white',
-        background: '#17a2b8',
-        border: 'none',
-        borderRadius: '6px',
-        cursor: syncing ? 'not-allowed' : 'pointer',
-        opacity: syncing ? 0.6 : 1,
-      }}
-    >
-      {syncing ? '🔄 Syncing...' : '🔄 Force Sync State'}
-    </button>
-  );
-}
-
-function TestApp() {
-  return (
-    <div style={{ 
-      maxWidth: '1200px', 
-      margin: '40px auto', 
-      padding: '20px', 
-      fontFamily: 'sans-serif' 
-    }}>
-      {/* Header */}
-      <div style={{
-        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-        color: 'white',
-        padding: '30px',
-        borderRadius: '12px',
-        marginBottom: '30px',
-      }}>
-        <h1 style={{ margin: 0, fontSize: '32px' }}>
-          🦄 AutoConnect v1.3 - Comprehensive Test Suite
-        </h1>
-        <p style={{ margin: '10px 0 0 0', opacity: 0.9 }}>
-          Testing all unicornConnector functions + seamless wagmi compatibility
-        </p>
+    <div style={cardStyle}>
+      <h3>🎯 Test 1: Wallet Connection (useAccount)</h3>
+      <div style={testInfoStyle}>
+        <p><strong>Tests:</strong> connector.connect(), connector.getAccount(), connector.getChainId()</p>
+        <p><strong>Expected:</strong> Should auto-connect via URL params, show Unicorn wallet info</p>
       </div>
-      
-      {/* Connect Button */}
-      <div style={{ 
-        display: 'flex', 
-        justifyContent: 'space-between', 
-        alignItems: 'center',
-        marginBottom: '30px',
-        padding: '20px',
-        background: '#f8f9fa',
-        borderRadius: '12px',
-        boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-      }}>
-        <div>
-          <strong style={{ fontSize: '18px' }}>🔌 Connect Wallet</strong>
-          <p style={{ margin: '5px 0 0 0', fontSize: '14px', color: '#666' }}>
-            Test with MetaMask, Coinbase Wallet, or Unicorn
-          </p>
+      {isConnected ? (
+        <div style={successStyle}>
+          <p>✅ Connected: {address?.slice(0, 10)}...{address?.slice(-8)}</p>
+          <p>🔗 Chain: {chain?.name} (ID: {chain?.id})</p>
+          <p>🔌 Connector: {connector?.name}</p>
+          <p>🦄 Is Unicorn: {connector?.id === 'unicorn' ? 'Yes' : 'No'}</p>
+          <button onClick={() => disconnect()} style={buttonStyle}>
+            Disconnect
+          </button>
         </div>
-        <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-          <ForceSyncButton />
-          <ConnectButton />
+      ) : (
+        <div style={warningStyle}>
+          <p>❌ Not connected</p>
+          <p>Use ConnectButton or add URL params: ?walletId=inApp&authCookie=test</p>
         </div>
-      </div>
-
-      {/* Test Info Banner */}
-      <div style={{
-        padding: '20px',
-        background: '#e3f2fd',
-        borderRadius: '12px',
-        marginBottom: '30px',
-        fontSize: '14px',
-        lineHeight: '1.6',
-      }}>
-        <strong style={{ fontSize: '16px' }}>✨ v1.3 Test Coverage</strong>
-        <div style={{ marginTop: '15px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
-          <div>
-            <strong>🔧 Connector Functions:</strong>
-            <ul style={{ margin: '5px 0', paddingLeft: '20px', fontSize: '13px' }}>
-              <li>setup() - Initialize Thirdweb client</li>
-              <li>connect() - Connect wallet</li>
-              <li>disconnect() - Disconnect wallet</li>
-              <li>getAccount() - Get address</li>
-              <li>getChainId() - Get chain ID</li>
-              <li>isAuthorized() - Check auth status</li>
-              <li>switchChain() - Change network</li>
-              <li>getProvider() - Get wallet instance</li>
-            </ul>
-          </div>
-          <div>
-            <strong>🔄 Seamless Wagmi Tests:</strong>
-            <ul style={{ margin: '5px 0', paddingLeft: '20px', fontSize: '13px' }}>
-              <li>useSendTransaction (native wagmi)</li>
-              <li>useWriteContract (native wagmi)</li>
-              <li>useReadContract (native wagmi)</li>
-              <li>useSignMessage (native wagmi)</li>
-              <li>useSignTypedData (native wagmi)</li>
-              <li>useAccount (connection state)</li>
-              <li>useSwitchChain (network switching)</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-
-      {/* Wallet Status */}
-      <WalletStatus />
-
-      {/* Test Sections */}
-      <div style={{
-        display: 'grid',
-        gap: '30px',
-        marginTop: '30px',
-      }}>
-        {/* Section 1: Connector Function Tests */}
-        <div style={{
-          padding: '25px',
-          background: 'white',
-          borderRadius: '12px',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-        }}>
-          <h2 style={{ 
-            margin: '0 0 20px 0', 
-            fontSize: '24px',
-            color: '#667eea',
-            borderBottom: '2px solid #667eea',
-            paddingBottom: '10px',
-          }}>
-            🔧 Connector Function Tests
-          </h2>
-          <ConnectorFunctionTests />
-        </div>
-
-        {/* Section 2: Seamless Wagmi Compatibility Tests */}
-        <div style={{
-          padding: '25px',
-          background: 'white',
-          borderRadius: '12px',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-        }}>
-          <h2 style={{ 
-            margin: '0 0 20px 0', 
-            fontSize: '24px',
-            color: '#764ba2',
-            borderBottom: '2px solid #764ba2',
-            paddingBottom: '10px',
-          }}>
-            🔄 Seamless Wagmi Tests
-          </h2>
-          <p style={{ fontSize: '14px', color: '#666', marginBottom: '20px' }}>
-            These tests use <strong>native wagmi hooks</strong> directly - no wrapper hooks!
-            This proves the connector works seamlessly with existing wagmi code.
-          </p>
-          <SeamlessWagmiTests />
-        </div>
-
-        {/* Section 3: Stress Tests */}
-        <div style={{
-          padding: '25px',
-          background: 'white',
-          borderRadius: '12px',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-        }}>
-          <h2 style={{ 
-            margin: '0 0 20px 0', 
-            fontSize: '24px',
-            color: '#f093fb',
-            borderBottom: '2px solid #f093fb',
-            paddingBottom: '10px',
-          }}>
-            🔥 Stress & Edge Case Tests
-          </h2>
-          <StressTests />
-        </div>
-      </div>
-
-      {/* Technical Comparison */}
-      <div style={{
-        marginTop: '30px',
-        padding: '25px',
-        background: 'linear-gradient(135deg, #667eea15 0%, #764ba215 100%)',
-        borderRadius: '12px',
-        fontSize: '14px',
-      }}>
-        <h3 style={{ marginTop: 0 }}>💡 EOA vs Smart Account Technical Details</h3>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '25px' }}>
-          <div style={{ 
-            padding: '20px', 
-            background: 'white', 
-            borderRadius: '8px',
-            boxShadow: '0 2px 4px rgba(0,0,0,0.05)',
-          }}>
-            <strong style={{ fontSize: '16px' }}>🦊 EOA (MetaMask, etc.)</strong>
-            <ul style={{ margin: '15px 0 0 0', paddingLeft: '20px', fontSize: '13px', lineHeight: '1.8' }}>
-              <li><strong>Type:</strong> Externally Owned Account</li>
-              <li><strong>Control:</strong> Private key (secp256k1)</li>
-              <li><strong>Signatures:</strong> ECDSA (recoverable)</li>
-              <li><strong>Verification:</strong> Client-side ✅</li>
-              <li><strong>Gas:</strong> User pays 💰</li>
-              <li><strong>Wagmi:</strong> Native support 🎯</li>
-              <li><strong>Security:</strong> Key = full control</li>
-            </ul>
-          </div>
-          <div style={{ 
-            padding: '20px', 
-            background: 'white', 
-            borderRadius: '8px',
-            boxShadow: '0 2px 4px rgba(0,0,0,0.05)',
-          }}>
-            <strong style={{ fontSize: '16px' }}>🦄 Unicorn (Smart Account)</strong>
-            <ul style={{ margin: '15px 0 0 0', paddingLeft: '20px', fontSize: '13px', lineHeight: '1.8' }}>
-              <li><strong>Type:</strong> Smart Contract (ERC-4337)</li>
-              <li><strong>Control:</strong> Contract logic + key</li>
-              <li><strong>Signatures:</strong> ERC-1271 (on-chain)</li>
-              <li><strong>Verification:</strong> On-chain required 🔗</li>
-              <li><strong>Gas:</strong> Sponsored (gasless!) ⚡</li>
-              <li><strong>Wagmi:</strong> Via connector 🔌</li>
-              <li><strong>Security:</strong> Programmable rules 🛡️</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-
-      {/* Test Results Legend */}
-      <div style={{
-        marginTop: '30px',
-        padding: '20px',
-        background: '#fff3cd',
-        borderRadius: '12px',
-        fontSize: '14px',
-      }}>
-        <h4 style={{ margin: '0 0 15px 0' }}>📊 Test Results Legend</h4>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px' }}>
-          <div><strong>✅ Pass:</strong> Function works correctly</div>
-          <div><strong>❌ Fail:</strong> Function error or unexpected result</div>
-          <div><strong>⏳ Pending:</strong> Test in progress</div>
-          <div><strong>⚠️ Warning:</strong> Works but with caveats</div>
-          <div><strong>ℹ️ Info:</strong> Additional context provided</div>
-          <div><strong>🔄 Testing:</strong> Automated test running</div>
-        </div>
-      </div>
-
-      {/* Connection Diagnostic - only shows in development */}
-
+      )}
     </div>
   );
 }
 
-// Main App with Providers
+
+
+function BalanceTest() {
+  const { address, isConnected } = useAccount();
+  const { data: balance, isLoading, refetch } = useBalance({
+    address,
+    enabled: isConnected,
+  });
+
+  return (
+    <div style={cardStyle}>
+      <h3>💰 Test 2: Balance Check (useBalance)</h3>
+      <div style={testInfoStyle}>
+        <p><strong>Tests:</strong> connector.getProvider() for RPC calls</p>
+        <p><strong>Expected:</strong> Should fetch ETH balance seamlessly</p>
+      </div>
+      {!isConnected ? (
+        <p style={warningStyle}>⚠️ Connect wallet first</p>
+      ) : isLoading ? (
+        <p>⏳ Loading balance...</p>
+      ) : (
+        <div style={successStyle}>
+          <p>✅ Balance: {formatEther(balance?.value || 0n)} {balance?.symbol}</p>
+          <button onClick={() => refetch()} style={buttonStyle}>
+            Refresh Balance
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function SendTransactionTest() {
+  const { isConnected, connector } = useAccount();
+  const { sendTransaction, isPending, isSuccess, isError, data, error } = useSendTransaction();
+  const [lastTx, setLastTx] = useState('');
+
+  const handleSend = async () => {
+    try {
+      setLastTx('Sending...');
+      const result = await sendTransaction({
+        to: TEST_ADDRESS,
+        value: parseEther('0.0001'),
+      });
+      setLastTx(`Success! TX: ${result}`);
+    } catch (err) {
+      setLastTx(`Error: ${err.message}`);
+    }
+  };
+
+  return (
+    <div style={cardStyle}>
+      <h3>💸 Test 3: Send Transaction (useSendTransaction)</h3>
+      <div style={testInfoStyle}>
+        <p><strong>Tests:</strong> connector.sendTransaction() with approval dialog</p>
+        <p><strong>Expected:</strong> Should show approval dialog for Unicorn, wallet popup for others</p>
+      </div>
+      {!isConnected ? (
+        <p style={warningStyle}>⚠️ Connect wallet first</p>
+      ) : (
+        <>
+          <button 
+            onClick={handleSend} 
+            disabled={isPending}
+            style={buttonStyle}
+          >
+            {isPending ? '⏳ Sending...' : '💸 Send 0.0001 ETH'}
+          </button>
+          {connector?.id === 'unicorn' && (
+            <p style={{ fontSize: '12px', color: '#666', marginTop: '8px' }}>
+              ⚡ Unicorn: Gasless transaction - approval dialog will show
+            </p>
+          )}
+          {lastTx && (
+            <div style={{ marginTop: '12px', fontSize: '14px' }}>
+              <pre style={{ wordBreak: 'break-all', whiteSpace: 'pre-wrap' }}>
+                {lastTx}
+              </pre>
+            </div>
+          )}
+          {isError && (
+            <div style={errorStyle}>
+              Error: {error?.message}
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  );
+}
+
+function ReadContractTest() {
+  const { address, isConnected } = useAccount();
+  const { data: balance, isLoading, refetch, isError, error } = useReadContract({
+    address: USDC_BASE,
+    abi: ERC20_ABI,
+    functionName: 'balanceOf',
+    args: [address],
+    enabled: isConnected && !!address,
+  });
+
+  return (
+    <div style={cardStyle}>
+      <h3>📖 Test 4: Read Contract (useReadContract)</h3>
+      <div style={testInfoStyle}>
+        <p><strong>Tests:</strong> connector.getProvider() for contract reads</p>
+        <p><strong>Expected:</strong> Should read USDC balance without issues</p>
+      </div>
+      {!isConnected ? (
+        <p style={warningStyle}>⚠️ Connect wallet first</p>
+      ) : isLoading ? (
+        <p>⏳ Reading contract...</p>
+      ) : isError ? (
+        <div style={errorStyle}>
+          Error: {error?.message}
+        </div>
+      ) : (
+        <div style={successStyle}>
+          <p>✅ USDC Balance: {(Number(balance || 0n) / 1e6).toFixed(2)} USDC</p>
+          <button onClick={() => refetch()} style={buttonStyle}>
+            Refresh
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function WriteContractTest() {
+  const { isConnected, connector } = useAccount();
+  const { writeContract, isPending, isSuccess, isError, error, data } = useWriteContract();
+  const [lastResult, setLastResult] = useState('');
+
+  const handleWrite = async () => {
+    try {
+      setLastResult('Writing to contract...');
+      const result = await writeContract({
+        address: USDC_BASE,
+        abi: ERC20_ABI,
+        functionName: 'transfer',
+        args: [TEST_ADDRESS, 1000000], // 1 USDC (6 decimals)
+      });
+      setLastResult(`Success! TX: ${result}`);
+    } catch (err) {
+      setLastResult(`Error: ${err.message}`);
+    }
+  };
+
+  return (
+    <div style={cardStyle}>
+      <h3>✏️ Test 5: Write Contract (useWriteContract)</h3>
+      <div style={testInfoStyle}>
+        <p><strong>Tests:</strong> connector.sendTransaction() for contract calls</p>
+        <p><strong>Expected:</strong> Should encode function data and send transaction</p>
+      </div>
+      {!isConnected ? (
+        <p style={warningStyle}>⚠️ Connect wallet first</p>
+      ) : (
+        <>
+          <button 
+            onClick={handleWrite} 
+            disabled={isPending}
+            style={buttonStyle}
+          >
+            {isPending ? '⏳ Writing...' : '✏️ Transfer 1 USDC'}
+          </button>
+          {connector?.id === 'unicorn' && (
+            <p style={{ fontSize: '12px', color: '#666', marginTop: '8px' }}>
+              ⚡ Unicorn: Gasless transaction
+            </p>
+          )}
+          {lastResult && (
+            <div style={{ marginTop: '12px', fontSize: '14px' }}>
+              <pre style={{ wordBreak: 'break-all', whiteSpace: 'pre-wrap' }}>
+                {lastResult}
+              </pre>
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  );
+}
+
+function SignMessageTest() {
+  const { isConnected, connector } = useAccount();
+  const { signMessage, isPending, isSuccess, data, error, isError } = useSignMessage();
+  const [message] = useState('Testing AutoConnect v1.3!');
+  const [signature, setSignature] = useState('');
+
+  const handleSign = async () => {
+    try {
+      const sig = await signMessage({ message });
+      setSignature(sig);
+    } catch (err) {
+      console.error('Sign error:', err);
+    }
+  };
+
+  return (
+    <div style={cardStyle}>
+      <h3>✍️ Test 6: Sign Message (useSignMessage)</h3>
+      <div style={testInfoStyle}>
+        <p><strong>Tests:</strong> connector.signMessage()</p>
+        <p><strong>Expected:</strong> Should sign with ERC-1271 for Unicorn, ECDSA for others</p>
+      </div>
+      {!isConnected ? (
+        <p style={warningStyle}>⚠️ Connect wallet first</p>
+      ) : (
+        <>
+          <p style={{ fontSize: '14px', marginBottom: '12px' }}>
+            Message: "{message}"
+          </p>
+          <button 
+            onClick={handleSign} 
+            disabled={isPending}
+            style={buttonStyle}
+          >
+            {isPending ? '⏳ Signing...' : '✍️ Sign Message'}
+          </button>
+          {signature && (
+            <div style={successStyle}>
+              <p>✅ Signed!</p>
+              <p style={{ fontSize: '12px', fontFamily: 'monospace', wordBreak: 'break-all' }}>
+                {signature.slice(0, 20)}...{signature.slice(-20)}
+              </p>
+              {connector?.id === 'unicorn' && (
+                <p style={{ fontSize: '12px', color: '#f59e0b', marginTop: '8px' }}>
+                  ⚠️ Smart Account: Uses ERC-1271 (on-chain verification required)
+                </p>
+              )}
+            </div>
+          )}
+          {isError && (
+            <div style={errorStyle}>
+              Error: {error?.message}
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  );
+}
+
+function SignTypedDataTest() {
+  const { address, isConnected, connector } = useAccount();
+  const { signTypedData, isPending, data, isError, error } = useSignTypedData();
+  const [signature, setSignature] = useState('');
+
+  const handleSign = async () => {
+    try {
+      const sig = await signTypedData({
+        domain: {
+          name: 'Test App',
+          version: '1',
+          chainId: 8453, // Base
+          verifyingContract: '0x0000000000000000000000000000000000000000',
+        },
+        types: {
+          Person: [
+            { name: 'name', type: 'string' },
+            { name: 'wallet', type: 'address' },
+          ],
+        },
+        primaryType: 'Person',
+        message: {
+          name: 'Test User',
+          wallet: address,
+        },
+      });
+      setSignature(sig);
+    } catch (err) {
+      console.error('Sign typed data error:', err);
+    }
+  };
+
+  return (
+    <div style={cardStyle}>
+      <h3>📝 Test 7: Sign Typed Data (useSignTypedData)</h3>
+      <div style={testInfoStyle}>
+        <p><strong>Tests:</strong> connector.signTypedData()</p>
+        <p><strong>Expected:</strong> Should sign EIP-712 typed data</p>
+      </div>
+      {!isConnected ? (
+        <p style={warningStyle}>⚠️ Connect wallet first</p>
+      ) : (
+        <>
+          <button 
+            onClick={handleSign} 
+            disabled={isPending}
+            style={buttonStyle}
+          >
+            {isPending ? '⏳ Signing...' : '📝 Sign Typed Data'}
+          </button>
+          {signature && (
+            <div style={successStyle}>
+              <p>✅ Signed!</p>
+              <p style={{ fontSize: '12px', fontFamily: 'monospace', wordBreak: 'break-all' }}>
+                {signature.slice(0, 20)}...{signature.slice(-20)}
+              </p>
+            </div>
+          )}
+          {isError && (
+            <div style={errorStyle}>
+              Error: {error?.message}
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  );
+}
+
+function SwitchChainTest() {
+  const { chain, isConnected, connector } = useAccount();
+  const { chains, switchChain, isPending, isSuccess, isError, error } = useSwitchChain();
+
+  return (
+    <div style={cardStyle}>
+      <h3>🔄 Test 8: Switch Chain (useSwitchChain)</h3>
+      <div style={testInfoStyle}>
+        <p><strong>Tests:</strong> connector.switchChain()</p>
+        <p><strong>Expected:</strong> Should switch between Base and Polygon</p>
+      </div>
+      {!isConnected ? (
+        <p style={warningStyle}>⚠️ Connect wallet first</p>
+      ) : (
+        <>
+          <p style={{ marginBottom: '12px' }}>
+            Current Chain: <strong>{chain?.name}</strong> (ID: {chain?.id})
+          </p>
+          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+            {chains.map((c) => (
+              <button
+                key={c.id}
+                onClick={() => switchChain({ chainId: c.id })}
+                disabled={isPending || c.id === chain?.id}
+                style={{
+                  ...buttonStyle,
+                  opacity: c.id === chain?.id ? 0.5 : 1,
+                }}
+              >
+                {isPending ? '⏳...' : `Switch to ${c.name}`}
+              </button>
+            ))}
+          </div>
+          {isError && (
+            <div style={errorStyle}>
+              Error: {error?.message}
+            </div>
+          )}
+          {isSuccess && (
+            <p style={successStyle}>✅ Chain switched successfully!</p>
+          )}
+        </>
+      )}
+    </div>
+  );
+}
+
+function WatchAssetTest() {
+  const { isConnected } = useAccount();
+  const { watchAsset, isPending, isSuccess, isError, error } = useWatchAsset();
+
+  const handleWatch = async () => {
+    try {
+      await watchAsset({
+        type: 'ERC20',
+        options: {
+          address: USDC_BASE,
+          symbol: 'USDC',
+          decimals: 6,
+        },
+      });
+    } catch (err) {
+      console.error('Watch asset error:', err);
+    }
+  };
+
+  return (
+    <div style={cardStyle}>
+      <h3>👁️ Test 9: Watch Asset (useWatchAsset)</h3>
+      <div style={testInfoStyle}>
+        <p><strong>Tests:</strong> connector.watchAsset()</p>
+        <p><strong>Expected:</strong> Should add USDC to wallet (if supported)</p>
+      </div>
+      {!isConnected ? (
+        <p style={warningStyle}>⚠️ Connect wallet first</p>
+      ) : (
+        <>
+          <button 
+            onClick={handleWatch} 
+            disabled={isPending}
+            style={buttonStyle}
+          >
+            {isPending ? '⏳ Adding...' : '👁️ Add USDC to Wallet'}
+          </button>
+          {isSuccess && (
+            <p style={successStyle}>✅ Asset added (or already exists)</p>
+          )}
+          {isError && (
+            <div style={errorStyle}>
+              Error: {error?.message}
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  );
+}
+
+// ============================================================================
+// MAIN TEST APP
+// ============================================================================
+
+function TestApp() {
+  const [showAdvanced, setShowAdvanced] = useState(false);
+  const { isConnected, address, status, connector } = useAccount();
+
+  // DEBUG: Log every state change
+  useEffect(() => {
+    console.log('🔍 TestApp - Wagmi State Update:', {
+      status,
+      isConnected,
+      address: address?.slice(0, 10),
+      connectorId: connector?.id
+    });
+  }, [status, isConnected, address, connector]);
+
+
+  return (
+    <div style={{ maxWidth: '1200px', margin: '40px auto', padding: '20px', fontFamily: 'sans-serif' }}>
+      <header style={{ marginBottom: '30px' }}>
+        <h1>🦄 AutoConnect v1.3 - Complete Test Suite</h1>
+        <p style={{ fontSize: '16px', color: '#666' }}>
+          Tests ALL connector functions using standard Wagmi hooks - zero custom code!
+        </p>
+      </header>
+
+      {/* Connect Section */}
+      <div style={{ ...cardStyle, background: '#e3f2fd' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div>
+            <h3>🔌 Connect Wallet</h3>
+            <p style={{ fontSize: '14px', color: '#666', margin: '8px 0' }}>
+              Use RainbowKit or URL params: <code>?walletId=inApp&authCookie=test</code>
+            </p>
+          </div>
+          <ConnectButton />
+        </div>
+      </div>
+
+      {/* Core Tests */}
+      <div style={{ marginTop: '20px' }}>
+        <h2>🎯 Core Functionality Tests</h2>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '20px' }}>
+          <WalletStatus />
+          <BalanceTest />
+          <SendTransactionTest />
+          <ReadContractTest />
+          <WriteContractTest />
+        </div>
+      </div>
+
+      {/* Advanced Tests */}
+      <div style={{ marginTop: '30px' }}>
+        <button
+          onClick={() => setShowAdvanced(!showAdvanced)}
+          style={{ ...buttonStyle, width: '100%' }}
+        >
+          {showAdvanced ? '▼' : '▶'} Advanced Tests (Signing & Chain Management)
+        </button>
+        {showAdvanced && (
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '20px', marginTop: '20px' }}>
+            <SignMessageTest />
+            <SignTypedDataTest />
+            <SwitchChainTest />
+            <WatchAssetTest />
+          </div>
+        )}
+      </div>
+
+      {/* Test Info */}
+      <div style={{ ...cardStyle, background: '#fff3cd', marginTop: '30px' }}>
+        <h3>ℹ️ Test Information</h3>
+        <ul style={{ margin: '10px 0', paddingLeft: '20px', fontSize: '14px' }}>
+          <li><strong>Zero custom code:</strong> All tests use standard <code>wagmi</code> hooks</li>
+          <li><strong>Seamless integration:</strong> Unicorn wallet works exactly like MetaMask</li>
+          <li><strong>Approval dialogs:</strong> Unicorn shows approval UI, others use native popups</li>
+          <li><strong>Gasless transactions:</strong> All Unicorn transactions are gasless</li>
+          <li><strong>Smart account signatures:</strong> Uses ERC-1271 (requires on-chain verification)</li>
+          <li>Test on <strong>Base network</strong> (chain ID: 8453)</li>
+          <li>All tests send minimal amounts (0.0001 ETH, 1 USDC)</li>
+        </ul>
+      </div>
+
+      {/* Architecture Comparison */}
+      <div style={{ ...cardStyle, background: '#d4edda', marginTop: '20px' }}>
+        <h3>✅ v1.3 Architecture Success</h3>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', fontSize: '14px' }}>
+          <div>
+            <h4>❌ Old Approach (v1.2)</h4>
+            <pre style={{ background: '#fee', padding: '10px', borderRadius: '4px' }}>
+{`import { useUniversalTransaction } from '@unicorn/autoconnect';
+
+const tx = useUniversalTransaction();
+await tx.sendTransaction(...);
+// ^ Custom hook required`}
+            </pre>
+          </div>
+          <div>
+            <h4>✅ New Approach (v1.3)</h4>
+            <pre style={{ background: '#efe', padding: '10px', borderRadius: '4px' }}>
+{`import { useSendTransaction } from 'wagmi';
+
+const { sendTransaction } = useSendTransaction();
+await sendTransaction(...);
+// ^ Standard wagmi hook!`}
+            </pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ============================================================================
+// APP WRAPPER WITH PROVIDERS
+// ============================================================================
+
 export default function App() {
   return (
     <WagmiProvider config={config}>
       <QueryClientProvider client={queryClient}>
         <RainbowKitProvider>
-          <TestApp />
+
           
-          {/* Autoconnect component for Unicorn portal */}
+          {/* AutoConnect component for URL-based connection */}
           <UnicornAutoConnect
             clientId={import.meta.env.VITE_THIRDWEB_CLIENT_ID}
             factoryAddress={import.meta.env.VITE_THIRDWEB_FACTORY_ADDRESS}
             defaultChain="base"
             debug={true}
-            onConnect={(wallet) => {
-              console.log('✅ Unicorn autoconnected via component!', wallet);
-            }}
-            onError={(error) => {
-              console.error('❌ Autoconnect failed:', error);
-            }}
+            enableTransactionApproval={true}
+            onConnect={(wallet) => console.log('✅ Unicorn autoconnected!', wallet)}
+            onError={(error) => console.error('❌ Autoconnect failed:', error)}
           />
+                    <TestApp />
         </RainbowKitProvider>
       </QueryClientProvider>
     </WagmiProvider>
   );
 }
+
+// ============================================================================
+// STYLES
+// ============================================================================
+
+const cardStyle = {
+  padding: '20px',
+  background: '#f8f9fa',
+  borderRadius: '8px',
+  marginBottom: '15px',
+};
+
+const buttonStyle = {
+  padding: '12px 20px',
+  fontSize: '14px',
+  fontWeight: 'bold',
+  color: 'white',
+  background: '#007bff',
+  border: 'none',
+  borderRadius: '6px',
+  cursor: 'pointer',
+  transition: 'opacity 0.2s',
+};
+
+const successStyle = {
+  padding: '12px',
+  background: '#d4edda',
+  borderRadius: '6px',
+  marginTop: '12px',
+  fontSize: '14px',
+};
+
+const warningStyle = {
+  padding: '12px',
+  background: '#fff3cd',
+  borderRadius: '6px',
+  marginTop: '12px',
+  fontSize: '14px',
+  color: '#856404',
+};
+
+const errorStyle = {
+  padding: '12px',
+  background: '#f8d7da',
+  borderRadius: '6px',
+  marginTop: '12px',
+  fontSize: '14px',
+  color: '#721c24',
+};
+
+const testInfoStyle = {
+  padding: '10px',
+  background: '#e3f2fd',
+  borderRadius: '4px',
+  marginBottom: '12px',
+  fontSize: '13px',
+  color: '#1565c0',
+};
