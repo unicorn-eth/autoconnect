@@ -98,7 +98,14 @@ function App() {
 }
 ```
 
-### 3. Use Standard Wagmi Hooks - That's It!
+### 2. Add Environment Variables
+
+```bash
+NEXT_PUBLIC_THIRDWEB_CLIENT_ID=4e8c81182c3709ee441e30d776223354
+NEXT_PUBLIC_THIRDWEB_FACTORY_ADDRESS=0xD771615c873ba5a2149D5312448cE01D677Ee48A
+```
+
+### 3. Use Universal Hooks (Recommended)
 
 ```jsx
 import { useAccount, useSendTransaction } from 'wagmi';
@@ -570,4 +577,4 @@ MIT License - see [LICENSE](./LICENSE)
 
 **Built with ❤️ by [@cryptowampum](https://github.com/cryptowampum) and Claude AI**
 
-True seamless wagmi integration for Unicorn wallets 🦄✨
+Enhance your existing dApps without breaking anything 🦄✨
