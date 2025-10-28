@@ -89,7 +89,9 @@ const ApprovalModal = ({ transaction, onApprove, onReject }) => {
           </div>
           <div>
             <h2 style={{ margin: 0, fontSize: '20px', color: '#1f2937' }}>
-              Confirm Transaction
+              {transaction.method === 'personal_sign' ? 'Sign Message' :
+               transaction.method === 'eth_signTypedData_v4' ? 'Sign Typed Data' :
+               'Confirm Transaction'}
             </h2>
             <p style={{ margin: 0, fontSize: '14px', color: '#6b7280' }}>
               Unicorn Smart Wallet
@@ -97,28 +99,96 @@ const ApprovalModal = ({ transaction, onApprove, onReject }) => {
           </div>
         </div>
 
-        {/* Transaction Details */}
+        {/* Transaction/Signing Details */}
         <div style={{
           background: '#f9fafb',
           borderRadius: '12px',
           padding: '16px',
           marginBottom: '20px',
         }}>
-          <div style={{ marginBottom: '12px' }}>
-            <div style={{ fontSize: '12px', color: '#6b7280', marginBottom: '4px' }}>
-              To
+          {/* Show message for signing operations */}
+          {transaction.method === 'personal_sign' && transaction.message && (
+            <div style={{ marginBottom: '12px' }}>
+              <div style={{ fontSize: '12px', color: '#6b7280', marginBottom: '4px' }}>
+                Message
+              </div>
+              <div style={{
+                fontSize: '14px',
+                color: '#1f2937',
+                fontFamily: 'monospace',
+                wordBreak: 'break-all',
+                maxHeight: '120px',
+                overflow: 'auto',
+                padding: '8px',
+                background: 'white',
+                borderRadius: '6px',
+                border: '1px solid #e5e7eb',
+              }}>
+                {transaction.message}
+              </div>
             </div>
-            <div style={{
-              fontSize: '14px',
-              color: '#1f2937',
-              fontFamily: 'monospace',
-              wordBreak: 'break-all',
-            }}>
-              {transaction.to || 'Contract Interaction'}
-            </div>
-          </div>
+          )}
 
-          {transaction.value && transaction.value !== '0' && transaction.value !== '0x0' && (
+          {/* Show typed data for eth_signTypedData_v4 */}
+          {transaction.method === 'eth_signTypedData_v4' && transaction.typedData && (
+            <div style={{ marginBottom: '12px' }}>
+              <div style={{ fontSize: '12px', color: '#6b7280', marginBottom: '4px' }}>
+                Typed Data
+              </div>
+              <div style={{
+                fontSize: '12px',
+                color: '#1f2937',
+                fontFamily: 'monospace',
+                wordBreak: 'break-all',
+                maxHeight: '120px',
+                overflow: 'auto',
+                padding: '8px',
+                background: 'white',
+                borderRadius: '6px',
+                border: '1px solid #e5e7eb',
+              }}>
+                <pre style={{ margin: 0, fontSize: '11px' }}>
+                  {JSON.stringify(transaction.typedData, null, 2)}
+                </pre>
+              </div>
+            </div>
+          )}
+
+          {/* Show "From" for signing operations */}
+          {(transaction.method === 'personal_sign' || transaction.method === 'eth_signTypedData_v4') && transaction.from && (
+            <div style={{ marginBottom: '12px' }}>
+              <div style={{ fontSize: '12px', color: '#6b7280', marginBottom: '4px' }}>
+                Signing With
+              </div>
+              <div style={{
+                fontSize: '14px',
+                color: '#1f2937',
+                fontFamily: 'monospace',
+                wordBreak: 'break-all',
+              }}>
+                {transaction.from}
+              </div>
+            </div>
+          )}
+
+          {/* Show "To" for transactions */}
+          {!transaction.method && transaction.to && (
+            <div style={{ marginBottom: '12px' }}>
+              <div style={{ fontSize: '12px', color: '#6b7280', marginBottom: '4px' }}>
+                To
+              </div>
+              <div style={{
+                fontSize: '14px',
+                color: '#1f2937',
+                fontFamily: 'monospace',
+                wordBreak: 'break-all',
+              }}>
+                {transaction.to}
+              </div>
+            </div>
+          )}
+
+          {!transaction.method && transaction.value && transaction.value !== '0' && transaction.value !== '0x0' && (
             <div style={{ marginBottom: '12px' }}>
               <div style={{ fontSize: '12px', color: '#6b7280', marginBottom: '4px' }}>
                 Value
@@ -133,7 +203,7 @@ const ApprovalModal = ({ transaction, onApprove, onReject }) => {
             </div>
           )}
 
-          {transaction.data && transaction.data !== '0x' && (
+          {!transaction.method && transaction.data && transaction.data !== '0x' && (
             <div>
               <div style={{ fontSize: '12px', color: '#6b7280', marginBottom: '4px' }}>
                 Data
@@ -153,6 +223,51 @@ const ApprovalModal = ({ transaction, onApprove, onReject }) => {
           )}
         </div>
 
+        {/* Gasless Badge - show for transactions, different badge for signing */}
+        {!transaction.method ? (
+          <div style={{
+            background: '#dcfce7',
+            border: '1px solid #16a34a',
+            borderRadius: '8px',
+            padding: '12px',
+            marginBottom: '20px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+          }}>
+            <span style={{ fontSize: '20px' }}>⚡</span>
+            <div>
+              <div style={{ fontSize: '14px', fontWeight: '600', color: '#166534' }}>
+                Gasless Transaction
+              </div>
+              <div style={{ fontSize: '12px', color: '#166534' }}>
+                No gas fees required
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div style={{
+            background: '#fef3c7',
+            border: '1px solid #f59e0b',
+            borderRadius: '8px',
+            padding: '12px',
+            marginBottom: '20px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+          }}>
+            <span style={{ fontSize: '20px' }}>✍️</span>
+            <div>
+              <div style={{ fontSize: '14px', fontWeight: '600', color: '#92400e' }}>
+                Signature Request
+              </div>
+              <div style={{ fontSize: '12px', color: '#92400e' }}>
+                This signature proves account ownership
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Gasless Badge */}
         <div style={{
           background: '#dcfce7',
@@ -160,7 +275,7 @@ const ApprovalModal = ({ transaction, onApprove, onReject }) => {
           borderRadius: '8px',
           padding: '12px',
           marginBottom: '20px',
-          display: 'flex',
+          display: 'none', // Hidden - replaced by conditional badge above
           alignItems: 'center',
           gap: '8px',
         }}>

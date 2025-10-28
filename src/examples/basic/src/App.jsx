@@ -1,6 +1,7 @@
 // TestApp-v1.3-Complete.jsx
 // Comprehensive test suite for @unicorn.eth/autoconnect v1.3
 // Tests BOTH unicornConnector functions AND seamless wagmi integration
+// Coded lovingly by @cryptowampum and Claude AI
 
 import { useState, useEffect } from 'react';
 import { WagmiProvider, createConfig, http } from 'wagmi';
@@ -147,16 +148,27 @@ function SendTransactionTest() {
   const { sendTransaction, isPending, isSuccess, isError, data, error } = useSendTransaction();
   const [lastTx, setLastTx] = useState('');
 
+  // Watch for transaction success/error and update display
+  useEffect(() => {
+    if (isSuccess && data) {
+      setLastTx(`✅ Success! TX: ${data}`);
+    }
+    if (isError && error) {
+      setLastTx(`❌ Error: ${error.message}`);
+    }
+  }, [isSuccess, isError, data, error]);
+
   const handleSend = async () => {
     try {
-      setLastTx('Sending...');
-      const result = await sendTransaction({
+      setLastTx('⏳ Waiting for approval...');
+      await sendTransaction({
         to: TEST_ADDRESS,
         value: parseEther('0.0001'),
       });
-      setLastTx(`Success! TX: ${result}`);
+      // Don't set success here - the useEffect above will handle it
     } catch (err) {
-      setLastTx(`Error: ${err.message}`);
+      // This catches user rejection before the transaction is sent
+      setLastTx(`❌ ${err.message}`);
     }
   };
 
@@ -184,15 +196,22 @@ function SendTransactionTest() {
             </p>
           )}
           {lastTx && (
-            <div style={{ marginTop: '12px', fontSize: '14px' }}>
-              <pre style={{ wordBreak: 'break-all', whiteSpace: 'pre-wrap' }}>
+            <div style={{ 
+              marginTop: '12px', 
+              fontSize: '14px',
+              padding: '12px',
+              background: lastTx.includes('✅') ? '#dcfce7' : lastTx.includes('❌') ? '#fee2e2' : '#f3f4f6',
+              borderRadius: '8px',
+              border: `2px solid ${lastTx.includes('✅') ? '#16a34a' : lastTx.includes('❌') ? '#dc2626' : '#d1d5db'}`,
+            }}>
+              <pre style={{ 
+                wordBreak: 'break-all', 
+                whiteSpace: 'pre-wrap',
+                margin: 0,
+                color: lastTx.includes('✅') ? '#166534' : lastTx.includes('❌') ? '#991b1b' : '#374151',
+              }}>
                 {lastTx}
               </pre>
-            </div>
-          )}
-          {isError && (
-            <div style={errorStyle}>
-              Error: {error?.message}
             </div>
           )}
         </>
@@ -243,18 +262,29 @@ function WriteContractTest() {
   const { writeContract, isPending, isSuccess, isError, error, data } = useWriteContract();
   const [lastResult, setLastResult] = useState('');
 
+  // Watch for transaction success/error and update display
+  useEffect(() => {
+    if (isSuccess && data) {
+      setLastResult(`✅ Success! TX: ${data}`);
+    }
+    if (isError && error) {
+      setLastResult(`❌ Error: ${error.message}`);
+    }
+  }, [isSuccess, isError, data, error]);
+
   const handleWrite = async () => {
     try {
-      setLastResult('Writing to contract...');
-      const result = await writeContract({
+      setLastResult('⏳ Waiting for approval...');
+      await writeContract({
         address: USDC_BASE,
         abi: ERC20_ABI,
         functionName: 'transfer',
         args: [TEST_ADDRESS, 1000000], // 1 USDC (6 decimals)
       });
-      setLastResult(`Success! TX: ${result}`);
+      // Don't set success here - the useEffect above will handle it
     } catch (err) {
-      setLastResult(`Error: ${err.message}`);
+      // This catches user rejection before the transaction is sent
+      setLastResult(`❌ ${err.message}`);
     }
   };
 
@@ -282,8 +312,20 @@ function WriteContractTest() {
             </p>
           )}
           {lastResult && (
-            <div style={{ marginTop: '12px', fontSize: '14px' }}>
-              <pre style={{ wordBreak: 'break-all', whiteSpace: 'pre-wrap' }}>
+            <div style={{ 
+              marginTop: '12px', 
+              fontSize: '14px',
+              padding: '12px',
+              background: lastResult.includes('✅') ? '#dcfce7' : lastResult.includes('❌') ? '#fee2e2' : '#f3f4f6',
+              borderRadius: '8px',
+              border: `2px solid ${lastResult.includes('✅') ? '#16a34a' : lastResult.includes('❌') ? '#dc2626' : '#d1d5db'}`,
+            }}>
+              <pre style={{ 
+                wordBreak: 'break-all', 
+                whiteSpace: 'pre-wrap',
+                margin: 0,
+                color: lastResult.includes('✅') ? '#166534' : lastResult.includes('❌') ? '#991b1b' : '#374151',
+              }}>
                 {lastResult}
               </pre>
             </div>
@@ -527,18 +569,6 @@ function WatchAssetTest() {
 
 function TestApp() {
   const [showAdvanced, setShowAdvanced] = useState(false);
-  const { isConnected, address, status, connector } = useAccount();
-
-  // DEBUG: Log every state change
-  useEffect(() => {
-    console.log('🔍 TestApp - Wagmi State Update:', {
-      status,
-      isConnected,
-      address: address?.slice(0, 10),
-      connectorId: connector?.id
-    });
-  }, [status, isConnected, address, connector]);
-
 
   return (
     <div style={{ maxWidth: '1200px', margin: '40px auto', padding: '20px', fontFamily: 'sans-serif' }}>

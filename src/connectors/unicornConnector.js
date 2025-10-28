@@ -5,7 +5,18 @@
 import { createConnector } from 'wagmi';
 import { createThirdwebClient } from 'thirdweb';
 import { inAppWallet } from 'thirdweb/wallets';
-import { base, polygon } from 'thirdweb/chains';
+import { base, polygon, arbitrum, optimism, gnosis, celo } from 'thirdweb/chains';
+
+// Centralized mapping of wagmi chain IDs to Thirdweb chain objects
+// This ensures consistency across all connector methods
+const THIRDWEB_CHAIN_MAP = {
+  8453: base,       // Base
+  137: polygon,     // Polygon
+  42161: arbitrum,  // Arbitrum
+  10: optimism,     // Optimism
+  100: gnosis,      // Gnosis Chain
+  42220: celo       // Celo
+};
 
 // Transaction approval dialog (dynamically imported when needed)
 let requestTransactionApproval = null;
@@ -89,13 +100,8 @@ export function unicornConnector(options = {}) {
       
       this.client = createThirdwebClient({ clientId });
       
-      // Map wagmi chain ID to Thirdweb chain
-      const thirdwebChainMap = {
-        8453: base,
-        137: polygon,
-      };
-      
-      const thirdwebChain = thirdwebChainMap[defaultChain] || base;
+      // Use centralized chain map
+      const thirdwebChain = THIRDWEB_CHAIN_MAP[defaultChain] || base;
       
       console.log('[UnicornConnector] Using Thirdweb chain:', thirdwebChain.name || thirdwebChain.id);
       
@@ -190,17 +196,12 @@ export function unicornConnector(options = {}) {
         throw new Error('No account available - wallet not authenticated');
       }
       
-      // Map wagmi chain ID to Thirdweb chain
-      const thirdwebChainMap = {
-        8453: base,
-        137: polygon,
-      };
-      
+      // Use centralized chain map
       const targetWagmiChain = config.chains.find(c => c.id === chainId) || 
                                config.chains.find(c => c.id === defaultChain) ||
                                config.chains[0];
       
-      const targetThirdwebChain = thirdwebChainMap[targetWagmiChain.id] || base;
+      const targetThirdwebChain = THIRDWEB_CHAIN_MAP[targetWagmiChain.id] || base;
 
       console.log('[UnicornConnector] Target chain:', targetWagmiChain.name);
       console.log('[UnicornConnector] Final connected address:', this.account.address);
@@ -246,8 +247,8 @@ export function unicornConnector(options = {}) {
       this.setupPromise = null;
       
       // CRITICAL: Recreate the wallet instance to ensure no cached state
-      const thirdwebChainMap = { 8453: base, 137: polygon };
-      const thirdwebChain = thirdwebChainMap[defaultChain] || base;
+      // Use centralized chain map
+      const thirdwebChain = THIRDWEB_CHAIN_MAP[defaultChain] || base;
       
       this.wallet = inAppWallet({
         auth: {
@@ -368,14 +369,9 @@ export function unicornConnector(options = {}) {
           throw new Error('Failed to import Thirdweb EIP1193 module');
         }
         
-        // Map to Thirdweb chain to ensure proper RPC configuration
-        const thirdwebChainMap = {
-          8453: base,
-          137: polygon,
-        };
-        
+        // Use centralized chain map to ensure proper RPC configuration
         const currentChainId = account.chain?.id || defaultChain;
-        const thirdwebChain = thirdwebChainMap[currentChainId] || base;
+        const thirdwebChain = THIRDWEB_CHAIN_MAP[currentChainId] || base;
         
         console.log('[UnicornConnector] Creating provider for chain:', thirdwebChain.name || thirdwebChain.id);
         console.log('[UnicornConnector] Account object:', {
@@ -455,6 +451,20 @@ export function unicornConnector(options = {}) {
               try {
                 const [message, address] = args.params;
                 console.log('[UnicornConnector] Intercepting personal_sign, using account.signMessage');
+                console.log('[UnicornConnector] Message to sign:', message);
+                
+                // Show approval dialog for signing
+                const approvalHandler = await loadApprovalUI();
+                
+                // Create a transaction-like object for the approval dialog
+                await approvalHandler({
+                  method: 'personal_sign',
+                  message: message,
+                  from: address,
+                  data: message, // Display the message in the approval dialog
+                });
+                console.log('[UnicornConnector] Message signing approved by user');
+                
                 console.log('[UnicornConnector] Account has signMessage:', typeof this.account.signMessage);
                 console.log('[UnicornConnector] Account keys:', Object.keys(this.account));
                 
@@ -469,7 +479,11 @@ export function unicornConnector(options = {}) {
                 
                 return signature;
               } catch (error) {
-                console.error('[UnicornConnector] personal_sign failed:', error);
+                if (error.message.includes('rejected')) {
+                  console.log('[UnicornConnector] Message signing rejected by user');
+                } else {
+                  console.error('[UnicornConnector] personal_sign failed:', error);
+                }
                 throw error;
               }
             }
@@ -479,6 +493,20 @@ export function unicornConnector(options = {}) {
                 const [address, dataString] = args.params;
                 const typedData = JSON.parse(dataString);
                 console.log('[UnicornConnector] Intercepting eth_signTypedData_v4, using account.signTypedData');
+                console.log('[UnicornConnector] Typed data:', typedData);
+                
+                // Show approval dialog for signing
+                const approvalHandler = await loadApprovalUI();
+                
+                // Create a transaction-like object for the approval dialog
+                await approvalHandler({
+                  method: 'eth_signTypedData_v4',
+                  typedData: typedData,
+                  from: address,
+                  data: JSON.stringify(typedData, null, 2), // Display the typed data in approval dialog
+                });
+                console.log('[UnicornConnector] Typed data signing approved by user');
+                
                 console.log('[UnicornConnector] Account has signTypedData:', typeof this.account.signTypedData);
                 
                 const signature = await this.account.signTypedData(typedData);
@@ -492,7 +520,11 @@ export function unicornConnector(options = {}) {
                 
                 return signature;
               } catch (error) {
-                console.error('[UnicornConnector] eth_signTypedData_v4 failed:', error);
+                if (error.message.includes('rejected')) {
+                  console.log('[UnicornConnector] Typed data signing rejected by user');
+                } else {
+                  console.error('[UnicornConnector] eth_signTypedData_v4 failed:', error);
+                }
                 throw error;
               }
             }
@@ -585,16 +617,8 @@ export function unicornConnector(options = {}) {
         throw new Error(`Chain ${chainId} not supported`);
       }
       
-      // Map to Thirdweb chain
-      const thirdwebChainMap = {
-        8453: base,
-        137: polygon,
-        42161: arbitrum,
-        10: optimism,
-        100: gnosis,
-        42220: celo
-      };
-      const targetThirdwebChain = thirdwebChainMap[chainId];
+      // Use centralized chain map
+      const targetThirdwebChain = THIRDWEB_CHAIN_MAP[chainId];
       
       if (!targetThirdwebChain) {
         throw new Error(`Thirdweb chain not configured for ${chainId}`);
