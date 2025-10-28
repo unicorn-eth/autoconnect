@@ -282,12 +282,48 @@ export function unicornConnector(options = {}) {
       return !!address;
     },
 
+    async signMessage({ message }) {
+      console.log('[UnicornConnector] signMessage called:', message);
+      
+      if (!this.account) {
+        throw new Error('No account connected');
+      }
+      
+      try {
+        // Use the account's signMessage method
+        const signature = await this.account.signMessage({ message });
+        console.log('[UnicornConnector] Message signed:', signature.slice(0, 20) + '...');
+        return signature;
+      } catch (error) {
+        console.error('[UnicornConnector] signMessage failed:', error);
+        throw error;
+      }
+    },
+
+    async signTypedData(typedData) {
+      console.log('[UnicornConnector] signTypedData called:', typedData);
+      
+      if (!this.account) {
+        throw new Error('No account connected');
+      }
+      
+      try {
+        // Use the account's signTypedData method
+        const signature = await this.account.signTypedData(typedData);
+        console.log('[UnicornConnector] Typed data signed:', signature.slice(0, 20) + '...');
+        return signature;
+      } catch (error) {
+        console.error('[UnicornConnector] signTypedData failed:', error);
+        throw error;
+      }
+    },
+
     async getProvider() {
       if (!this.eip1193Provider || !this.account) {
-        const { EIP1193 } = await import('thirdweb/wallets');
         const account = this.account || await this.wallet.getAccount();
         
         if (!account) {
+          console.log('[UnicornConnector] No account, returning stub provider');
           return {
             request: async () => {
               throw new Error('Wallet not connected');
@@ -295,6 +331,17 @@ export function unicornConnector(options = {}) {
             on: () => {},
             removeListener: () => {},
           };
+        }
+        
+        // Try importing EIP1193
+        let EIP1193;
+        try {
+          const module = await import('thirdweb/wallets');
+          EIP1193 = module.EIP1193;
+          console.log('[UnicornConnector] EIP1193 imported successfully');
+        } catch (error) {
+          console.error('[UnicornConnector] Failed to import EIP1193:', error);
+          throw new Error('Failed to import Thirdweb EIP1193 module');
         }
         
         // Map to Thirdweb chain to ensure proper RPC configuration
@@ -307,12 +354,102 @@ export function unicornConnector(options = {}) {
         const thirdwebChain = thirdwebChainMap[currentChainId] || base;
         
         console.log('[UnicornConnector] Creating provider for chain:', thirdwebChain.name || thirdwebChain.id);
-        
-        const baseProvider = await EIP1193.toProvider({
-          client: this.client,
-          chain: thirdwebChain, // Use proper Thirdweb chain with RPC
-          account,
+        console.log('[UnicornConnector] Account object:', {
+          hasAddress: !!account.address,
+          hasChain: !!account.chain,
+          chainId: account.chain?.id,
+          hasSendTransaction: !!account.sendTransaction,
         });
+        console.log('[UnicornConnector] Client object:', {
+          hasClientId: !!this.client.clientId,
+          hasSecretKey: !!this.client.secretKey,
+        });
+        console.log('[UnicornConnector] Chain object:', {
+          hasId: !!thirdwebChain.id,
+          hasRpc: !!thirdwebChain.rpc,
+          hasName: !!thirdwebChain.name,
+        });
+        
+        let baseProvider;
+        try {
+          baseProvider = await EIP1193.toProvider({
+            client: this.client,
+            chain: thirdwebChain,
+            wallet: this.wallet, // CRITICAL: Pass wallet, not account!
+          });
+          
+          console.log('[UnicornConnector] Base provider created successfully');
+          console.log('[UnicornConnector] Provider has subscribe:', !!baseProvider.subscribe);
+          
+          // Wrap the provider's request method to add logging and handle signing
+          const originalRequest = baseProvider.request.bind(baseProvider);
+          baseProvider.request = async (args) => {
+            console.log('[UnicornConnector] Provider request:', args.method, args.params);
+            
+            // Intercept signing methods and use account's methods directly
+            if (args.method === 'personal_sign' && this.account) {
+              try {
+                const [message, address] = args.params;
+                console.log('[UnicornConnector] Intercepting personal_sign, using account.signMessage');
+                const signature = await this.account.signMessage({ message });
+                console.log('[UnicornConnector] Signature from account:', signature.slice(0, 20) + '...');
+                return signature;
+              } catch (error) {
+                console.error('[UnicornConnector] personal_sign failed:', error);
+                throw error;
+              }
+            }
+            
+            if (args.method === 'eth_signTypedData_v4' && this.account) {
+              try {
+                const [address, dataString] = args.params;
+                const typedData = JSON.parse(dataString);
+                console.log('[UnicornConnector] Intercepting eth_signTypedData_v4, using account.signTypedData');
+                const signature = await this.account.signTypedData(typedData);
+                console.log('[UnicornConnector] Signature from account:', signature.slice(0, 20) + '...');
+                return signature;
+              } catch (error) {
+                console.error('[UnicornConnector] eth_signTypedData_v4 failed:', error);
+                throw error;
+              }
+            }
+            
+            // For all other methods, use the original provider
+            try {
+              const result = await originalRequest(args);
+              console.log('[UnicornConnector] Provider response:', args.method, '→', result?.slice?.(0, 20) || result);
+              return result;
+            } catch (error) {
+              console.error('[UnicornConnector] Provider request failed:', args.method, error);
+              throw error;
+            }
+          };
+        } catch (error) {
+          console.error('[UnicornConnector] Failed to create base provider:', error);
+          console.error('[UnicornConnector] Error details:', {
+            message: error.message,
+            stack: error.stack,
+          });
+          
+          // Return a minimal provider that can at least handle basic requests
+          console.warn('[UnicornConnector] Returning fallback provider');
+          return {
+            request: async ({ method, params }) => {
+              console.log('[UnicornConnector] Fallback provider request:', method, params);
+              // Try to use the account's sendTransaction for eth_sendTransaction
+              if (method === 'eth_sendTransaction' && account.sendTransaction) {
+                const tx = params[0];
+                return account.sendTransaction(tx);
+              }
+              throw new Error(`Provider method ${method} not supported in fallback mode`);
+            },
+            on: () => {},
+            once: () => {},
+            removeListener: () => {},
+            off: () => {},
+            subscribe: () => ({ unsubscribe: () => {} }),
+          };
+        }
         
         // Ensure provider has event emitter methods and subscription support
         // Wagmi uses subscribe for watching transactions and events
