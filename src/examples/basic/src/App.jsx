@@ -20,11 +20,13 @@ import { StressTests } from './components/StressTests.jsx';
 import { ConnectionDiagnostic } from './components/ConnectionDiagnostic.jsx';
 import { useState } from 'react';
 
-const ClientID = import.meta.env.VITE_THIRDWEB_CLIENT_ID || 'Fuck';
+const ClientID = import.meta.env.VITE_THIRDWEB_CLIENT_ID || '4e8c81182c3709ee441e30d776223354';
 const FactoryAddress = import.meta.env.VITE_THIRDWEB_FACTORY_ADDRESS || '0xD771615c873ba5a2149D5312448cE01D677Ee48A';
-const ProjectId = import.meta.env.VITE_WALLETCONNECT_PROJECT_ID | '129c01c8ead0c5162747118a048279c6';
+const ProjectId = import.meta.env.VITE_WALLETCONNECT_PROJECT_ID || '129c01c8ead0c5162747118a048279c6';
 
-console.log('props ', ClientID + ' ' + FactoryAddress + ' ' + ProjectId);
+console.log('ClientID:', ClientID);
+console.log('FactoryAddress:', FactoryAddress);
+console.log('ProjectId:', ProjectId);
 
 // Wagmi config with unicornConnector
 const config = createConfig({
@@ -32,11 +34,11 @@ const config = createConfig({
   connectors: [
     injected({ target: 'metaMask' }),
     walletConnect({
-      projectId: ProjectId,
+      projectId: ProjectId
     }),
     unicornConnector({
-      clientId: import.meta.env.VITE_THIRDWEB_CLIENT_ID,
-      factoryAddress: import.meta.env.VITE_THIRDWEB_FACTORY_ADDRESS,
+      clientId: ClientID,
+      factoryAddress: FactoryAddress,
       defaultChain: base.id,
     }),
   ],

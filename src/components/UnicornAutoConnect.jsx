@@ -50,7 +50,7 @@ const UnicornAutoConnect = ({
     }
 
     // Check for Unicorn URL parameters
-    console.log('Looking for URL  Params',window.location.search);
+  
     const isUnicornUrl = () => {
       if (typeof window === 'undefined') return false;
       const params = new URLSearchParams(window.location.search);
