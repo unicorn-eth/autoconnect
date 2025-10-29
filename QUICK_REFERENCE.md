@@ -76,11 +76,9 @@ const config = getDefaultConfig({
 config.connectors.push(
   unicornConnector({
     chains: [base, polygon, mainnet],
-    options: {
       clientId: process.env.NEXT_PUBLIC_THIRDWEB_CLIENT_ID,
       factoryAddress: process.env.NEXT_PUBLIC_THIRDWEB_FACTORY_ADDRESS,
       defaultChain: 'base',
-    }
   })
 );
 
@@ -412,12 +410,12 @@ import { base, polygon, mainnet, arbitrum, optimism } from 'wagmi/chains';
 config.connectors.push(
   unicornConnector({
     chains: [base, polygon, mainnet, arbitrum, optimism],
-    options: {
+
       clientId: process.env.NEXT_PUBLIC_THIRDWEB_CLIENT_ID,
       factoryAddress: process.env.NEXT_PUBLIC_THIRDWEB_FACTORY_ADDRESS,
       defaultChain: 'base',
       debug: process.env.NODE_ENV === 'development',
-    }
+
   })
 );
 ```
