@@ -353,14 +353,12 @@ import { UnicornConnector } from './UnicornConnector';
 export function unicornConnector({ chains, options }) {
   return new UnicornConnector({
     chains,
-    options: {
       clientId: options.clientId,
       factoryAddress: options.factoryAddress,
       defaultChain: options.defaultChain || 'base',
       timeout: options.timeout || 5000,
       debug: options.debug || false,
       enableTransactionApproval: options.enableTransactionApproval !== false,
-    }
   });
 }
 ```

@@ -3,7 +3,7 @@
 // Wagmi connector-based approach for seamless integration
 
 // Wagmi Connector (NEW in v1.2.0 - recommended approach)
-export { unicornConnector } from './unicornConnector';
+export { unicornConnector } from './connectors/unicornConnector';
 
 // Universal Hooks (use these in your components)
 export { useUniversalWallet } from './hooks/useUniversalWallet';
