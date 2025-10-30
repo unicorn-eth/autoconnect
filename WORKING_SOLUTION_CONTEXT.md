@@ -219,16 +219,40 @@ VITE_WALLETCONNECT_PROJECT_ID=b68c5c018517f32dc678237299644367
 
 ---
 
+## Additional Fixes (October 2025)
+
+### TypeScript Build Errors Fixed
+1. **Missing TypeScript Definitions**
+   - Added `UnicornConnectorOptions` interface
+   - Added `unicornConnector()` function export to type definitions
+   - Made `clientId` and `factoryAddress` optional in `UnicornAutoConnectProps`
+
+2. **Build Configuration Issues**
+   - Removed platform-specific `@rollup/rollup-linux-x64-gnu` dependency
+   - Added `typescript` as devDependency (required by tsup)
+   - Fixed wagmi import resolution in basic example with Vite config
+
+3. **Conditional Connector Loading**
+   - Added environment variable checks before adding unicornConnector
+   - Prevents build failures when Thirdweb credentials not set
+   - Allows graceful degradation to other wallet connectors
+
+### Example Apps Fixed
+- **Basic Example**: Updated Vite config with `dedupe` and `optimizeDeps` for proper module resolution
+- **SporkDAO App**: Added conditional connector loading to handle missing env vars during build
+
+---
+
 ## Git Status
 
-Both working files are modified but NOT yet committed:
-- `src/connectors/unicornConnector.js` - contains working implementation
-- `src/components/UnicornAutoConnect.jsx` - original version (works with basic example)
+Working implementation is ready:
+- ✅ `src/connectors/unicornConnector.js` - uses `wallet.autoConnect()`
+- ✅ `src/components/UnicornAutoConnect.jsx` - works with basic example
+- ✅ `src/types/index.d.ts` - complete TypeScript definitions
+- ✅ `pnpm-lock.yaml` - properly tracked for GitHub Actions
 
-**Next steps**:
-1. Commit the working connector
-2. Optionally enhance `UnicornAutoConnect.jsx` to include wagmi state sync
-3. Update package version and publish
+**Next Enhancement**:
+Build manual wagmi state sync INTO `UnicornAutoConnect.jsx` to eliminate need for wrapper component in RainbowKit apps.
 
 ---
 
@@ -240,5 +264,8 @@ Both working files are modified but NOT yet committed:
 - ✅ Proper chainId handling
 - ✅ localStorage properly configured
 - ✅ Thirdweb autoConnect working
+- ✅ TypeScript definitions complete and accurate
+- ✅ Build process works on all platforms
+- ✅ Production builds succeed with missing env vars
 
-**The package is functional and ready for use with the current wrapper pattern!**
+**The package is functional and ready for v1.3.4 release with wrapper elimination as next major feature!**
