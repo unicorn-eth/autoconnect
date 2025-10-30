@@ -7,7 +7,7 @@ export default defineConfig({
     global: 'globalThis',
   },
   server: {
-    port: 3002,
+    port: 3001,
     open: true,
   }
 })

@@ -3,7 +3,7 @@
 // Just add this component and everything works!
 
 import React from 'react';
-import { useConnect, useAccount } from 'wagmi';
+import { useConnect, useAccount, useConfig } from 'wagmi';
 
 /**
  * UnicornAutoConnect Component
@@ -26,13 +26,14 @@ import { useConnect, useAccount } from 'wagmi';
  * @param {Function} props.onError - Optional callback on error
  * @param {boolean} props.debug - Enable debug logging
  */
-const UnicornAutoConnect = ({ 
-  onConnect, 
+const UnicornAutoConnect = ({
+  onConnect,
   onError,
   debug = false,
 }) => {
   const { connectAsync, connectors } = useConnect();
   const { isConnected, connector, address } = useAccount();
+  const config = useConfig();
   const attemptedRef = React.useRef(false);
 
   // Monitor when account state changes after connection
@@ -97,11 +98,21 @@ const UnicornAutoConnect = ({
         if (debug) {
           console.log('[UnicornAutoConnect] Found Unicorn connector:', unicornConnector);
           console.log('[UnicornAutoConnect] Connector ready:', unicornConnector.ready);
+        }
+
+        // Get chainId from wagmi config (first chain)
+        const chainId = config.chains[0]?.id;
+
+        if (debug) {
+          console.log('[UnicornAutoConnect] Using chainId:', chainId);
           console.log('[UnicornAutoConnect] Connecting via wagmi...');
         }
 
         // Connect through wagmi using connectAsync for proper promise handling
-        const connectResult = await connectAsync({ connector: unicornConnector });
+        const connectResult = await connectAsync({
+          connector: unicornConnector,
+          chainId: chainId
+        });
 
         if (debug) {
           console.log('[UnicornAutoConnect] ✅ Connect result from wagmi:', connectResult);
@@ -144,7 +155,7 @@ const UnicornAutoConnect = ({
 
     return () => clearTimeout(timer);
 
-  }, [connectAsync, connectors, isConnected, connector, onConnect, onError, debug]);
+  }, [connectAsync, connectors, isConnected, connector, onConnect, onError, debug, config]);
 
   // This component doesn't render anything
   return null;

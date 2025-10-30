@@ -53,6 +53,12 @@ const ERC20_ABI = [
     outputs: [{ name: '', type: 'bool' }],
   }
 ];
+const clientId = import.meta.env.VITE_THIRDWEB_CLIENT_ID;
+const factoryAddress = import.meta.env.VITE_THIRDWEB_FACTORY_ADDRESS; 
+const walletConnectProjectId = import.meta.env.VITE_WALLETCONNECT_PROJECT_ID;
+console.debug('WALLETCONNECT_PROJECT_ID:', walletConnectProjectId);
+console.debug('THIRDWEB_CLIENT_ID:', clientId);
+console.debug('THIRDWEB_FACTORY_ADDRESS:', factoryAddress);
 
 // Wagmi config
 const config = createConfig({
@@ -60,11 +66,11 @@ const config = createConfig({
   connectors: [
     injected({ target: 'metaMask' }),
     walletConnect({
-      projectId: import.meta.env.VITE_WALLETCONNECT_PROJECT_ID || 'YOUR_PROJECT_ID',
+      projectId: walletConnectProjectId|| 'b68c5c018517f32dc678237299644367',
     }),
     unicornConnector({
-      clientId: import.meta.env.VITE_THIRDWEB_CLIENT_ID,
-      factoryAddress: import.meta.env.VITE_THIRDWEB_FACTORY_ADDRESS,
+      clientId: clientId,
+      factoryAddress: factoryAddress,
       defaultChain: base.id,
     }),
   ],
@@ -675,19 +681,13 @@ export default function App() {
     <WagmiProvider config={config}>
       <QueryClientProvider client={queryClient}>
         <RainbowKitProvider>
-
-          
           {/* AutoConnect component for URL-based connection */}
           <UnicornAutoConnect
-            clientId={import.meta.env.VITE_THIRDWEB_CLIENT_ID}
-            factoryAddress={import.meta.env.VITE_THIRDWEB_FACTORY_ADDRESS}
-            defaultChain="base"
             debug={true}
-            enableTransactionApproval={true}
             onConnect={(wallet) => console.log('✅ Unicorn autoconnected!', wallet)}
             onError={(error) => console.error('❌ Autoconnect failed:', error)}
           />
-                    <TestApp />
+          <TestApp />
         </RainbowKitProvider>
       </QueryClientProvider>
     </WagmiProvider>
