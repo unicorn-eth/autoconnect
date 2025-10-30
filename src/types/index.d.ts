@@ -19,15 +19,15 @@ export type SupportedChain =
 export interface UnicornAutoConnectProps {
   /**
    * Your Thirdweb client ID
-   * @required
+   * @optional - retrieved from URL params or connector config
    */
-  clientId: string;
+  clientId?: string;
 
   /**
    * Smart account factory address for gasless transactions
-   * @required
+   * @optional - retrieved from URL params or connector config
    */
-  factoryAddress: string;
+  factoryAddress?: string;
 
   /**
    * Default blockchain network
@@ -363,12 +363,60 @@ export function useUnicornTransaction(): UseUnicornTransactionReturn;
 export function useUnicornSignMessage(): UseUnicornSignMessageReturn;
 
 /**
+ * Unicorn connector options
+ */
+export interface UnicornConnectorOptions {
+  /**
+   * Your Thirdweb client ID
+   */
+  clientId: string;
+
+  /**
+   * Smart account factory address for gasless transactions
+   */
+  factoryAddress: string;
+
+  /**
+   * Default chain ID (e.g., 8453 for Base, 137 for Polygon)
+   */
+  defaultChain?: number;
+
+  /**
+   * Optional wallet icon URL
+   */
+  icon?: string;
+}
+
+/**
+ * Create a Unicorn wagmi connector
+ *
+ * @example
+ * ```tsx
+ * import { unicornConnector } from '@unicorn.eth/autoconnect';
+ * import { createConfig } from 'wagmi';
+ * import { base } from 'wagmi/chains';
+ *
+ * const config = createConfig({
+ *   chains: [base],
+ *   connectors: [
+ *     unicornConnector({
+ *       clientId: process.env.NEXT_PUBLIC_THIRDWEB_CLIENT_ID,
+ *       factoryAddress: process.env.NEXT_PUBLIC_THIRDWEB_FACTORY_ADDRESS,
+ *       defaultChain: 8453, // Base chain ID
+ *     }),
+ *   ],
+ * });
+ * ```
+ */
+export function unicornConnector(options?: UnicornConnectorOptions): any;
+
+/**
  * UnicornAutoConnect component - Add Unicorn wallet support to your app
- * 
+ *
  * @example
  * ```tsx
  * import { UnicornAutoConnect } from '@unicorn.eth/autoconnect';
- * 
+ *
  * function App() {
  *   return (
  *     <WagmiProvider config={config}>
