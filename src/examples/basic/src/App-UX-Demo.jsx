@@ -22,8 +22,12 @@ import {
 } from 'wagmi';
 import { parseEther, formatEther, formatUnits, erc20Abi, erc721Abi } from 'viem';
 
-import { unicornConnector } from '../../../connectors/unicornConnector.js';
-import UnicornAutoConnect from '../../../components/UnicornAutoConnect.jsx';
+// Production imports (for Vercel deployment)
+import { unicornConnector, UnicornAutoConnect } from '@unicorn.eth/autoconnect';
+
+// Development imports (uncomment for local development)
+// import { unicornConnector } from '../../../connectors/unicornConnector.js';
+// import UnicornAutoConnect from '../../../components/UnicornAutoConnect.jsx';
 
 // Configuration
 const RECIPIENT_ADDRESS = '0x7049747E615a1C5C22935D5790a664B7E65D9681';

@@ -53,6 +53,51 @@ Visit **http://localhost:3000** and use the demo switcher at the top to toggle b
 - **Normal mode**: http://localhost:3000
 - **Unicorn auto-connect**: http://localhost:3000/?walletId=inApp&authCookie=test
 
+## 🔧 Development vs Production Setup
+
+The demos are configured to work in both environments:
+
+### For Vercel/Production Deployment (Default)
+By default, demos use the published npm package:
+
+**package.json:**
+```json
+"@unicorn.eth/autoconnect": "^1.3.5"
+```
+
+**Import statements:**
+```javascript
+import { unicornConnector, UnicornAutoConnect } from '@unicorn.eth/autoconnect';
+```
+
+### For Local Development
+To test local changes to the connector:
+
+1. **Update package.json:**
+   ```json
+   "@unicorn.eth/autoconnect": "file:../../.."
+   ```
+
+2. **Update imports in demo files** (comment out production, uncomment development):
+   ```javascript
+   // Production imports (for Vercel deployment)
+   // import { unicornConnector, UnicornAutoConnect } from '@unicorn.eth/autoconnect';
+
+   // Development imports (uncomment for local development)
+   import { unicornConnector } from '../../../connectors/unicornConnector.js';
+   import UnicornAutoConnect from '../../../components/UnicornAutoConnect.jsx';
+   ```
+
+3. **Reinstall dependencies:**
+   ```bash
+   npm install --legacy-peer-deps
+   ```
+
+This setup allows you to:
+- ✅ Deploy to Vercel without build errors
+- ✅ Test local connector changes during development
+- ✅ Switch between modes easily
+
 ## 🎨 Demo Switcher UI
 
 The demo now includes an **interactive switcher** that lets you instantly switch between all three demos without editing code:
