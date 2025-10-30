@@ -1,18 +1,24 @@
-# @unicorn.eth/autoconnect v1.3
+# @unicorn.eth/autoconnect v1.3.5
 
 [![npm version](https://img.shields.io/npm/v/@unicorn.eth/autoconnect.svg)](https://www.npmjs.com/package/@unicorn.eth/autoconnect)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 > True seamless Wagmi integration - Use standard wagmi hooks with Unicorn wallets
 
-AutoConnect v1.3 is a **standard Wagmi connector** that enables gasless smart account transactions through the familiar wagmi interface you already know. No custom hooks required.
+AutoConnect v1.3.5 is a **standard Wagmi connector** that enables gasless smart account transactions through the familiar wagmi interface you already know. No custom hooks required.
+
+## ✨ What's New in v1.3.5
+
+- 🌐 **18 Networks Supported** - All major EVM chains including Ethereum, Avalanche, BNB Chain, zkSync, Scroll, and Zora
+- 🧪 **Interactive Demo Switcher** - Three demo modes (UX, Technical, Pure Wagmi) with one-click switching
+- 🎨 **Enhanced Examples** - Token balances, NFT galleries, and network-agnostic components
+- ✅ **Ethereum Mainnet Fixed** - Added missing support for chain ID 1
 
 ## ✨ What's New in v1.3
 
 - 🎯 **Zero-Code-Change Integration** - Use standard `useSendTransaction`, `useSignMessage`, etc.
 - 🔌 **Standard Wagmi Connector** - Works like MetaMask, WalletConnect, or any other connector
 - ⚡ **Transaction Approval Dialogs** - Beautiful UI for gasless transaction confirmation
-- 🌐 **Multi-Chain Support** - Base, Polygon, Arbitrum, Optimism, Gnosis, Celo
 - 🔐 **Full Signature Support** - personal_sign and eth_signTypedData_v4 with approval dialogs
 - 📱 **Auto-Connection** - Seamless connection via URL parameters
 
@@ -338,25 +344,56 @@ const config = createConfig({
 
 ## 🌐 Supported Chains
 
-| Chain | Chain ID | Notes |
-|-------|----------|-------|
-| Base | 8453 | L2 - Low fees |
+**v1.3.5 now supports 18 networks!** All major EVM chains are included out of the box:
+
+### Production Mainnets (12 networks)
+| Chain | Chain ID | Use Case |
+|-------|----------|----------|
+| Ethereum | 1 | L1 - Main network |
+| Base | 8453 | L2 - Coinbase, low fees |
 | Polygon | 137 | Popular sidechain |
-| Arbitrum | 42161 | L2 - Low fees |
+| Arbitrum One | 42161 | L2 - Low fees |
 | Optimism | 10 | L2 - Low fees |
 | Gnosis Chain | 100 | Stable coin gas |
 | Celo | 42220 | Mobile-first |
+| Avalanche C-Chain | 43114 | Alternative L1 |
+| BNB Smart Chain | 56 | Alternative L1 |
+| zkSync Era | 324 | ZK Rollup |
+| Scroll | 534352 | ZK Rollup |
+| Zora | 7777777 | NFT-focused |
 
-To add more chains, just import from `thirdweb/chains` and `wagmi/chains`:
+### Testnets (6 networks)
+| Chain | Chain ID | Use Case |
+|-------|----------|----------|
+| Sepolia | 11155111 | Ethereum testnet |
+| Base Sepolia | 84532 | Base testnet |
+| Polygon Amoy | 80002 | Polygon testnet |
+| Arbitrum Sepolia | 421614 | Arbitrum testnet |
+| Optimism Sepolia | 11155420 | Optimism testnet |
+
+### Adding to Your App
+
+All these networks work automatically - just add them to your wagmi config:
 
 ```javascript
-import { avalanche } from 'thirdweb/chains';
-import { avalanche as wagmiAvalanche } from 'wagmi/chains';
+import { createConfig } from 'wagmi';
+import { ethereum, base, polygon, avalanche, zkSync } from 'wagmi/chains';
+import { unicornConnector } from '@unicorn.eth/autoconnect';
 
-// Add to connector
-// Add to wagmi config chains
-// Add transport
+const config = createConfig({
+  chains: [ethereum, base, polygon, avalanche, zkSync],
+  connectors: [
+    unicornConnector({
+      clientId: 'your-client-id',
+      factoryAddress: 'your-factory-address',
+    }),
+  ],
+});
 ```
+
+No additional configuration needed - the connector handles everything automatically!
+
+See [Release Notes v1.3.5](./RELEASE_NOTES_v1.3.5.md) for details on the network expansion.
 
 ## 💡 How It Works
 
@@ -401,6 +438,39 @@ User Code (Standard Wagmi)
    - Different UI for transactions vs. signatures
    - Supports user rejection
 
+## 🎮 Interactive Demo
+
+The [basic example](./src/examples/basic/) includes **three interactive demos** with a built-in switcher:
+
+### 1. **UX Demo** - Product Showcase
+- Beautiful RainbowKit UI
+- Token balance display (all ERC-20s)
+- NFT gallery with thumbnails
+- Network switching (Base, Polygon, Ethereum, Gnosis)
+- Perfect for stakeholder demos
+
+### 2. **Technical Test Suite** - Developer Testing
+- Comprehensive 9-test suite
+- All wagmi hooks tested
+- Contract interactions
+- Detailed console logging
+- Perfect for QA and integration testing
+
+### 3. **Pure Wagmi** - Minimal Integration
+- No RainbowKit dependency
+- Standard wagmi hooks only
+- Manual connector buttons
+- Perfect for understanding the core integration
+
+**Try it now:**
+```bash
+cd src/examples/basic
+npm install --legacy-peer-deps
+npm run dev
+```
+
+Visit http://localhost:3000 and use the interactive switcher to explore all three demos!
+
 ## 🧪 Testing
 
 ### Test with Different Wallets
@@ -414,6 +484,8 @@ http://localhost:3000/?walletId=inApp&authCookie=test
 ```
 
 ### Complete Test Suite
+
+The Technical Test Suite demo includes all these tests:
 
 ```jsx
 // Test 1: Connection
