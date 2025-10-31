@@ -44,7 +44,31 @@ AutoConnect v1.3 is now a **pure Wagmi connector** - it works exactly like any o
 npm install @unicorn.eth/autoconnect wagmi viem
 # or
 pnpm add @unicorn.eth/autoconnect wagmi viem
+# or
+yarn add @unicorn.eth/autoconnect wagmi viem
 ```
+
+### React Version Compatibility
+
+**Supports React 18 and React 19**
+
+This package is compatible with both React 18 and React 19. If you're using React 19, you may see peer dependency warnings during installation. This is expected and harmless - the package works correctly with React 19.
+
+**For React 19 users**, use one of these installation methods:
+
+```bash
+# Option 1: Use --legacy-peer-deps flag
+npm install @unicorn.eth/autoconnect --legacy-peer-deps
+
+# Option 2: Use --force flag
+npm install @unicorn.eth/autoconnect --force
+
+# Option 3: Add to .npmrc file
+echo "legacy-peer-deps=true" >> .npmrc
+npm install @unicorn.eth/autoconnect
+```
+
+**Why the warning?** We specify React 18 in `peerDependencies` to ensure compatibility with the widest range of projects. React 19 is backward compatible with React 18 APIs, so everything works perfectly.
 
 ## 🚀 Quick Start
 
@@ -628,6 +652,65 @@ Smart account signatures use ERC-1271 and require on-chain verification. The sig
 5. ✅ **Loading States** - Use `isPending` from wagmi hooks
 6. ✅ **Chain Configuration** - Add all chains you support to both maps
 7. ✅ **Test URL Parameters** - Test both normal and Unicorn modes
+
+## 🔧 Troubleshooting
+
+### React 19 Peer Dependency Warnings
+
+**Symptom:** Installation warnings about React peer dependencies
+
+**Solution:** This is expected and harmless. Use `--legacy-peer-deps`:
+```bash
+npm install @unicorn.eth/autoconnect --legacy-peer-deps
+```
+
+### Build Fails with "clientId is required"
+
+**Symptom:** Production builds fail with connector initialization error
+
+**Solution:** Conditionally add the connector only when env vars are set:
+```typescript
+const connectors = [injected(), walletConnect()];
+
+// Only add Unicorn if credentials exist
+if (process.env.NEXT_PUBLIC_THIRDWEB_CLIENT_ID) {
+  connectors.push(unicornConnector({
+    clientId: process.env.NEXT_PUBLIC_THIRDWEB_CLIENT_ID,
+    factoryAddress: process.env.NEXT_PUBLIC_THIRDWEB_FACTORY_ADDRESS,
+  }));
+}
+```
+
+### Connector Not Found Error
+
+**Symptom:** "Unicorn connector not found" in console
+
+**Solution:** Ensure `unicornConnector()` is in your wagmi config's `connectors` array
+
+### RainbowKit Doesn't Show Connection
+
+**Symptom:** AutoConnect logs success but RainbowKit still shows "Connect Wallet"
+
+**Solution (v1.3.4+):** The component now auto-syncs wagmi state. Enable debug mode to see:
+```tsx
+<UnicornAutoConnect debug={true} />
+```
+
+### Vite Build Errors with Wagmi Imports
+
+**Symptom:** "Cannot resolve module 'wagmi'" in examples
+
+**Solution:** Add to `vite.config.js`:
+```javascript
+export default defineConfig({
+  resolve: {
+    dedupe: ['react', 'react-dom', 'wagmi', 'viem', 'thirdweb'],
+  },
+  optimizeDeps: {
+    include: ['wagmi', 'viem', 'thirdweb'],
+  },
+});
+```
 
 ## 📖 Additional Resources
 
