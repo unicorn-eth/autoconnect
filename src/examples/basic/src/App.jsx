@@ -27,8 +27,12 @@ import {
 import { parseEther, formatEther } from 'viem';
 
 // Import connector and component
-import { unicornConnector } from '../../../connectors/unicornConnector.js';
-import UnicornAutoConnect from '../../../components/UnicornAutoConnect.jsx';
+// Production imports (for Vercel deployment)
+import { unicornConnector, UnicornAutoConnect } from '@unicorn.eth/autoconnect';
+
+// Development imports (uncomment for local development)
+// import { unicornConnector } from '../../../connectors/unicornConnector.js';
+// import UnicornAutoConnect from '../../../components/UnicornAutoConnect.jsx';
 
 // Test constants
 const TEST_ADDRESS = '0x742d35Cc6634C0532925a3b844Bc454e4438f44e';

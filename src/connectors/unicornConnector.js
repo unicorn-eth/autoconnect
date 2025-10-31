@@ -5,17 +5,49 @@
 import { createConnector } from 'wagmi';
 import { createThirdwebClient } from 'thirdweb';
 import { inAppWallet } from 'thirdweb/wallets';
-import { base, polygon, arbitrum, optimism, gnosis, celo } from 'thirdweb/chains';
+import {
+  ethereum,
+  base,
+  baseSepolia,
+  polygon,
+  polygonAmoy,
+  arbitrum,
+  arbitrumSepolia,
+  optimism,
+  optimismSepolia,
+  gnosis,
+  celo,
+  avalanche,
+  bsc,
+  sepolia,
+  scroll,
+  zora,
+  zkSync
+} from 'thirdweb/chains';
 
 // Centralized mapping of wagmi chain IDs to Thirdweb chain objects
 // This ensures consistency across all connector methods
 const THIRDWEB_CHAIN_MAP = {
-  8453: base,       // Base
-  137: polygon,     // Polygon
-  42161: arbitrum,  // Arbitrum
-  10: optimism,     // Optimism
-  100: gnosis,      // Gnosis Chain
-  42220: celo       // Celo
+  // Mainnets
+  1: ethereum,        // Ethereum Mainnet
+  8453: base,         // Base
+  137: polygon,       // Polygon
+  42161: arbitrum,    // Arbitrum One
+  10: optimism,       // Optimism
+  100: gnosis,        // Gnosis Chain
+  42220: celo,        // Celo
+  43114: avalanche,   // Avalanche C-Chain
+  56: bsc,            // BNB Smart Chain
+  534352: scroll,     // Scroll
+  7777777: zora,      // Zora
+  324: zkSync,        // zkSync Era
+
+  // Testnets
+  11155111: sepolia,        // Sepolia
+  84532: baseSepolia,       // Base Sepolia
+  80002: polygonAmoy,       // Polygon Amoy
+  421614: arbitrumSepolia,  // Arbitrum Sepolia
+  11155420: optimismSepolia // Optimism Sepolia
 };
 
 // Transaction approval dialog (dynamically imported when needed)
