@@ -8,7 +8,7 @@ AutoConnect v1.3.5 dramatically expands network support, adding **12 new network
 
 ## ✨ What's New
 
-### Expanded Network Support (18 Networks Total!)
+### Expanded Network Support (17 Networks Total!)
 
 **New Mainnets Added:**
 - 🆕 **Avalanche C-Chain** (43114)
@@ -124,7 +124,7 @@ If you're already using AutoConnect, simply:
 
 **`src/connectors/unicornConnector.js`**:
 - Added 17 new chain imports from `thirdweb/chains`
-- Expanded `THIRDWEB_CHAIN_MAP` from 7 to 18 networks
+- Expanded `THIRDWEB_CHAIN_MAP` from 7 to 17 networks
 - Organized mapping with clear mainnet/testnet sections
 
 ### Network Mapping
@@ -198,7 +198,7 @@ Future enhancements may include:
 - Chain mapping now properly handles all major EVM networks
 
 ### Changed
-- Expanded THIRDWEB_CHAIN_MAP from 7 to 18 networks
+- Expanded THIRDWEB_CHAIN_MAP from 7 to 17 networks
 - Organized chain mapping with mainnet/testnet sections
 - Updated chain imports from thirdweb/chains
 
@@ -229,4 +229,6 @@ npm install @unicorn.eth/autoconnect@1.3.5 --legacy-peer-deps
 
 ## Summary
 
-v1.3.5 is a significant quality-of-life update that expands AutoConnect's network compatibility from 7 to 18 networks, covering all major EVM chains and popular testnets. No breaking changes - just more networks that work out of the box! 🎉
+v1.3.5 is a significant quality-of-life update that expands AutoConnect's network compatibility from 7 to 17 networks, covering all major EVM chains and popular testnets. No breaking changes - just more networks that work out of the box! 🎉
+
+**Note**: Earlier documentation incorrectly stated 18 networks (12 mainnets + 6 testnets). The actual implementation supports 17 networks (12 mainnets + 5 testnets). Documentation has been corrected.

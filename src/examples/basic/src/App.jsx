@@ -5,7 +5,7 @@
 
 import { useState, useEffect } from 'react';
 import { WagmiProvider, createConfig, http } from 'wagmi';
-import { base, polygon } from 'wagmi/chains';
+import { base, polygon, mainnet } from 'wagmi/chains';
 import { injected, walletConnect } from 'wagmi/connectors';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { RainbowKitProvider, ConnectButton } from '@rainbow-me/rainbowkit';
@@ -66,7 +66,7 @@ console.debug('THIRDWEB_FACTORY_ADDRESS:', factoryAddress);
 
 // Wagmi config
 const config = createConfig({
-  chains: [base, polygon],
+  chains: [base, polygon, mainnet],
   connectors: [
     injected({ target: 'metaMask' }),
     walletConnect({
@@ -81,6 +81,7 @@ const config = createConfig({
   transports: {
     [base.id]: http(),
     [polygon.id]: http(),
+    [mainnet.id]: http(),
   },
 });
 

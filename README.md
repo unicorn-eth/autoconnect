@@ -9,7 +9,7 @@ AutoConnect v1.3.5 is a **standard Wagmi connector** that enables gasless smart 
 
 ## ✨ What's New in v1.3.5
 
-- 🌐 **18 Networks Supported** - All major EVM chains including Ethereum, Avalanche, BNB Chain, zkSync, Scroll, and Zora
+- 🌐 **17 Networks Supported** - All major EVM chains including Ethereum, Avalanche, BNB Chain, zkSync, Scroll, and Zora
 - 🧪 **Interactive Demo Switcher** - Three demo modes (UX, Technical, Pure Wagmi) with one-click switching
 - 🎨 **Enhanced Examples** - Token balances, NFT galleries, and network-agnostic components
 - ✅ **Ethereum Mainnet Fixed** - Added missing support for chain ID 1
@@ -80,6 +80,8 @@ const config = createConfig({
 
 For URL-based auto-connection:
 
+Note: debug, onConnect, and onError are optional
+
 ```jsx
 import { UnicornAutoConnect } from '@unicorn.eth/autoconnect';
 
@@ -107,7 +109,7 @@ function App() {
 ### 2. Add Environment Variables
 
 ```bash
-NEXT_PUBLIC_THIRDWEB_CLIENT_ID=4e8c81182c3709ee441e30d776223354
+NEXT_PUBLIC_THIRDWEB_CLIENT_ID=
 NEXT_PUBLIC_THIRDWEB_FACTORY_ADDRESS=0xD771615c873ba5a2149D5312448cE01D677Ee48A
 ```
 
@@ -344,7 +346,7 @@ const config = createConfig({
 
 ## 🌐 Supported Chains
 
-**v1.3.5 now supports 18 networks!** All major EVM chains are included out of the box:
+**v1.3.5 now supports 17 networks!** All major EVM chains are included out of the box:
 
 ### Production Mainnets (12 networks)
 | Chain | Chain ID | Use Case |
@@ -362,7 +364,7 @@ const config = createConfig({
 | Scroll | 534352 | ZK Rollup |
 | Zora | 7777777 | NFT-focused |
 
-### Testnets (6 networks)
+### Testnets (5 networks)
 | Chain | Chain ID | Use Case |
 |-------|----------|----------|
 | Sepolia | 11155111 | Ethereum testnet |
@@ -629,9 +631,42 @@ Smart account signatures use ERC-1271 and require on-chain verification. The sig
 6. ✅ **Chain Configuration** - Add all chains you support to both maps
 7. ✅ **Test URL Parameters** - Test both normal and Unicorn modes
 
+## 🌟 Next Step: Get Discovered
+
+Once you've integrated AutoConnect, get your dApp listed in Unicorn portals to reach thousands of users!
+
+### What are Unicorn Portals?
+
+Portals are community-specific app directories where users discover and launch dApps with one click:
+- **app.ethdenver.com** - ETHDenver community
+- **app.polygon.ac** - Polygon ecosystem
+- **app.mylink.fun** - MyLink community
+- And many more...
+
+### How It Works
+
+1. 🧪 **Test locally** - Create a test community and use Live Preview
+2. 🚀 **Deploy** - Push your dApp to production
+3. 📝 **Submit** - Fill out the App Center submission form
+4. ✅ **Get approved** - Team reviews (1-2 weeks)
+5. 🎉 **Get discovered** - Users find your dApp in portals
+
+### Get Started
+
+See the complete [Portal Setup Guide](./PORTAL_SETUP_GUIDE.md) for:
+- Creating test communities
+- Using Live Preview to validate integration
+- Submitting to App Center
+- Getting listed in multiple portals
+- Tracking portal performance
+
+**Result:** Your dApp appears in established portals where users already browse for apps, with seamless one-click gasless onboarding. That's distribution. 🦄
+
 ## 📖 Additional Resources
 
 - 📄 [Quick Reference](./QUICK_REFERENCE.md) - Complete API documentation
+- 🚀 [Integration Guide](./INTEGRATION_GUIDE.md) - Step-by-step integration instructions
+- 🌐 [Portal Setup Guide](./PORTAL_SETUP_GUIDE.md) - Get your dApp listed in Unicorn portals
 - 🔍 [Visual Explanation](./VISUAL-EXPLANATION.md) - Architecture diagrams
 - 🔄 [Continuation Prompt](./CONTINUATION-PROMPT.md) - For development handoff
 - 💬 [Discord](https://discord.gg/unicorn) - Community support
