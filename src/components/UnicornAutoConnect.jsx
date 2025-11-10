@@ -7,10 +7,11 @@ import { useConnect, useAccount, useConfig } from 'wagmi';
 
 /**
  * UnicornAutoConnect Component
- * 
+ *
  * Automatically connects Unicorn wallet when accessed via URL parameters.
  * Requires NO changes to existing dApp code - just add this component!
- * 
+ * Now includes automatic wagmi state sync for RainbowKit compatibility!
+ *
  * Usage:
  * ```jsx
  * <WagmiProvider config={config}>
@@ -20,7 +21,14 @@ import { useConnect, useAccount, useConfig } from 'wagmi';
  *   </RainbowKitProvider>
  * </WagmiProvider>
  * ```
- * 
+ *
+ * Features:
+ * - Detects Unicorn URL parameters (?walletId=inApp&authCookie=...)
+ * - Automatically connects via wagmi's connectAsync()
+ * - Manually syncs wagmi state if needed (RainbowKit compatibility)
+ * - Works with both basic wagmi and RainbowKit setups
+ * - Zero configuration required
+ *
  * @param {Object} props
  * @param {Function} props.onConnect - Optional callback when connected
  * @param {Function} props.onError - Optional callback on error
@@ -124,7 +132,64 @@ const UnicornAutoConnect = ({
         await new Promise(resolve => setTimeout(resolve, 100));
 
         if (debug) {
-          console.log('[UnicornAutoConnect] ✅ Wagmi state propagation complete - all hooks should now work');
+          console.log('[UnicornAutoConnect] ✅ Wagmi state propagation complete');
+        }
+
+        // ENHANCED: Manual wagmi state sync for RainbowKit compatibility
+        // Check if wagmi state properly synced, if not, manually sync it
+        const currentState = config.getState();
+        const isProperlyConnected = currentState.status === 'connected' &&
+                                   currentState.current === unicornConnector.uid;
+
+        if (!isProperlyConnected) {
+          if (debug) {
+            console.log('[UnicornAutoConnect] Wagmi state not fully synced, manually syncing...');
+          }
+
+          try {
+            // Get the provider and account info
+            const provider = await unicornConnector.getProvider?.();
+            if (provider) {
+              const account = await provider.getAccount?.();
+
+              if (account?.address) {
+                const accountChainId = account.chain?.id || chainId;
+
+                if (debug) {
+                  console.log('[UnicornAutoConnect] Manually updating wagmi state:', {
+                    address: account.address,
+                    chainId: accountChainId
+                  });
+                }
+
+                // Manually update wagmi's internal state
+                await config.setState((state) => {
+                  const newConnections = new Map(state.connections);
+                  newConnections.set(unicornConnector.uid, {
+                    accounts: [account.address],
+                    chainId: accountChainId,
+                    connector: unicornConnector,
+                  });
+
+                  return {
+                    ...state,
+                    connections: newConnections,
+                    current: unicornConnector.uid,
+                    status: 'connected',
+                  };
+                });
+
+                if (debug) {
+                  console.log('[UnicornAutoConnect] ✅ Manual wagmi state sync complete');
+                }
+
+                // Wait for React to propagate the manual state update
+                await new Promise(resolve => setTimeout(resolve, 100));
+              }
+            }
+          } catch (err) {
+            console.warn('[UnicornAutoConnect] Manual state sync failed, connection may still work:', err);
+          }
         }
 
         // Optional: Call onConnect callback

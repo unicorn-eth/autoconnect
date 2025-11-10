@@ -364,7 +364,7 @@ const config = createConfig({
 | Scroll | 534352 | ZK Rollup |
 | Zora | 7777777 | NFT-focused |
 
-### Testnets (5 networks)
+### Testnets (6 networks)
 | Chain | Chain ID | Use Case |
 |-------|----------|----------|
 | Sepolia | 11155111 | Ethereum testnet |
@@ -482,7 +482,7 @@ Visit http://localhost:3000 and use the interactive switcher to explore all thre
 http://localhost:3000
 
 # Unicorn mode - Auto-connects Unicorn wallet
-http://localhost:3000/?walletId=inApp&authCookie=test
+http://localhost:3000/?walletId=inApp&authCookie=test - this won't work, its just the format
 ```
 
 ### Complete Test Suite
