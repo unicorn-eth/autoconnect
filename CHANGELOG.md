@@ -14,6 +14,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Deep linking support
 - Mobile SDK
 
+## [1.3.6] - 2025-11-11
+
+### Fixed
+- **Critical**: Fixed `config.getState is not a function` error in `UnicornAutoConnect` component
+- Wagmi v2 compatibility for state access - now uses `config.state` property instead of non-existent method
+- Auto-connection now works properly with wagmi v2
+
+### Changed
+- Updated `UnicornAutoConnect.jsx` to use correct wagmi v2 state access API
+- Updated documentation to reflect the fix
+
+## [1.3.5] - 2025-10-XX
+
+### Added
+- Support for 17 networks (12 mainnets + 5 testnets)
+- Ethereum Mainnet support (chain ID 1)
+- Avalanche C-Chain, BNB Smart Chain, zkSync Era, Scroll, and Zora mainnets
+- Sepolia, Base Sepolia, Polygon Amoy, Arbitrum Sepolia, and Optimism Sepolia testnets
+
+### Fixed
+- "Thirdweb chain not configured for 1" error when switching to Ethereum Mainnet
+
 ## [1.0.0] - 2025-01-XX
 
 ### Added

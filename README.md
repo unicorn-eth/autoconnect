@@ -1,11 +1,17 @@
-# @unicorn.eth/autoconnect v1.3.5
+# @unicorn.eth/autoconnect v1.3.6
 
 [![npm version](https://img.shields.io/npm/v/@unicorn.eth/autoconnect.svg)](https://www.npmjs.com/package/@unicorn.eth/autoconnect)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 > True seamless Wagmi integration - Use standard wagmi hooks with Unicorn wallets
 
-AutoConnect v1.3.5 is a **standard Wagmi connector** that enables gasless smart account transactions through the familiar wagmi interface you already know. No custom hooks required.
+AutoConnect v1.3.6 is a **standard Wagmi connector** that enables gasless smart account transactions through the familiar wagmi interface you already know. No custom hooks required.
+
+## ✨ What's New in v1.3.6
+
+- 🐛 **Wagmi v2 Compatibility Fix** - Fixed `config.getState is not a function` error
+- ✅ **UnicornAutoConnect Component Fixed** - Auto-connection now works properly with wagmi v2
+- 🔧 **State Access Updated** - Uses correct `config.state` property instead of deprecated method
 
 ## ✨ What's New in v1.3.5
 
@@ -364,7 +370,7 @@ const config = createConfig({
 | Scroll | 534352 | ZK Rollup |
 | Zora | 7777777 | NFT-focused |
 
-### Testnets (6 networks)
+### Testnets (5 networks)
 | Chain | Chain ID | Use Case |
 |-------|----------|----------|
 | Sepolia | 11155111 | Ethereum testnet |
