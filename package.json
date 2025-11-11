@@ -1,6 +1,6 @@
 {
   "name": "@unicorn.eth/autoconnect",
-  "version": "1.3.5",
+  "version": "1.3.6",
   "description": "Drop-in Unicorn wallet integration for existing web3 apps. Works alongside your existing wallet setup (RainbowKit, Wagmi, etc.) without modifying any code.",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",

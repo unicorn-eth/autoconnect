@@ -137,7 +137,7 @@ const UnicornAutoConnect = ({
 
         // ENHANCED: Manual wagmi state sync for RainbowKit compatibility
         // Check if wagmi state properly synced, if not, manually sync it
-        const currentState = config.getState();
+        const currentState = config.state;
         const isProperlyConnected = currentState.status === 'connected' &&
                                    currentState.current === unicornConnector.uid;
 
