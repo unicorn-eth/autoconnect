@@ -109,7 +109,9 @@ const UnicornAutoConnect = ({
         }
 
         // Get chainId from wagmi config (first chain)
-        const chainId = config.chains[0]?.id;
+        // Handle both wagmi v1 and v2 config structures
+        const chains = config.chains || config._internal?.chains || [];
+        const chainId = chains[0]?.id;
 
         if (debug) {
           console.log('[UnicornAutoConnect] Using chainId:', chainId);
@@ -137,7 +139,7 @@ const UnicornAutoConnect = ({
 
         // ENHANCED: Manual wagmi state sync for RainbowKit compatibility
         // Check if wagmi state properly synced, if not, manually sync it
-        const currentState = config.state;
+        const currentState = config.state || {};
         const isProperlyConnected = currentState.status === 'connected' &&
                                    currentState.current === unicornConnector.uid;
 

@@ -10,7 +10,7 @@ import {
 } from 'wagmi';
 import { parseEther } from 'viem';
 
-const TEST_ADDRESS = '0x742d35Cc6634C0532925a3b844Bc454e4438f44e';
+const TEST_ADDRESS = '0x7049747E615a1C5C22935D5790a664B7E65D9681';
 
 export function StressTests() {
   const { address, isConnected, chainId } = useAccount();

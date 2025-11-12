@@ -485,7 +485,7 @@ Once connected with Unicorn:
 const { sendTransaction } = useSendTransaction();
 
 sendTransaction({
-  to: '0x742d35Cc6634C0532925a3b844Bc454e4438f44e',
+  to: '0x7049747E615a1C5C22935D5790a664B7E65D9681',
   value: parseEther('0.001'),
 });
 ```
@@ -900,7 +900,7 @@ function SendETH() {
 
   const handleSend = () => {
     sendTransaction({
-      to: '0x742d35Cc6634C0532925a3b844Bc454e4438f44e',
+      to: '0x7049747E615a1C5C22935D5790a664B7E65D9681',
       value: parseEther('0.001'),
     });
   };

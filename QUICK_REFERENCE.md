@@ -123,7 +123,7 @@ function MyDapp() {
     <div>
       <p>Connected: {address}</p>
       <button onClick={() => sendTransaction({
-        to: '0x742d35Cc6634C0532925a3b844Bc454e4438f44e',
+        to: '0x7049747E615a1C5C22935D5790a664B7E65D9681',
         value: parseEther('0.001')
       })}>
         Send ETH
@@ -213,7 +213,7 @@ function SendETH() {
   return (
     <button 
       onClick={() => sendTransaction({
-        to: '0x742d35Cc6634C0532925a3b844Bc454e4438f44e',
+        to: '0x7049747E615a1C5C22935D5790a664B7E65D9681',
         value: parseEther('0.001')
       })}
       disabled={isPending}
@@ -248,7 +248,7 @@ function TransferToken() {
       address: USDC,
       abi: ERC20_ABI,
       functionName: 'transfer',
-      args: ['0x742d35Cc6634C0532925a3b844Bc454e4438f44e', 1000000]
+      args: ['0x7049747E615a1C5C22935D5790a664B7E65D9681', 1000000]
     })}>
       Send 1 USDC
     </button>
@@ -287,7 +287,7 @@ function SignTypedData() {
     name: 'My dApp',
     version: '1',
     chainId: 8453,
-    verifyingContract: '0x742d35Cc6634C0532925a3b844Bc454e4438f44e'
+    verifyingContract: '0x7049747E615a1C5C22935D5790a664B7E65D9681'
   };
   
   const types = {

@@ -14,7 +14,7 @@ import {
 } from '../../../../hooks/useUniversalSignMessage.js';
 
 const USDC_BASE = '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913';
-const TEST_ADDRESS = '0x742d35Cc6634C0532925a3b844Bc454e4438f44e';
+const TEST_ADDRESS = '0x7049747E615a1C5C22935D5790a664B7E65D9681';
 
 const ERC20_ABI = [
   {

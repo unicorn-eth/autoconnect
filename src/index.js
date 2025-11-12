@@ -1,9 +1,12 @@
 // src/index.js
-// @unicorn.eth/autoconnect v1.2.0
+// @unicorn.eth/autoconnect v1.4.0
 // Wagmi connector-based approach for seamless integration
 
-// Wagmi Connector (NEW in v1.2.0 - recommended approach)
+// Wagmi v2 Connector (for wagmi v2+ / RainbowKit / pure wagmi)
 export { unicornConnector } from './connectors/unicornConnector';
+
+// Wagmi v1 Connector (for Web3Modal v2 / wagmi v1.x)
+export { unicornConnector as unicornConnectorV1, UnicornConnector } from './connectors/unicornConnector.v1';
 
 // Universal Hooks (use these in your components)
 export { useUniversalWallet } from './hooks/useUniversalWallet';
