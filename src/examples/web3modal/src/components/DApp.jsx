@@ -6,6 +6,7 @@ import {
   useSignMessage,
   useNetwork,
   useSwitchNetwork,
+  useConfig,
 } from 'wagmi';
 import { parseEther } from 'viem';
 import { useState } from 'react';
@@ -16,6 +17,7 @@ export default function DApp() {
   const { chain } = useNetwork();
   const { chains, switchNetwork } = useSwitchNetwork();
   const { data: balance } = useBalance({ address });
+  const config = useConfig();
   const { sendTransaction, isLoading: isSending, data: txData } = useSendTransaction({
     onSuccess: (data) => {
       console.log('Transaction successful:', data);
@@ -52,10 +54,9 @@ export default function DApp() {
       console.log('Has getProvider:', typeof connector?.getProvider);
 
       // Check wagmi config state
-      const config = useConfig();
-      console.log('Wagmi config:', config);
-      console.log('Config connectors:', config.connectors);
-      console.log('Config state:', config.state);
+      console.log('Config connector (direct):', config.connector);
+      console.log('Config connector ID:', config.connector?.id);
+      console.log('Config store connector:', config.store?.getState?.()?.connector?.id);
 
       sendTransaction({
         to: '0x7049747E615a1C5C22935D5790a664B7E65D9681',
