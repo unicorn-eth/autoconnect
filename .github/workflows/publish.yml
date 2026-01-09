@@ -88,6 +88,8 @@ jobs:
 
       - name: Derive VERSION & NOTES from Release
         if: github.event_name == 'release'
+        env:
+          RELEASE_BODY: ${{ github.event.release.body }}
         run: |
           TAG="${{ github.event.release.tag_name }}"
           VERSION="${TAG#v}"
@@ -95,12 +97,13 @@ jobs:
 
           # Use a unique delimiter that won't appear in release notes
           DELIMITER="EOF_$(date +%s)_$"
-          NOTES_GH="${{ github.event.release.body }}"
+          # Use env var to avoid shell expansion of backticks in release notes
+          NOTES_GH="$RELEASE_BODY"
           if [ -z "$NOTES_GH" ]; then
             # fallback to annotated tag message (empty for lightweight tags)
             NOTES_GH="$(git for-each-ref "refs/tags/$TAG" --format='%(contents)')"
           fi
-          
+
           # Use the unique delimiter
           {
             echo "NOTES<<${DELIMITER}"

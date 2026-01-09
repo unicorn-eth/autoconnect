@@ -109,7 +109,9 @@ const UnicornAutoConnect = ({
         }
 
         // Get chainId from wagmi config (first chain)
-        const chainId = config.chains[0]?.id;
+        // Handle both wagmi v1 and v2 config structures
+        const chains = config.chains || config._internal?.chains || [];
+        const chainId = chains[0]?.id;
 
         if (debug) {
           console.log('[UnicornAutoConnect] Using chainId:', chainId);
@@ -135,11 +137,25 @@ const UnicornAutoConnect = ({
           console.log('[UnicornAutoConnect] ✅ Wagmi state propagation complete');
         }
 
+        // CRITICAL FIX for wagmi v1: Expose connector on config object
+        // Wagmi v1 actions look for config.connector, not just in the store
+        // Only apply this fix for wagmi v1 (which has config.store with getState)
+        if (!config.connector && config.store && typeof config.store.getState === 'function') {
+          const storeState = config.store.getState();
+          if (storeState.connector) {
+            // Make connector accessible at config level for wagmi v1 actions
+            config.connector = storeState.connector;
+            if (debug) {
+              console.log('[UnicornAutoConnect] Set config.connector for wagmi v1 compatibility');
+            }
+          }
+        }
+
         // ENHANCED: Manual wagmi state sync for RainbowKit compatibility
         // Check if wagmi state properly synced, if not, manually sync it
-        const currentState = config.state;
+        const currentState = config.state || config.store?.getState() || {};
         const isProperlyConnected = currentState.status === 'connected' &&
-                                   currentState.current === unicornConnector.uid;
+                                   currentState.connector?.id === unicornConnector.id;
 
         if (!isProperlyConnected) {
           if (debug) {

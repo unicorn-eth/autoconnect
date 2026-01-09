@@ -148,7 +148,7 @@ function SendETH() {
   const handleSend = async () => {
     try {
       const result = await tx.sendTransactionAsync({
-        to: '0x742d35Cc6634C0532925a3b844Bc454e4438f44e',
+        to: '0x7049747E615a1C5C22935D5790a664B7E65D9681',
         value: parseEther('0.001'),
       });
       console.log('Transaction hash:', result.hash);
@@ -176,7 +176,7 @@ function SendETH() {
   const handleSend = async () => {
     try {
       sendTransaction({
-        to: '0x742d35Cc6634C0532925a3b844Bc454e4438f44e',
+        to: '0x7049747E615a1C5C22935D5790a664B7E65D9681',
         value: parseEther('0.001'),
       });
       // Note: Don't await - wagmi handles state updates
@@ -227,7 +227,7 @@ function TransferToken() {
       address: USDC,
       abi: ERC20_ABI,
       functionName: 'transfer',
-      args: ['0x742d35Cc6634C0532925a3b844Bc454e4438f44e', 1000000],
+      args: ['0x7049747E615a1C5C22935D5790a664B7E65D9681', 1000000],
     });
   };
   
@@ -264,7 +264,7 @@ function TransferToken() {
       address: USDC,
       abi: ERC20_ABI,
       functionName: 'transfer',
-      args: ['0x742d35Cc6634C0532925a3b844Bc454e4438f44e', 1000000],
+      args: ['0x7049747E615a1C5C22935D5790a664B7E65D9681', 1000000],
     });
   };
   
@@ -434,7 +434,7 @@ function SignTypedData() {
     name: 'My dApp',
     version: '1',
     chainId: 8453,
-    verifyingContract: '0x742d35Cc6634C0532925a3b844Bc454e4438f44e'
+    verifyingContract: '0x7049747E615a1C5C22935D5790a664B7E65D9681'
   };
   
   const types = {
@@ -471,7 +471,7 @@ function SignTypedData() {
     name: 'My dApp',
     version: '1',
     chainId: 8453,
-    verifyingContract: '0x742d35Cc6634C0532925a3b844Bc454e4438f44e'
+    verifyingContract: '0x7049747E615a1C5C22935D5790a664B7E65D9681'
   };
   
   const types = {

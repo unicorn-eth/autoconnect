@@ -52,6 +52,33 @@ npm install @unicorn.eth/autoconnect wagmi viem
 pnpm add @unicorn.eth/autoconnect wagmi viem
 ```
 
+## 🌐 Works With Your Existing Setup
+
+AutoConnect is framework-agnostic and works with:
+
+- ✅ **Pure Wagmi** - Standard wagmi configuration
+- ✅ **RainbowKit** - Popular wallet connection UI
+- ✅ **Web3Modal** - WalletConnect's modal library
+- ✅ **Any wagmi-based setup** - Works as a standard connector
+
+### Using Web3Modal?
+
+If you're using `@web3modal/ethereum` or `@web3modal/react`, see our [Web3Modal Integration Guide](./WEB3MODAL_INTEGRATION.md) for a drop-in solution:
+
+```javascript
+import { w3mConnectors } from '@web3modal/ethereum';
+import { unicornConnector } from '@unicorn.eth/autoconnect';
+
+const wagmiConfig = createConfig({
+  connectors: [
+    ...w3mConnectors({ projectId, chains }),
+    unicornConnector({ clientId, factoryAddress, defaultChain }), // Add this line!
+  ],
+});
+```
+
+That's it! Your Web3Modal now supports Unicorn wallets with zero code changes. 🎉
+
 ## 🚀 Quick Start
 
 ### 1. Add the Connector to Your Wagmi Config
@@ -131,7 +158,7 @@ function SendETH() {
   
   const handleSend = () => {
     sendTransaction({
-      to: '0x742d35Cc6634C0532925a3b844Bc454e4438f44e',
+      to: '0x7049747E615a1C5C22935D5790a664B7E65D9681',
       value: parseEther('0.001'),
     });
   };
@@ -672,6 +699,7 @@ See the complete [Portal Setup Guide](./PORTAL_SETUP_GUIDE.md) for:
 
 - 📄 [Quick Reference](./QUICK_REFERENCE.md) - Complete API documentation
 - 🚀 [Integration Guide](./INTEGRATION_GUIDE.md) - Step-by-step integration instructions
+- 🌐 [Web3Modal Integration](./WEB3MODAL_INTEGRATION.md) - Web3Modal v2 setup guide
 - 🌐 [Portal Setup Guide](./PORTAL_SETUP_GUIDE.md) - Get your dApp listed in Unicorn portals
 - 🔍 [Visual Explanation](./VISUAL-EXPLANATION.md) - Architecture diagrams
 - 🔄 [Continuation Prompt](./CONTINUATION-PROMPT.md) - For development handoff
