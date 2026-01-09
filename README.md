@@ -1,11 +1,20 @@
-# @unicorn.eth/autoconnect v1.3.6
+# @unicorn.eth/autoconnect v1.4
 
 [![npm version](https://img.shields.io/npm/v/@unicorn.eth/autoconnect.svg)](https://www.npmjs.com/package/@unicorn.eth/autoconnect)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 > True seamless Wagmi integration - Use standard wagmi hooks with Unicorn wallets
 
-AutoConnect v1.3.6 is a **standard Wagmi connector** that enables gasless smart account transactions through the familiar wagmi interface you already know. No custom hooks required.
+AutoConnect v1.4 is a **standard Wagmi connector** that enables gasless smart account transactions through the familiar wagmi interface you already know. No custom hooks required.
+
+## ✨ What's New in v1.4
+
+- 🌐 **Web3Modal v2 Support** - Official support for `@web3modal/ethereum` and `@web3modal/react` v2.7+
+- 🔧 **New Integration Helper** - `createWeb3ModalConfig()` for the easiest possible Web3Modal setup
+- 📦 **New Export Path** - Import from `@unicorn.eth/autoconnect/web3modal` for Web3Modal helpers
+- 📚 **New Example Project** - Full working Web3Modal example in `src/examples/web3modal/`
+
+See [Release Notes v1.4.0](./RELEASE_NOTES_v1.4.0.md) for full details.
 
 ## ✨ What's New in v1.3.6
 
@@ -703,6 +712,8 @@ See the complete [Portal Setup Guide](./PORTAL_SETUP_GUIDE.md) for:
 - 🌐 [Portal Setup Guide](./PORTAL_SETUP_GUIDE.md) - Get your dApp listed in Unicorn portals
 - 🔍 [Visual Explanation](./VISUAL-EXPLANATION.md) - Architecture diagrams
 - 🔄 [Continuation Prompt](./CONTINUATION-PROMPT.md) - For development handoff
+- 📋 [Release Notes v1.4.0](./RELEASE_NOTES_v1.4.0.md) - Latest release details
+- 📋 [Changelog](./CHANGELOG.md) - Full version history
 - 💬 [Discord](https://discord.gg/unicorn) - Community support
 - 🐛 [Issues](https://github.com/MyUnicornAccount/autoconnect/issues) - Bug reports
 
