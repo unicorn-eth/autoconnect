@@ -1,15 +1,81 @@
-# Testing Guide for Web3Modal Integration
+# Testing Guide
 
-This guide will help you test the Web3Modal integration locally before publishing to npm.
+This guide covers how to test AutoConnect integration, including testing with the Unicorn Portal's Live Preview feature.
 
-## Prerequisites
+## How AutoConnect Works with Unicorn Portals
+
+**Important:** AutoConnect is designed to be invoked *from within* a Unicorn Portal. When a user clicks on your dApp in a portal (like app.ethdenver.com or app.polygon.ac), the portal automatically passes authentication parameters to your dApp via URL:
+
+```
+https://your-dapp.com/?walletId=inApp&authCookie=eyJhbGciOiJSUzI1NiIsI...
+```
+
+The `UnicornAutoConnect` component detects these parameters and automatically connects the user's Unicorn wallet - no wallet popup, no seed phrase, completely seamless.
+
+## Testing with Live Preview (Recommended)
+
+The best way to test your AutoConnect integration is using the Unicorn Portal's **Live Preview** feature. This lets you test the real authentication flow before deploying to production.
+
+### Step 1: Access the Admin Portal
+
+1. Go to [admin.myunicornaccount.com/login](https://admin.myunicornaccount.com/login)
+2. Log in or create a free starter account for testing
+
+### Step 2: Navigate to Your Community
+
+1. Click on **"My Community"** in the dashboard
+
+### Step 3: Register Your Test dApp
+
+1. Click **"Add an app"**
+2. Click **"Add a custom dApp"** at the bottom of the page
+3. Check **"Yes, I've finished the Integration"** (don't worry - this is fine for testing)
+4. Click **"Next"**
+5. Fill in your dApp details:
+   - **URL**: Your local or deployed URL (e.g., `http://localhost:5173` or `https://your-app.vercel.app`)
+   - **Title**: Your dApp name
+   - **Description**: Brief description
+   - **Logo**: Upload an icon
+
+### Step 4: Use Live Preview
+
+1. After saving, click the **"Live Preview"** link
+2. The portal will open your dApp with real authentication parameters
+3. Your `UnicornAutoConnect` component should automatically connect the wallet
+
+### Step 5: Verify the Integration
+
+- ✅ Wallet connects automatically (no popup)
+- ✅ User's address displays correctly
+- ✅ Transactions show the approval dialog
+- ✅ Transactions are gasless (sponsored by the portal)
+
+### Manual URL Testing
+
+You can also manually append URL parameters to test locally:
+
+```bash
+http://localhost:5173/?walletId=inApp&authCookie=YOUR_AUTH_COOKIE
+```
+
+To get a valid `authCookie`:
+1. Use Live Preview and copy the full URL from the browser
+2. Extract the `authCookie` parameter
+
+---
+
+## Testing Web3Modal Integration
+
+If you're using Web3Modal, follow these additional steps to test the integration.
+
+### Prerequisites
 
 You'll need:
 1. **WalletConnect Project ID** - Get one at [cloud.walletconnect.com](https://cloud.walletconnect.com)
 2. **Thirdweb Client ID** - Get one at [thirdweb.com/dashboard](https://thirdweb.com/dashboard)
 3. A wallet with some testnet tokens (e.g., Base Sepolia ETH)
 
-## Option 1: Test the Example Project (Recommended)
+### Option 1: Test the Example Project (Recommended)
 
 ### Step 1: Set Up Environment Variables
 
@@ -75,7 +141,7 @@ Visit http://localhost:5173
 - ✅ Networks can be switched
 - ✅ No console errors (except for invalid Unicorn authCookie)
 
-## Option 2: Test with npm link (Test Package Integration)
+### Option 2: Test with npm link (Test Package Integration)
 
 This tests the package as if it were installed from npm.
 
@@ -129,7 +195,7 @@ Create `src/main.jsx` - copy from the example project.
 npm run dev
 ```
 
-## Option 3: Unit Testing (For CI/CD)
+### Option 3: Unit Testing (For CI/CD)
 
 ### Test the Integration Helper
 
@@ -169,7 +235,7 @@ describe('Web3Modal Integration', () => {
 });
 ```
 
-## Option 4: Manual Integration Test
+### Option 4: Manual Integration Test
 
 ### Create a Minimal Test Case
 
@@ -219,7 +285,7 @@ Create a new file `test-integration.html`:
 </html>
 ```
 
-## Troubleshooting
+### Troubleshooting
 
 ### Issue: "Cannot find module '@unicorn.eth/autoconnect/web3modal'"
 
