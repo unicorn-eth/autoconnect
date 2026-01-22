@@ -517,14 +517,28 @@ Visit http://localhost:3000 and use the interactive switcher to explore all thre
 
 ## 🧪 Testing
 
+### Testing with Unicorn Portal (Live Preview)
+
+AutoConnect is designed to be invoked **from within a Unicorn Portal**. The portal passes authentication to your dApp via URL parameters. To test the real Unicorn flow:
+
+1. **Log in** to [admin.myunicornaccount.com](https://admin.myunicornaccount.com/login) (free starter account)
+2. Go to **"My Community"** → **"Add an app"** → **"Add a custom dApp"**
+3. Check **"Yes, I've finished the Integration"** and click **"Next"**
+4. Enter your dApp URL (localhost works!), title, description, and logo
+5. Click **"Live Preview"** to test with real authentication
+
+The portal will open your dApp with valid `?walletId=inApp&authCookie=...` parameters, and `UnicornAutoConnect` will automatically connect the wallet.
+
+See the [Testing Guide](./TESTING_GUIDE.md) for complete details.
+
 ### Test with Different Wallets
 
 ```bash
 # Normal mode - Standard wallets only
 http://localhost:3000
 
-# Unicorn mode - Auto-connects Unicorn wallet
-http://localhost:3000/?walletId=inApp&authCookie=test - this won't work, its just the format
+# Unicorn mode - Auto-connects Unicorn wallet (requires valid authCookie from Live Preview)
+http://localhost:3000/?walletId=inApp&authCookie=eyJhbGci...
 ```
 
 ### Complete Test Suite

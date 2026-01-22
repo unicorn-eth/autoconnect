@@ -117,7 +117,9 @@ jobs:
         run: |
           CURRENT_VERSION=$(node -p "require('./package.json').version")
           INPUT_VERSION="${{ inputs.version }}"
-          
+          # Strip 'v' prefix if present (npm version doesn't accept it)
+          INPUT_VERSION="${INPUT_VERSION#v}"
+
           if [ "$CURRENT_VERSION" != "$INPUT_VERSION" ]; then
             npm version "$INPUT_VERSION" --no-git-tag-version
             echo "VERSION=$INPUT_VERSION" >> "$GITHUB_ENV"
