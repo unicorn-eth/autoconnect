@@ -1,12 +1,13 @@
 // src/index.js
-// @unicorn.eth/autoconnect v1.4.0
-// Wagmi connector-based approach for seamless integration
+// @unicorn.eth/autoconnect v1.5.0
+// Wagmi v2 connector-based approach for seamless integration
 
-// Wagmi v2 Connector (for wagmi v2+ / RainbowKit / pure wagmi)
+// Wagmi v2 Connector (for wagmi v2+ / RainbowKit / Web3Modal v3+ / pure wagmi)
 export { unicornConnector } from './connectors/unicornConnector';
 
-// Wagmi v1 Connector (for Web3Modal v2 / wagmi v1.x)
-export { unicornConnector as unicornConnectorV1, UnicornConnector } from './connectors/unicornConnector.v1';
+// NOTE: Wagmi v1 support has been removed in v1.5.0 to fix bundling conflicts.
+// If you need wagmi v1 support, install the legacy version:
+//   npm install @unicorn.eth/autoconnect@legacy
 
 // Universal Hooks (use these in your components)
 export { useUniversalWallet } from './hooks/useUniversalWallet';
