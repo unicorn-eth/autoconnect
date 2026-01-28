@@ -82,34 +82,30 @@ jobs:
           head -n 5 pnpm-lock.yaml
 
       - name: Install deps (clean + shamefully-hoist)
+        timeout-minutes: 5
         run: |
           rm -rf node_modules
           pnpm install --no-frozen-lockfile --shamefully-hoist
 
-      - name: Derive VERSION & NOTES from Release
+      - name: Debug event info
         if: github.event_name == 'release'
+        run: |
+          echo "Event name: ${{ github.event_name }}"
+          echo "Tag name: ${{ github.event.release.tag_name }}"
+          echo "Release body length: ${#RELEASE_BODY}"
         env:
           RELEASE_BODY: ${{ github.event.release.body }}
+
+      - name: Derive VERSION & NOTES from Release
+        if: github.event_name == 'release'
         run: |
           TAG="${{ github.event.release.tag_name }}"
           VERSION="${TAG#v}"
+          echo "VERSION=$VERSION"
           echo "VERSION=$VERSION" >> "$GITHUB_ENV"
 
-          # Use a unique delimiter that won't appear in release notes
-          DELIMITER="EOF_$(date +%s)_$"
-          # Use env var to avoid shell expansion of backticks in release notes
-          NOTES_GH="$RELEASE_BODY"
-          if [ -z "$NOTES_GH" ]; then
-            # fallback to annotated tag message (empty for lightweight tags)
-            NOTES_GH="$(git for-each-ref "refs/tags/$TAG" --format='%(contents)')"
-          fi
-
-          # Use the unique delimiter
-          {
-            echo "NOTES<<${DELIMITER}"
-            echo "$NOTES_GH"
-            echo "${DELIMITER}"
-          } >> "$GITHUB_ENV"
+          # Skip notes for now to simplify - just use tag name
+          echo "NOTES=Release $VERSION" >> "$GITHUB_ENV"
 
       # If manually dispatched with an input version, respect it
       - name: Optional bump version (workflow_dispatch)
