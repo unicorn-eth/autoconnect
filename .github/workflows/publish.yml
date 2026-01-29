@@ -67,25 +67,22 @@ jobs:
         with:
           version: 10.17.1
 
-      - name: Sanity check pnpm version
-        run: pnpm --version
-
-      - name: Enable Corepack
-        run: corepack enable
-
-      - name: Sanity check pnpm version
-        run: pnpm --version  # should show 10.17.1
-
-      - name: Show pnpm & lockfile headers
+      - name: Get pnpm store directory
+        shell: bash
         run: |
-          pnpm --version
-          head -n 5 pnpm-lock.yaml
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
 
-      - name: Install deps (clean + shamefully-hoist)
-        timeout-minutes: 5
-        run: |
-          rm -rf node_modules
-          pnpm install --no-frozen-lockfile --shamefully-hoist
+      - name: Cache pnpm store
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Install deps
+        timeout-minutes: 10
+        run: pnpm install --no-frozen-lockfile
 
       - name: Debug event info
         if: github.event_name == 'release'
