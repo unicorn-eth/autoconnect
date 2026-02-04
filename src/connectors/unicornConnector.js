@@ -324,14 +324,23 @@ export function unicornConnector(options = {}) {
       if (this.account?.chain?.id) {
         return this.account.chain.id;
       }
-      
+
       const account = await this.wallet.getAccount();
       if (account?.chain?.id) {
         this.account = account;
         return account.chain.id;
       }
-      
+
       return defaultChain;
+    },
+
+    /**
+     * Get the internal ThirdWeb wallet instance.
+     * This is useful for passing to ThirdWeb components like CheckoutWidget.
+     * @returns {Object|null} The ThirdWeb wallet or null if not connected
+     */
+    getWallet() {
+      return this.wallet || null;
     },
 
     async isAuthorized() {
