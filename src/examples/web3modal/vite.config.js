@@ -5,12 +5,11 @@ import { fileURLToPath } from 'url';
 import { readFileSync, writeFileSync, mkdirSync } from 'fs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-
-const pkg = JSON.parse(readFileSync('../../package.json', 'utf-8'));
+const pkg = JSON.parse(readFileSync(path.resolve(__dirname, '../../package.json'), 'utf-8'));
 
 // Generate public/version.json at config load time
-mkdirSync('public', { recursive: true });
-writeFileSync('public/version.json', JSON.stringify({
+mkdirSync(path.resolve(__dirname, 'public'), { recursive: true });
+writeFileSync(path.resolve(__dirname, 'public/version.json'), JSON.stringify({
   service: pkg.name,
   version: pkg.version,
 }, null, 2));
@@ -22,7 +21,6 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      // Use Web3Modal integration which exports v1 connector
       '@unicorn.eth/autoconnect': path.resolve(__dirname, '../../integrations/web3modal/index.js'),
     },
   },

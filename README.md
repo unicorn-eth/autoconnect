@@ -753,7 +753,8 @@ See the complete [Portal Setup Guide](./PORTAL_SETUP_GUIDE.md) for:
 
 - 📄 [Quick Reference](./QUICK_REFERENCE.md) - Complete API documentation
 - 🚀 [Integration Guide](./INTEGRATION_GUIDE.md) - Step-by-step integration instructions
-- 🌐 [Web3Modal Integration](./WEB3MODAL_INTEGRATION.md) - Web3Modal v2 setup guide
+- 🔐 [SIWE Integration](./INTEGRATION_GUIDE.md#sign-in-with-ethereum-siwe) - Sign-In with Ethereum for smart accounts
+- 🌐 [Web3Modal Integration](./WEB3MODAL_INTEGRATION.md) - Web3Modal v3 setup guide
 - 🌐 [Portal Setup Guide](./PORTAL_SETUP_GUIDE.md) - Get your dApp listed in Unicorn portals
 - 🔍 [Visual Explanation](./VISUAL-EXPLANATION.md) - Architecture diagrams
 - 🔄 [Continuation Prompt](./CONTINUATION-PROMPT.md) - For development handoff
