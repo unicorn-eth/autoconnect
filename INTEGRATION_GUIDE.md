@@ -1102,7 +1102,43 @@ async function verifySiweSignature({ address, message, signature, chainId }) {
 | **siwe** | Yes | Pass `provider` option to `.verify()` |
 | **ethers.js** | Manual | Use `contract.isValidSignature()` |
 | **NextAuth + SIWE** | Partial | Needs custom `verifyMessage` in credentials provider |
-| **BetterAuth** | TBD | May need custom signature verifier plugin |
+| **BetterAuth** | Yes | Use `verifySiweMessage` from `@unicorn.eth/autoconnect/siwe` in the SIWE plugin's `verifyMessage` callback |
+
+### Using with BetterAuth
+
+BetterAuth's built-in SIWE plugin accepts a custom `verifyMessage` callback. Use autoconnect's SIWE adapter or viem directly:
+
+```javascript
+import { betterAuth } from "better-auth";
+import { siwe } from "better-auth/plugins";
+import { generateNonce } from "siwe";
+import { verifySiweMessage } from "@unicorn.eth/autoconnect/siwe";
+
+export const auth = betterAuth({
+  plugins: [
+    siwe({
+      domain: "yourdomain.com",
+      getNonce: async () => generateNonce(),
+      verifyMessage: async ({ message, signature, address, chainId }) => {
+        // Handles both EOA (ecrecover) and smart contract (ERC-1271) wallets
+        return verifySiweMessage({ address, message, signature, chainId });
+      },
+    }),
+  ],
+});
+```
+
+Or without the autoconnect adapter (works with any version):
+
+```javascript
+import { createPublicClient, http } from "viem";
+import { base } from "viem/chains";
+
+verifyMessage: async ({ message, signature, address }) => {
+  const client = createPublicClient({ chain: base, transport: http() });
+  return client.verifyMessage({ address, message, signature });
+},
+```
 
 ### Important Notes
 
@@ -1298,6 +1334,6 @@ Before deploying, ensure:
 
 ---
 
-*Last updated: November 10, 2025*
-*AutoConnect Version: 1.3.5*
+*Last updated: February 2026*
+*AutoConnect Version: 1.5.2*
 *License: MIT*

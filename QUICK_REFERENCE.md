@@ -500,6 +500,36 @@ await signMessage({ message });
 
 See [MIGRATION_GUIDE_v1.2_to_v1.3.md](./docs/MIGRATION_GUIDE_v1.2_to_v1.3.md) for detailed examples.
 
+## SIWE (Sign-In with Ethereum)
+
+Smart account wallets use ERC-1271 for signature verification. Standard `ecrecover` won't work. Use the SIWE adapter:
+
+```javascript
+// Server-side verification
+import { verifySiweMessage } from '@unicorn.eth/autoconnect/siwe';
+
+const isValid = await verifySiweMessage({
+  address: '0x...',
+  message: siweMessage,
+  signature: '0x...',
+  chainId: 8453,
+});
+```
+
+Or create a reusable verifier:
+
+```javascript
+import { createSiweVerifier } from '@unicorn.eth/autoconnect/siwe';
+
+const verifier = createSiweVerifier({
+  rpcUrls: { 8453: 'https://mainnet.base.org' },
+});
+
+const isValid = await verifier.verify({ address, message, signature, chainId });
+```
+
+See the [Integration Guide — SIWE section](./INTEGRATION_GUIDE.md#sign-in-with-ethereum-siwe) for full details including BetterAuth integration.
+
 ## Architecture
 
 ### Core Components

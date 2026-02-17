@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- SIWE (Sign-In with Ethereum) verification adapter (`@unicorn.eth/autoconnect/siwe`)
+  - `verifySiweMessage()` — one-shot ERC-1271-aware signature verification
+  - `createSiweVerifier()` — reusable verifier with configurable RPC URLs
+- SIWE documentation in Integration Guide with client and server examples
+- BetterAuth integration guidance for smart contract wallet authentication
+- EIP-1193 `personal_sign` hex decode test (Test 10) in basic example
+- SIWE sign & verify end-to-end test (Test 11) in basic example
+- `/version.json` endpoint to example apps (reports library version from root package.json)
+
+### Fixed
+- `.npmrc` auth token variable mismatch (`NPM_TOKEN` → `NODE_AUTH_TOKEN`) that prevented CI publishing
+- Example `.npmrc` files cleaned up (removed pnpm-specific settings)
+
 ### Planned
 - Enhanced transaction approval UI
 - Analytics integration
