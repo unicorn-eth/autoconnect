@@ -24,6 +24,7 @@ import {
   zora,
   zkSync
 } from 'thirdweb/chains';
+import { isHex, hexToString } from 'viem';
 
 // Centralized mapping of wagmi chain IDs to Thirdweb chain objects
 // This ensures consistency across all connector methods
@@ -493,23 +494,26 @@ export function unicornConnector(options = {}) {
                 const [message, address] = args.params;
                 console.log('[UnicornConnector] Intercepting personal_sign, using account.signMessage');
                 console.log('[UnicornConnector] Message to sign:', message);
-                
+
+                // Decode hex-encoded message per EIP-1193 personal_sign spec
+                const decodedMessage = isHex(message) ? hexToString(message) : message;
+
                 // Show approval dialog for signing
                 const approvalHandler = await loadApprovalUI();
-                
+
                 // Create a transaction-like object for the approval dialog
                 await approvalHandler({
                   method: 'personal_sign',
-                  message: message,
+                  message: decodedMessage,
                   from: address,
-                  data: message, // Display the message in the approval dialog
+                  data: decodedMessage, // Display the message in the approval dialog
                 });
                 console.log('[UnicornConnector] Message signing approved by user');
-                
+
                 console.log('[UnicornConnector] Account has signMessage:', typeof this.account.signMessage);
                 console.log('[UnicornConnector] Account keys:', Object.keys(this.account));
-                
-                const signature = await this.account.signMessage({ message });
+
+                const signature = await this.account.signMessage({ message: decodedMessage });
                 console.log('[UnicornConnector] Signature from account (length:', signature.length, ')');
                 console.log('[UnicornConnector] Full signature:', signature);
                 
