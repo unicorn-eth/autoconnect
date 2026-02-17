@@ -41,6 +41,9 @@ Thumbs.db
 *.tmp
 .cache/
 
+# Generated version file
+**/public/version.json
+
 # Package manager
 .yarn/
 .npm/
