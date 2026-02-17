@@ -1,6 +1,6 @@
 {
   "name": "@unicorn.eth/autoconnect",
-  "version": "1.5.1",
+  "version": "1.5.2",
   "description": "Drop-in Unicorn wallet integration for existing web3 apps. Works alongside your existing wallet setup (RainbowKit, Wagmi, Web3Modal, etc.) without modifying any code.",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
@@ -14,6 +14,10 @@
     "./web3modal": {
       "import": "./src/integrations/web3modal/index.js",
       "require": "./src/integrations/web3modal/index.js"
+    },
+    "./siwe": {
+      "import": "./src/siwe/index.js",
+      "require": "./src/siwe/index.js"
     }
   },
   "files": [
@@ -53,10 +57,14 @@
   },
   "homepage": "https://github.com/unicorn-eth/autoconnect#readme",
   "peerDependencies": {
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "thirdweb": "^5.68.0",
-    "wagmi": "^2.17.0"
+    "react": "^18.2.0 || ^19.0.0",
+    "react-dom": "^18.2.0 || ^19.0.0",
+    "thirdweb": "^5.118.0",
+    "wagmi": "^2.0.0"
+  },
+  "peerDependenciesMeta": {
+    "react": { "optional": true },
+    "react-dom": { "optional": true }
   },
   "devDependencies": {
     "rollup": "^4.52.5",

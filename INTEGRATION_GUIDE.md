@@ -2,8 +2,8 @@
 
 > A comprehensive guide for integrating Unicorn wallet support into your existing dApp or creating a new integration from scratch.
 
-**Version:** 1.3.5
-**Last Updated:** November 10, 2025
+**Version:** 1.5.2
+**Last Updated:** January 2026
 
 ---
 
@@ -17,9 +17,10 @@
 6. [Testing Your Integration](#testing-your-integration)
 7. [Network Support](#network-support)
 8. [Troubleshooting](#troubleshooting)
-9. [Migration from Older Versions](#migration-from-older-versions)
-10. [Examples & Templates](#examples--templates)
-11. [Next Steps: Get Discovered](#next-steps-get-discovered)
+9. [Sign-In with Ethereum (SIWE)](#sign-in-with-ethereum-siwe)
+10. [Migration from Older Versions](#migration-from-older-versions)
+11. [Examples & Templates](#examples--templates)
+12. [Next Steps: Get Discovered](#next-steps-get-discovered)
 
 ---
 
@@ -57,8 +58,9 @@ Before integrating, ensure you have:
 {
   "wagmi": "^2.0.0",
   "viem": "^2.0.0",
-  "thirdweb": "^5.68.0",
-  "@tanstack/react-query": "^5.0.0"
+  "thirdweb": "^5.118.0",
+  "@tanstack/react-query": "^5.0.0",
+  "react": "^18.2.0 || ^19.0.0"
 }
 ```
 
@@ -958,6 +960,155 @@ function SignMessageDemo() {
   );
 }
 ```
+
+---
+
+## Sign-In with Ethereum (SIWE)
+
+AutoConnect uses **smart contract wallets** (account abstraction), which sign messages differently than standard EOA wallets like MetaMask. This affects SIWE (Sign-In with Ethereum) verification on the server side.
+
+### The Problem
+
+With a standard EOA wallet, SIWE verification uses `ecrecover` to recover the signer's address from the signature. With a smart contract wallet:
+
+- The **smart account address** is what the user presents (and what appears in the SIWE message)
+- The **underlying EOA signer** is what actually signs the message
+- `ecrecover` returns the EOA signer address, **not** the smart account address
+- Standard SIWE verification fails because the addresses don't match
+
+### Client Side — Works Out of the Box
+
+Signing SIWE messages works with no changes. Use standard wagmi hooks:
+
+```javascript
+import { useSignMessage } from 'wagmi';
+import { SiweMessage } from 'siwe';
+
+function SignIn() {
+  const { address, chainId } = useAccount();
+  const { signMessageAsync } = useSignMessage();
+
+  const handleSignIn = async () => {
+    // 1. Create SIWE message (same for all wallets)
+    const message = new SiweMessage({
+      domain: window.location.host,
+      address,
+      statement: 'Sign in to My dApp',
+      uri: window.location.origin,
+      version: '1',
+      chainId,
+      nonce: await fetchNonceFromServer(),
+    });
+
+    // 2. Sign it (works for both EOA and smart account wallets)
+    const signature = await signMessageAsync({
+      message: message.prepareMessage(),
+    });
+
+    // 3. Send to server for verification
+    await verifyOnServer({ message: message.prepareMessage(), signature });
+  };
+}
+```
+
+### Server Side — Requires ERC-1271 Support
+
+This is where you need to make a change. Standard SIWE verification will fail for smart account wallets.
+
+#### Option 1: Use viem's `verifyMessage` (Recommended)
+
+viem handles both EOA and ERC-1271 (smart contract) verification automatically:
+
+```javascript
+import { createPublicClient, http } from 'viem';
+import { base } from 'viem/chains';
+import { SiweMessage } from 'siwe';
+
+async function verifySiweSignature({ message, signature }) {
+  const siweMessage = new SiweMessage(message);
+
+  // Create a client for the chain the user is on
+  const client = createPublicClient({
+    chain: base, // Use the chain from siweMessage.chainId
+    transport: http(),
+  });
+
+  // This handles BOTH EOA (ecrecover) and smart contract (ERC-1271) wallets
+  const isValid = await client.verifyMessage({
+    address: siweMessage.address,
+    message,
+    signature,
+  });
+
+  return isValid;
+}
+```
+
+#### Option 2: Use the `siwe` Library with a Provider
+
+The `siwe` npm package supports ERC-1271 when you pass a provider:
+
+```javascript
+import { SiweMessage } from 'siwe';
+import { ethers } from 'ethers';
+
+async function verifySiweSignature({ message, signature }) {
+  const siweMessage = new SiweMessage(message);
+
+  // Pass a provider to enable ERC-1271 verification
+  const provider = new ethers.JsonRpcProvider('https://mainnet.base.org');
+
+  const result = await siweMessage.verify(
+    { signature },
+    { provider } // ← This enables smart contract wallet support
+  );
+
+  return result.success;
+}
+```
+
+**Without the `provider` parameter, `.verify()` only does `ecrecover` and will fail for smart account wallets.**
+
+#### Option 3: Manual Dual Verification
+
+```javascript
+import { createPublicClient, http, recoverMessageAddress } from 'viem';
+
+async function verifySiweSignature({ address, message, signature, chainId }) {
+  // 1. Try standard ECDSA recovery first (fast, no RPC needed)
+  try {
+    const recovered = await recoverMessageAddress({ message, signature });
+    if (recovered.toLowerCase() === address.toLowerCase()) {
+      return true; // Standard EOA wallet
+    }
+  } catch {}
+
+  // 2. Fall back to ERC-1271 on-chain verification
+  const client = createPublicClient({
+    chain: getChainById(chainId),
+    transport: http(),
+  });
+
+  const isValid = await client.verifyMessage({ address, message, signature });
+  return isValid;
+}
+```
+
+### Which Auth Libraries Support ERC-1271?
+
+| Library | ERC-1271 Support | How |
+|---------|-----------------|-----|
+| **viem** | Yes | `publicClient.verifyMessage()` handles both automatically |
+| **siwe** | Yes | Pass `provider` option to `.verify()` |
+| **ethers.js** | Manual | Use `contract.isValidSignature()` |
+| **NextAuth + SIWE** | Partial | Needs custom `verifyMessage` in credentials provider |
+| **BetterAuth** | TBD | May need custom signature verifier plugin |
+
+### Important Notes
+
+- ERC-1271 verification requires an **RPC call** to the blockchain (unlike `ecrecover` which is purely computational)
+- The smart account must be **deployed on-chain** for ERC-1271 to work. If the account hasn't sent its first transaction yet, verification may fail on some implementations
+- Always verify against the **chain the user signed on** — smart accounts may have different addresses on different chains
 
 ---
 

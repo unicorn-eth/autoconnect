@@ -1,8 +1,8 @@
-# @unicorn.eth/autoconnect v1.3.0
+# @unicorn.eth/autoconnect v1.5.2
 
 > True zero-code integration - use standard wagmi hooks everywhere
 
-Drop-in Unicorn wallet integration for existing web3 apps. v1.3 achieves the holy grail: **copy/paste any wagmi tutorial code and it just works** with Unicorn wallets.
+Drop-in Unicorn wallet integration for existing web3 apps. **Copy/paste any wagmi tutorial code and it just works** with Unicorn wallets.
 
 ## Features
 
@@ -11,37 +11,26 @@ Drop-in Unicorn wallet integration for existing web3 apps. v1.3 achieves the hol
 - ✅ **No custom hooks needed** - Use `useSendTransaction`, `useSignMessage`, etc.
 - ✅ **Automatic approval dialogs** - Beautiful UI for transaction confirmation
 - ✅ **Gasless transactions** - Built into the connector
-- ✅ **Works with RainbowKit** - Shows up in wallet list automatically
+- ✅ **Works with RainbowKit & Web3Modal** - Shows up in wallet list automatically
+- ✅ **React 18 & 19 support** - Optional React dependency
 - ✅ **TypeScript support** - Full type definitions
-- ✅ **Production ready** - Battle-tested pattern
 
-## What's New in v1.3.0
+## What's New in v1.5.2
 
-### 🎯 True Wagmi Integration
+- ⚛️ **React 19 Support** - Works with React 18.x and 19.x
+- 📦 **Optional React** - React is optional for connector-only usage
+- ⬆️ **Thirdweb 5.118.0** - Updated to latest SDK
+- 🔧 **Wagmi v2 Only** - Removed wagmi v1 to fix bundling conflicts
 
-**v1.2 and earlier:**
-```jsx
-// Had to use custom hooks
-import { useUniversalTransaction } from '@unicorn.eth/autoconnect';
-const tx = useUniversalTransaction();
-```
+> **Using wagmi v1?** Install the legacy version: `npm install @unicorn.eth/autoconnect@legacy`
 
-**v1.3:**
-```jsx
-// Just use standard wagmi!
-import { useSendTransaction } from 'wagmi';
-const { sendTransaction } = useSendTransaction();
-```
-
-### Key Changes
+## Key Features
 
 - 🔌 **Native Connector** - `unicornConnector` is a proper wagmi v2 connector
 - ⚡ **Provider Wrapping** - Intercepts requests for approval dialogs
-- 🗺️ **Centralized Chain Config** - Single source of truth for all chains
-- 🔄 **Proper State Sync** - localStorage + wagmi events for reconnection
+- 🗺️ **17 Networks Supported** - All major EVM chains
+- 🔄 **Auto-connection** - URL-based wallet connection from Unicorn Portals
 - 🎨 **Better UX** - Approval dialogs with transaction details
-
-**Breaking Changes:** See [Migration Guide](#migration-from-v12x) below
 
 ## Installation
 

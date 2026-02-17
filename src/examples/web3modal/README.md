@@ -1,10 +1,10 @@
 # Unicorn + Web3Modal Example
 
-This example demonstrates how to integrate Unicorn wallet with Web3Modal v2 in a React application.
+This example demonstrates how to integrate Unicorn wallet with Web3Modal v3 in a React application.
 
 ## Features
 
-- ✅ Web3Modal v2 integration
+- ✅ Web3Modal v3 integration (wagmi v2)
 - ✅ Unicorn wallet support (gasless transactions)
 - ✅ Multiple wallet options (MetaMask, WalletConnect, Coinbase, etc.)
 - ✅ Auto-connection via URL parameters

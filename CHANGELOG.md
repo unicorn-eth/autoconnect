@@ -8,11 +8,45 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Planned
-- Support for more blockchain networks
 - Enhanced transaction approval UI
 - Analytics integration
 - Deep linking support
 - Mobile SDK
+
+## [1.5.2] - 2026-01-29
+
+### Changed
+- React peer dependency now supports React 18.x and 19.x
+- React and React-DOM are now optional peer dependencies (for connector-only usage)
+- Updated thirdweb SDK to ^5.118.0
+- Updated example projects to use latest dependencies
+- Web3Modal example updated from v2 to v3 (wagmi v2)
+
+### Fixed
+- Widened wagmi peer dependency to ^2.0.0 for better compatibility
+
+## [1.5.0] - 2026-01-29
+
+### Changed
+- **Breaking**: Removed wagmi v1 connector exports (`unicornConnectorV1`, `UnicornConnector`)
+- Package now targets wagmi v2 exclusively
+
+### Fixed
+- Bundling conflicts caused by wagmi v1 code importing non-existent `Connector` from wagmi v2
+
+### Migration
+- If you need wagmi v1 support, use `npm install @unicorn.eth/autoconnect@legacy`
+
+## [1.4.0] - 2025-11-12
+
+### Added
+- Web3Modal v2 official support
+- `createWeb3ModalConfig()` helper function
+- `/web3modal` export path for Web3Modal helpers
+- Web3Modal example project (`src/examples/web3modal/`)
+
+### Changed
+- Updated package exports to include Web3Modal entry point
 
 ## [1.3.6] - 2025-11-11
 

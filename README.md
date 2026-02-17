@@ -1,13 +1,19 @@
-# @unicorn.eth/autoconnect v1.5
+# @unicorn.eth/autoconnect v1.5.2
 
 [![npm version](https://img.shields.io/npm/v/@unicorn.eth/autoconnect.svg)](https://www.npmjs.com/package/@unicorn.eth/autoconnect)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 > True seamless Wagmi integration - Use standard wagmi hooks with Unicorn wallets
 
-AutoConnect v1.5 is a **standard Wagmi v2 connector** that enables gasless smart account transactions through the familiar wagmi interface you already know. No custom hooks required.
+AutoConnect v1.5.2 is a **standard Wagmi v2 connector** that enables gasless smart account transactions through the familiar wagmi interface you already know. No custom hooks required.
 
-## ✨ What's New in v1.5
+## ✨ What's New in v1.5.2
+
+- ⚛️ **React 19 Support** - Now supports React 18.x and 19.x
+- 📦 **Optional React** - React is now optional for connector-only usage (no UI components)
+- ⬆️ **Thirdweb 5.118.0** - Updated to latest thirdweb SDK
+
+## ✨ What's New in v1.5.0
 
 - 🔧 **Wagmi v2 Only** - Removed wagmi v1 code to fix bundling conflicts with wagmi v2 projects
 - 📦 **Smaller Bundle** - Cleaner build without legacy connector code
@@ -678,11 +684,29 @@ const config = createConfig({
 3. Added to wagmi config `chains` array
 4. Has a transport configured
 
-### Signatures Show as Invalid
+### Signatures Show as Invalid / SIWE Verification Fails
 
 **Note:** This is expected for smart accounts!
 
-Smart account signatures use ERC-1271 and require on-chain verification. The signatures **ARE valid** but cannot be verified client-side using standard ECDSA verification.
+Smart account signatures use **ERC-1271** (on-chain verification) instead of standard ECDSA. The signatures **ARE valid** but require on-chain verification.
+
+**For SIWE (Sign-In with Ethereum):** Use viem's `verifyMessage` on the server, which handles both EOA and smart contract wallets automatically:
+
+```javascript
+const isValid = await publicClient.verifyMessage({
+  address: siweMessage.address,
+  message,
+  signature,
+});
+```
+
+Or pass a `provider` to the `siwe` library's `.verify()` method:
+
+```javascript
+const result = await siweMessage.verify({ signature }, { provider });
+```
+
+See the [Integration Guide — SIWE section](./INTEGRATION_GUIDE.md#sign-in-with-ethereum-siwe) for complete examples.
 
 ## 🎯 Best Practices
 
@@ -733,7 +757,7 @@ See the complete [Portal Setup Guide](./PORTAL_SETUP_GUIDE.md) for:
 - 🌐 [Portal Setup Guide](./PORTAL_SETUP_GUIDE.md) - Get your dApp listed in Unicorn portals
 - 🔍 [Visual Explanation](./VISUAL-EXPLANATION.md) - Architecture diagrams
 - 🔄 [Continuation Prompt](./CONTINUATION-PROMPT.md) - For development handoff
-- 📋 [Release Notes v1.5.0](./RELEASE_NOTES_v1.5.0.md) - Latest release details
+- 📋 [Release Notes v1.5.2](./RELEASE_NOTES_v1.5.2.md) - Latest release details
 - 📋 [Changelog](./CHANGELOG.md) - Full version history
 - 💬 [Discord](https://discord.gg/unicorn) - Community support
 - 🐛 [Issues](https://github.com/MyUnicornAccount/autoconnect/issues) - Bug reports
