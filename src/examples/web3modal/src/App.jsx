@@ -1,7 +1,8 @@
-import { EthereumClient, w3mConnectors, w3mProvider } from '@web3modal/ethereum';
-import { Web3Modal } from '@web3modal/react';
-import { configureChains, createConfig, WagmiConfig } from 'wagmi';
+import { createWeb3Modal } from '@web3modal/wagmi/react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { WagmiProvider, createConfig, http } from 'wagmi';
 import { base, polygon, arbitrum, optimism } from 'wagmi/chains';
+import { walletConnect, injected, coinbaseWallet } from 'wagmi/connectors';
 import { unicornConnector, UnicornAutoConnect } from '@unicorn.eth/autoconnect';
 import DApp from './components/DApp';
 
@@ -20,41 +21,46 @@ if (!clientId) {
 // 2. Configure chains
 const chains = [base, polygon, arbitrum, optimism];
 
-const { publicClient, webSocketPublicClient } = configureChains(
-  chains,
-  [w3mProvider({ projectId })]
-);
-
 // 3. Create wagmi config with Unicorn connector
 const wagmiConfig = createConfig({
-  autoConnect: true,
+  chains,
   connectors: [
-    // Web3Modal connectors (WalletConnect, Injected wallets, etc.)
-    ...w3mConnectors({ projectId, chains }),
+    // Standard connectors
+    walletConnect({ projectId }),
+    injected(),
+    coinbaseWallet({ appName: 'Unicorn Web3Modal Example' }),
 
-    // Unicorn connector - this is the only line you need to add!
-    // Note: wagmi v1 syntax requires chains and options objects
+    // Unicorn connector - enables gasless transactions
     unicornConnector({
-      chains,
-      options: {
-        clientId,
-        factoryAddress,
-        defaultChain: 8453, // Base
-      },
+      clientId,
+      factoryAddress,
+      defaultChain: base.id,
     }),
   ],
-  publicClient,
-  webSocketPublicClient,
+  transports: {
+    [base.id]: http(),
+    [polygon.id]: http(),
+    [arbitrum.id]: http(),
+    [optimism.id]: http(),
+  },
 });
 
-// 4. Create Ethereum client for Web3Modal
-const ethereumClient = new EthereumClient(wagmiConfig, chains);
+// 4. Create Web3Modal
+createWeb3Modal({
+  wagmiConfig,
+  projectId,
+  chains,
+  enableAnalytics: false,
+});
 
-// 5. Main App component
+// 5. Create query client for React Query
+const queryClient = new QueryClient();
+
+// 6. Main App component
 export default function App() {
   return (
-    <>
-      <WagmiConfig config={wagmiConfig}>
+    <WagmiProvider config={wagmiConfig}>
+      <QueryClientProvider client={queryClient}>
         {/* Auto-connect component for URL-based connection */}
         <UnicornAutoConnect
           debug={true}
@@ -68,13 +74,7 @@ export default function App() {
 
         {/* Your dApp */}
         <DApp />
-      </WagmiConfig>
-
-      {/* Web3Modal component */}
-      <Web3Modal
-        projectId={projectId}
-        ethereumClient={ethereumClient}
-      />
-    </>
+      </QueryClientProvider>
+    </WagmiProvider>
   );
 }

@@ -1,62 +1,60 @@
-import { useWeb3Modal } from '@web3modal/react';
+import { useWeb3Modal } from '@web3modal/wagmi/react';
 import {
   useAccount,
   useBalance,
   useSendTransaction,
   useSignMessage,
-  useNetwork,
-  useSwitchNetwork,
+  useSwitchChain,
   useConfig,
 } from 'wagmi';
 import { parseEther } from 'viem';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export default function DApp() {
   const { open } = useWeb3Modal();
-  const { address, isConnected, connector } = useAccount();
-  const { chain } = useNetwork();
-  const { chains, switchNetwork } = useSwitchNetwork();
+  const { address, isConnected, connector, chain } = useAccount();
+  const { chains } = useConfig();
+  const { switchChain } = useSwitchChain();
   const { data: balance } = useBalance({ address });
-  const config = useConfig();
-  const { sendTransaction, isLoading: isSending, data: txData } = useSendTransaction({
-    onSuccess: (data) => {
-      console.log('Transaction successful:', data);
-      if (data?.hash) {
-        setTxHash(data.hash);
-      }
-    },
-    onError: (error) => {
-      console.error('Send failed -', error);
-    },
-  });
-  const { signMessage, isLoading: isSigning, data: sigData } = useSignMessage({
-    onSuccess: (data) => {
-      console.log('Message signed:', data);
-      if (data) {
-        setSignature(data);
-      }
-    },
-    onError: (error) => {
-      console.error('Sign failed -', error);
-    },
-  });
+
+  const {
+    sendTransaction,
+    isPending: isSending,
+    data: txData,
+    isSuccess: txSuccess,
+  } = useSendTransaction();
+
+  const {
+    signMessage,
+    isPending: isSigning,
+    data: sigData,
+    isSuccess: sigSuccess,
+  } = useSignMessage();
 
   const [txHash, setTxHash] = useState('');
   const [signature, setSignature] = useState('');
+
+  // Watch for transaction success
+  useEffect(() => {
+    if (txSuccess && txData) {
+      console.log('Transaction successful:', txData);
+      setTxHash(txData);
+    }
+  }, [txSuccess, txData]);
+
+  // Watch for signature success
+  useEffect(() => {
+    if (sigSuccess && sigData) {
+      console.log('Message signed:', sigData);
+      setSignature(sigData);
+    }
+  }, [sigSuccess, sigData]);
 
   const handleSendETH = async () => {
     try {
       console.log('=== DEBUG: Send Transaction ===');
       console.log('Connector:', connector);
       console.log('Connector ID:', connector?.id);
-      console.log('Connector ready:', connector?.ready);
-      console.log('Has getSigner:', typeof connector?.getSigner);
-      console.log('Has getProvider:', typeof connector?.getProvider);
-
-      // Check wagmi config state
-      console.log('Config connector (direct):', config.connector);
-      console.log('Config connector ID:', config.connector?.id);
-      console.log('Config store connector:', config.store?.getState?.()?.connector?.id);
 
       sendTransaction({
         to: '0x7049747E615a1C5C22935D5790a664B7E65D9681',
@@ -70,8 +68,6 @@ export default function DApp() {
   const handleSignMessage = async () => {
     try {
       console.log('Signing message...');
-
-      // Try wagmi hooks
       signMessage({
         message: 'Hello from Unicorn + Web3Modal!',
       });
@@ -92,7 +88,7 @@ export default function DApp() {
           <div className="connect-section">
             <h2>Get Started</h2>
             <p>Connect your wallet to interact with the dApp</p>
-            <button onClick={open} className="btn btn-primary">
+            <button onClick={() => open()} className="btn btn-primary">
               Connect Wallet
             </button>
             <p className="hint">
@@ -125,7 +121,7 @@ export default function DApp() {
                   </span>
                 </div>
               </div>
-              <button onClick={open} className="btn btn-secondary">
+              <button onClick={() => open()} className="btn btn-secondary">
                 Account Settings
               </button>
             </div>
@@ -174,7 +170,7 @@ export default function DApp() {
                   {chains?.map((c) => (
                     <button
                       key={c.id}
-                      onClick={() => switchNetwork?.(c.id)}
+                      onClick={() => switchChain?.({ chainId: c.id })}
                       disabled={c.id === chain?.id}
                       className={`btn ${c.id === chain?.id ? 'btn-active' : 'btn-secondary'}`}
                     >

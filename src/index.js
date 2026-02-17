@@ -1,5 +1,5 @@
 // src/index.js
-// @unicorn.eth/autoconnect v1.5.0
+// @unicorn.eth/autoconnect v1.5.2
 // Wagmi v2 connector-based approach for seamless integration
 
 // Wagmi v2 Connector (for wagmi v2+ / RainbowKit / Web3Modal v3+ / pure wagmi)

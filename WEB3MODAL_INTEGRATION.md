@@ -1,152 +1,128 @@
-# Web3Modal v2 Integration Guide
+# Web3Modal v3 Integration Guide
 
-> Drop-in Unicorn wallet support for @web3modal/ethereum v2.7+ projects
+> Drop-in Unicorn wallet support for Web3Modal v3 + wagmi v2 projects
 
 ## Overview
 
-Since **@web3modal/ethereum v2.7 uses wagmi underneath**, the existing `unicornConnector` works seamlessly with Web3Modal! This guide shows you how to add Unicorn wallet support to your Web3Modal project with minimal code changes.
+Web3Modal v3 uses wagmi v2 underneath, so the `unicornConnector` works seamlessly! This guide shows you how to add Unicorn wallet support to your Web3Modal project with minimal code changes.
 
 ## Quick Start
 
 ### Installation
 
 ```bash
-npm install @unicorn.eth/autoconnect
-# or
-pnpm add @unicorn.eth/autoconnect
+npm install @unicorn.eth/autoconnect @web3modal/wagmi @tanstack/react-query wagmi viem
 ```
 
-### Basic Integration (Zero Code Changes)
-
-**Option 1: Using the helper function (Easiest)**
+### Basic Integration
 
 ```javascript
-import { createWeb3ModalConfig } from '@unicorn.eth/autoconnect/web3modal';
-import { Web3Modal } from '@web3modal/react';
-import { WagmiConfig } from 'wagmi';
-import { base, polygon } from 'wagmi/chains';
+import { createWeb3Modal } from '@web3modal/wagmi/react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { WagmiProvider, createConfig, http } from 'wagmi';
+import { base, polygon, arbitrum, optimism } from 'wagmi/chains';
+import { walletConnect, injected, coinbaseWallet } from 'wagmi/connectors';
+import { unicornConnector, UnicornAutoConnect } from '@unicorn.eth/autoconnect';
 
-// Create config with Unicorn included
-const { wagmiConfig, ethereumClient } = await createWeb3ModalConfig({
-  projectId: 'YOUR_WALLETCONNECT_PROJECT_ID',
-  clientId: process.env.VITE_THIRDWEB_CLIENT_ID,
-  factoryAddress: '0xD771615c873ba5a2149D5312448cE01D677Ee48A',
-  defaultChain: 8453, // Base
-  chains: [base, polygon],
-});
-
-function App() {
-  return (
-    <>
-      <WagmiConfig config={wagmiConfig}>
-        <YourApp />
-      </WagmiConfig>
-
-      <Web3Modal
-        projectId="YOUR_WALLETCONNECT_PROJECT_ID"
-        ethereumClient={ethereumClient}
-      />
-    </>
-  );
-}
-```
-
-**Option 2: Manual integration (More control)**
-
-```javascript
-import { EthereumClient, w3mConnectors, w3mProvider } from '@web3modal/ethereum';
-import { Web3Modal } from '@web3modal/react';
-import { configureChains, createConfig, WagmiConfig } from 'wagmi';
-import { base, polygon } from 'wagmi/chains';
-import { unicornConnector } from '@unicorn.eth/autoconnect';
-
-// Configure chains
-const chains = [base, polygon];
+// 1. Get your IDs
 const projectId = 'YOUR_WALLETCONNECT_PROJECT_ID';
+const clientId = 'YOUR_THIRDWEB_CLIENT_ID';
+const factoryAddress = '0xD771615c873ba5a2149D5312448cE01D677Ee48A';
 
-const { publicClient } = configureChains(
-  chains,
-  [w3mProvider({ projectId })]
-);
+// 2. Configure chains
+const chains = [base, polygon, arbitrum, optimism];
 
-// Create wagmi config with Unicorn connector
+// 3. Create wagmi config with Unicorn connector
 const wagmiConfig = createConfig({
-  autoConnect: true,
+  chains,
   connectors: [
-    ...w3mConnectors({ projectId, chains }),
+    walletConnect({ projectId }),
+    injected(),
+    coinbaseWallet({ appName: 'My dApp' }),
 
-    // Add Unicorn connector
+    // Add Unicorn connector for gasless transactions
     unicornConnector({
-      clientId: process.env.VITE_THIRDWEB_CLIENT_ID,
-      factoryAddress: '0xD771615c873ba5a2149D5312448cE01D677Ee48A',
-      defaultChain: 8453,
+      clientId,
+      factoryAddress,
+      defaultChain: base.id,
     }),
   ],
-  publicClient,
+  transports: {
+    [base.id]: http(),
+    [polygon.id]: http(),
+    [arbitrum.id]: http(),
+    [optimism.id]: http(),
+  },
 });
 
-const ethereumClient = new EthereumClient(wagmiConfig, chains);
+// 4. Create Web3Modal
+createWeb3Modal({
+  wagmiConfig,
+  projectId,
+  chains,
+});
 
-function App() {
+// 5. Create query client
+const queryClient = new QueryClient();
+
+// 6. App component
+export default function App() {
   return (
-    <>
-      <WagmiConfig config={wagmiConfig}>
-        <YourApp />
-      </WagmiConfig>
+    <WagmiProvider config={wagmiConfig}>
+      <QueryClientProvider client={queryClient}>
+        {/* Auto-connect for URL-based connection */}
+        <UnicornAutoConnect debug={true} />
 
-      <Web3Modal projectId={projectId} ethereumClient={ethereumClient} />
-    </>
+        <YourApp />
+      </QueryClientProvider>
+    </WagmiProvider>
   );
 }
 ```
 
 ## Auto-Connection via URL
 
-Add the `UnicornAutoConnect` component to enable URL-based wallet connection:
+The `UnicornAutoConnect` component enables URL-based wallet connection from Unicorn Portals:
 
 ```javascript
 import { UnicornAutoConnect } from '@unicorn.eth/autoconnect';
-import { useWeb3Modal } from '@web3modal/react';
 
 function App() {
-  const { open } = useWeb3Modal();
-
   return (
-    <>
-      <WagmiConfig config={wagmiConfig}>
-        {/* Add this for URL-based auto-connection */}
+    <WagmiProvider config={wagmiConfig}>
+      <QueryClientProvider client={queryClient}>
         <UnicornAutoConnect
           debug={true}
-          onConnect={(wallet) => console.log('Unicorn connected!', wallet)}
-          onError={(error) => console.error('Connection error:', error)}
+          onConnect={(wallet) => console.log('Connected!', wallet)}
+          onError={(error) => console.error('Error:', error)}
         />
-
         <YourApp />
-      </WagmiConfig>
-
-      <Web3Modal projectId={projectId} ethereumClient={ethereumClient} />
-    </>
+      </QueryClientProvider>
+    </WagmiProvider>
   );
 }
 ```
 
-Now users can connect via URL:
+Users can connect via URL:
 ```
 https://yourapp.com/?walletId=inApp&authCookie=xxx
 ```
 
 ## Using Standard Wagmi Hooks
 
-Once integrated, use standard wagmi hooks - they work with both Web3Modal wallets AND Unicorn:
+Once integrated, use standard wagmi v2 hooks - they work with both Web3Modal wallets AND Unicorn:
 
 ```javascript
-import { useAccount, useSendTransaction, useSignMessage } from 'wagmi';
+import { useAccount, useSendTransaction, useSignMessage, useSwitchChain } from 'wagmi';
+import { useWeb3Modal } from '@web3modal/wagmi/react';
 import { parseEther } from 'viem';
 
 function YourComponent() {
-  const { address, isConnected, connector } = useAccount();
-  const { sendTransaction } = useSendTransaction();
+  const { open } = useWeb3Modal();
+  const { address, isConnected, connector, chain } = useAccount();
+  const { sendTransaction, isPending } = useSendTransaction();
   const { signMessage } = useSignMessage();
+  const { switchChain } = useSwitchChain();
 
   const handleSend = () => {
     sendTransaction({
@@ -161,94 +137,23 @@ function YourComponent() {
 
   return (
     <div>
-      {isConnected && (
+      {!isConnected ? (
+        <button onClick={() => open()}>Connect Wallet</button>
+      ) : (
         <>
           <p>Connected: {address}</p>
           <p>Connector: {connector?.name}</p>
-          <button onClick={handleSend}>Send ETH</button>
+          <p>Network: {chain?.name}</p>
+          <button onClick={handleSend} disabled={isPending}>
+            {isPending ? 'Sending...' : 'Send ETH'}
+          </button>
           <button onClick={handleSign}>Sign Message</button>
-        </>
-      )}
-    </div>
-  );
-}
-```
-
-## Complete Example
-
-Here's a full working example:
-
-```javascript
-// app.jsx
-import { EthereumClient, w3mConnectors, w3mProvider } from '@web3modal/ethereum';
-import { Web3Modal } from '@web3modal/react';
-import { configureChains, createConfig, WagmiConfig } from 'wagmi';
-import { base, polygon, arbitrum } from 'wagmi/chains';
-import { unicornConnector, UnicornAutoConnect } from '@unicorn.eth/autoconnect';
-import { useAccount, useSendTransaction } from 'wagmi';
-import { parseEther } from 'viem';
-
-// 1. Configure chains
-const chains = [base, polygon, arbitrum];
-const projectId = process.env.VITE_WALLETCONNECT_PROJECT_ID;
-
-const { publicClient } = configureChains(
-  chains,
-  [w3mProvider({ projectId })]
-);
-
-// 2. Create wagmi config with Unicorn
-const wagmiConfig = createConfig({
-  autoConnect: true,
-  connectors: [
-    ...w3mConnectors({ projectId, chains }),
-    unicornConnector({
-      clientId: process.env.VITE_THIRDWEB_CLIENT_ID,
-      factoryAddress: '0xD771615c873ba5a2149D5312448cE01D677Ee48A',
-      defaultChain: 8453,
-    }),
-  ],
-  publicClient,
-});
-
-const ethereumClient = new EthereumClient(wagmiConfig, chains);
-
-// 3. Your app component
-function MyDApp() {
-  const { address, isConnected } = useAccount();
-  const { sendTransaction } = useSendTransaction();
-
-  return (
-    <div>
-      <h1>My dApp</h1>
-      {isConnected ? (
-        <>
-          <p>Connected: {address}</p>
-          <button onClick={() => sendTransaction({
-            to: '0x7049747E615a1C5C22935D5790a664B7E65D9681',
-            value: parseEther('0.01'),
-          })}>
-            Send 0.01 ETH
+          <button onClick={() => switchChain({ chainId: 137 })}>
+            Switch to Polygon
           </button>
         </>
-      ) : (
-        <p>Please connect your wallet</p>
       )}
     </div>
-  );
-}
-
-// 4. Root component with providers
-export default function App() {
-  return (
-    <>
-      <WagmiConfig config={wagmiConfig}>
-        <UnicornAutoConnect debug={true} />
-        <MyDApp />
-      </WagmiConfig>
-
-      <Web3Modal projectId={projectId} ethereumClient={ethereumClient} />
-    </>
   );
 }
 ```
@@ -277,7 +182,7 @@ VITE_THIRDWEB_FACTORY_ADDRESS=0xD771615c873ba5a2149D5312448cE01D677Ee48A
   clientId: string;          // Required: Thirdweb client ID
   factoryAddress: string;    // Required: Smart account factory address
   defaultChain: number;      // Required: Default chain ID (e.g., 8453 for Base)
-  icon?: string;            // Optional: Custom wallet icon URL
+  icon?: string;             // Optional: Custom wallet icon URL
 }
 ```
 
@@ -285,9 +190,9 @@ VITE_THIRDWEB_FACTORY_ADDRESS=0xD771615c873ba5a2149D5312448cE01D677Ee48A
 
 ```typescript
 {
-  debug?: boolean;          // Optional: Enable debug logging
-  onConnect?: (wallet) => void;  // Optional: Called when wallet connects
-  onError?: (error) => void;     // Optional: Called on connection error
+  debug?: boolean;                    // Optional: Enable debug logging
+  onConnect?: (wallet) => void;       // Optional: Called when wallet connects
+  onError?: (error) => void;          // Optional: Called on connection error
 }
 ```
 
@@ -306,17 +211,16 @@ All 17 networks are supported out of the box:
 - Standard wallet connection modal
 - Account modal and management
 - Network switching
-- Transaction history
 - Wallet connection persistence
 
 ### ✅ Unicorn-Specific Features
 
 - **Gasless Transactions** - Smart account with sponsored gas
-- **Auto-Connection** - URL-based wallet connection
+- **Auto-Connection** - URL-based wallet connection from Unicorn Portals
 - **Approval Dialogs** - Beautiful UI for transaction confirmation
 - **Multi-Chain Support** - Seamless switching between 17+ networks
 
-### ✅ Zero Code Changes
+### ✅ Standard Wagmi v2 Hooks
 
 Your existing wagmi hooks continue to work:
 - `useSendTransaction`
@@ -324,94 +228,68 @@ Your existing wagmi hooks continue to work:
 - `useSignMessage`
 - `useSignTypedData`
 - `useSwitchChain`
-- All other wagmi hooks!
+- All other wagmi v2 hooks!
 
-## Differences from Pure Wagmi Integration
+## Migration from Web3Modal v2
 
-The Web3Modal integration is **identical** to the pure wagmi integration, with one addition:
+If you're upgrading from Web3Modal v2 (wagmi v1):
 
-1. You include `w3mConnectors` alongside `unicornConnector`
-2. You wrap your app with Web3Modal's UI components
-3. Everything else works the same!
-
+**Before (v2):**
 ```javascript
-// Pure Wagmi (from our main README)
-connectors: [
-  injected(),
-  walletConnect({ projectId }),
-  unicornConnector({ ... }),
-]
-
-// Web3Modal (this guide)
-connectors: [
-  ...w3mConnectors({ projectId, chains }),  // Includes WalletConnect + Injected
-  unicornConnector({ ... }),                 // Add Unicorn
-]
+import { EthereumClient, w3mConnectors } from '@web3modal/ethereum';
+import { Web3Modal } from '@web3modal/react';
+import { configureChains, createConfig, WagmiConfig } from 'wagmi';
 ```
 
-## Migration from Web3Modal-Only Setup
-
-If you have an existing Web3Modal setup:
-
-**Before:**
+**After (v3):**
 ```javascript
-const wagmiConfig = createConfig({
-  connectors: w3mConnectors({ projectId, chains }),
-  // ...
-});
+import { createWeb3Modal } from '@web3modal/wagmi/react';
+import { WagmiProvider, createConfig, http } from 'wagmi';
+import { walletConnect, injected } from 'wagmi/connectors';
 ```
 
-**After:**
-```javascript
-import { unicornConnector } from '@unicorn.eth/autoconnect';
-
-const wagmiConfig = createConfig({
-  connectors: [
-    ...w3mConnectors({ projectId, chains }),
-    unicornConnector({
-      clientId: process.env.VITE_THIRDWEB_CLIENT_ID,
-      factoryAddress: '0xD771615c873ba5a2149D5312448cE01D677Ee48A',
-      defaultChain: 8453,
-    }),
-  ],
-  // ...
-});
-```
-
-That's it! No other changes needed.
+Key changes:
+- `WagmiConfig` → `WagmiProvider`
+- `configureChains` → `transports` in config
+- `w3mConnectors` → individual connectors (`walletConnect`, `injected`, etc.)
+- `EthereumClient` + `Web3Modal` component → `createWeb3Modal()` function
+- Add `QueryClientProvider` for React Query
 
 ## Troubleshooting
 
-### Unicorn wallet doesn't appear in Web3Modal
+### Wallet doesn't appear
 
-Make sure you're on Web3Modal v2.7+. Earlier versions may not detect custom connectors properly.
-
-### TypeScript errors with connectors
-
-If you get type errors with the connectors array, you may need to cast:
-
-```typescript
-connectors: [
-  ...w3mConnectors({ projectId, chains }),
-  unicornConnector({ ... }),
-] as any
-```
-
-This is a known issue with Web3Modal v2.7 TypeScript definitions.
+Make sure all connectors are in the `connectors` array and the config is passed to `createWeb3Modal`.
 
 ### Auto-connect not working
 
 Make sure:
-1. `UnicornAutoConnect` component is rendered inside `WagmiConfig`
-2. URL parameters are correctly formatted: `?walletId=inApp&authCookie=xxx`
-3. Debug mode is enabled to see connection logs
+1. `UnicornAutoConnect` is inside `WagmiProvider` and `QueryClientProvider`
+2. URL parameters are correct: `?walletId=inApp&authCookie=xxx`
+3. Debug mode is enabled to see logs
+
+### Network switching issues
+
+Ensure all chains have transports configured:
+```javascript
+transports: {
+  [base.id]: http(),
+  [polygon.id]: http(),
+  // ... all your chains
+},
+```
+
+## Example Project
+
+See the full working example at `src/examples/web3modal/` in this repository.
 
 ## Resources
 
 - [Main README](./README.md) - Full documentation
 - [Quick Reference](./QUICK_REFERENCE.md) - API reference
-- [Wagmi Docs](https://wagmi.sh) - Wagmi documentation
-- [Web3Modal Docs](https://docs.walletconnect.com) - Web3Modal documentation
+- [Testing Guide](./TESTING_GUIDE.md) - How to test with Live Preview
+- [Wagmi v2 Docs](https://wagmi.sh) - Wagmi documentation
+- [Web3Modal v3 Docs](https://docs.walletconnect.com/web3modal/about) - Web3Modal documentation
 
 ## Support
 
