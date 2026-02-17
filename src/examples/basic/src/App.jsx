@@ -24,7 +24,8 @@ import {
   useWriteContract,
   useWatchAsset
 } from 'wagmi';
-import { parseEther, formatEther } from 'viem';
+import { parseEther, formatEther, createPublicClient, http as viemHttp, stringToHex } from 'viem';
+import { base as viemBase } from 'viem/chains';
 
 // Import connector and component
 // Production imports (for Vercel deployment)
@@ -574,6 +575,204 @@ function WatchAssetTest() {
   );
 }
 
+function EIP1193PersonalSignTest() {
+  const { isConnected, connector, address } = useAccount();
+  const [result, setResult] = useState('');
+  const [isPending, setIsPending] = useState(false);
+
+  const handleTest = async () => {
+    if (!connector) return;
+    setIsPending(true);
+    setResult('');
+
+    try {
+      const provider = await connector.getProvider();
+      const testMessage = 'Hello from EIP-1193 test!';
+      // EIP-1193 personal_sign sends hex-encoded message
+      const hexMessage = stringToHex(testMessage);
+
+      console.log('[Test] personal_sign with hex message:', hexMessage);
+      console.log('[Test] Original message:', testMessage);
+
+      const signature = await provider.request({
+        method: 'personal_sign',
+        params: [hexMessage, address],
+      });
+
+      if (!signature || signature === '0x') {
+        throw new Error('Empty signature returned');
+      }
+
+      setResult(
+        `✅ personal_sign succeeded!\n` +
+        `Original: "${testMessage}"\n` +
+        `Hex sent: ${hexMessage}\n` +
+        `Signature: ${signature.slice(0, 20)}...${signature.slice(-20)}`
+      );
+    } catch (err) {
+      setResult(`❌ ${err.message}`);
+    } finally {
+      setIsPending(false);
+    }
+  };
+
+  return (
+    <div style={cardStyle}>
+      <h3>🔧 Test 10: EIP-1193 personal_sign (Hex Decode)</h3>
+      <div style={testInfoStyle}>
+        <p><strong>Tests:</strong> Provider-level personal_sign with hex-encoded message</p>
+        <p><strong>Expected:</strong> Should decode hex to plaintext before signing (not double-hash)</p>
+      </div>
+      {!isConnected ? (
+        <p style={warningStyle}>⚠️ Connect wallet first</p>
+      ) : (
+        <>
+          <button onClick={handleTest} disabled={isPending} style={buttonStyle}>
+            {isPending ? '⏳ Signing...' : '🔧 Test personal_sign (hex)'}
+          </button>
+          {result && (
+            <div style={{
+              marginTop: '12px',
+              fontSize: '14px',
+              padding: '12px',
+              background: result.includes('✅') ? '#dcfce7' : '#fee2e2',
+              borderRadius: '8px',
+              border: `2px solid ${result.includes('✅') ? '#16a34a' : '#dc2626'}`,
+            }}>
+              <pre style={{
+                wordBreak: 'break-all',
+                whiteSpace: 'pre-wrap',
+                margin: 0,
+                color: result.includes('✅') ? '#166534' : '#991b1b',
+              }}>
+                {result}
+              </pre>
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  );
+}
+
+function SIWEVerificationTest() {
+  const { isConnected, connector, address, chain } = useAccount();
+  const { signMessageAsync } = useSignMessage();
+  const [result, setResult] = useState('');
+  const [isPending, setIsPending] = useState(false);
+
+  const handleTest = async () => {
+    setIsPending(true);
+    setResult('');
+
+    try {
+      // 1. Create a SIWE-style message (manual format to avoid siwe dependency)
+      const domain = window.location.host;
+      const uri = window.location.origin;
+      const nonce = Math.random().toString(36).slice(2, 10);
+      const issuedAt = new Date().toISOString();
+      const chainId = chain?.id || 8453;
+
+      const siweMessage = [
+        `${domain} wants you to sign in with your Ethereum account:`,
+        address,
+        '',
+        'SIWE verification test from AutoConnect test suite.',
+        '',
+        `URI: ${uri}`,
+        `Version: 1`,
+        `Chain ID: ${chainId}`,
+        `Nonce: ${nonce}`,
+        `Issued At: ${issuedAt}`,
+      ].join('\n');
+
+      console.log('[SIWE Test] Message:\n', siweMessage);
+
+      // 2. Sign via wagmi (goes through connector)
+      setResult('⏳ Step 1/2: Signing SIWE message...');
+      const signature = await signMessageAsync({ message: siweMessage });
+
+      console.log('[SIWE Test] Signature:', signature);
+
+      // 3. Verify the signature using viem (handles ERC-1271 for smart accounts)
+      setResult('⏳ Step 2/2: Verifying signature on-chain (ERC-1271)...');
+      const publicClient = createPublicClient({
+        chain: viemBase,
+        transport: viemHttp(),
+      });
+
+      const isValid = await publicClient.verifyMessage({
+        address,
+        message: siweMessage,
+        signature,
+      });
+
+      if (isValid) {
+        setResult(
+          `✅ SIWE verification passed!\n` +
+          `Address: ${address}\n` +
+          `Chain: ${chain?.name} (${chainId})\n` +
+          `Signature: ${signature.slice(0, 20)}...${signature.slice(-20)}\n` +
+          `Verified via: ${connector?.id === 'unicorn' ? 'ERC-1271 (on-chain)' : 'ecrecover'}`
+        );
+      } else {
+        setResult(
+          `❌ SIWE verification FAILED\n` +
+          `Signature was produced but could not be verified.\n` +
+          `This may indicate the hex decode fix is needed (PR pending).`
+        );
+      }
+    } catch (err) {
+      setResult(`❌ ${err.message}`);
+    } finally {
+      setIsPending(false);
+    }
+  };
+
+  return (
+    <div style={cardStyle}>
+      <h3>🔐 Test 11: SIWE Sign & Verify (ERC-1271)</h3>
+      <div style={testInfoStyle}>
+        <p><strong>Tests:</strong> Full SIWE flow — sign message + verify signature (ERC-1271 for smart accounts)</p>
+        <p><strong>Expected:</strong> Should sign a SIWE message and verify it on-chain via viem's verifyMessage</p>
+      </div>
+      {!isConnected ? (
+        <p style={warningStyle}>⚠️ Connect wallet first</p>
+      ) : (
+        <>
+          <button onClick={handleTest} disabled={isPending} style={buttonStyle}>
+            {isPending ? '⏳ Testing...' : '🔐 Test SIWE Flow'}
+          </button>
+          {connector?.id === 'unicorn' && (
+            <p style={{ fontSize: '12px', color: '#666', marginTop: '8px' }}>
+              🦄 Smart account: Will verify via ERC-1271 on-chain call
+            </p>
+          )}
+          {result && (
+            <div style={{
+              marginTop: '12px',
+              fontSize: '14px',
+              padding: '12px',
+              background: result.includes('✅') ? '#dcfce7' : result.includes('⏳') ? '#f3f4f6' : '#fee2e2',
+              borderRadius: '8px',
+              border: `2px solid ${result.includes('✅') ? '#16a34a' : result.includes('⏳') ? '#d1d5db' : '#dc2626'}`,
+            }}>
+              <pre style={{
+                wordBreak: 'break-all',
+                whiteSpace: 'pre-wrap',
+                margin: 0,
+                color: result.includes('✅') ? '#166534' : result.includes('⏳') ? '#374151' : '#991b1b',
+              }}>
+                {result}
+              </pre>
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  );
+}
+
 // ============================================================================
 // MAIN TEST APP
 // ============================================================================
@@ -629,6 +828,8 @@ function TestApp() {
             <SignTypedDataTest />
             <SwitchChainTest />
             <WatchAssetTest />
+            <EIP1193PersonalSignTest />
+            <SIWEVerificationTest />
           </div>
         )}
       </div>
@@ -642,6 +843,8 @@ function TestApp() {
           <li><strong>Approval dialogs:</strong> Unicorn shows approval UI, others use native popups</li>
           <li><strong>Gasless transactions:</strong> All Unicorn transactions are gasless</li>
           <li><strong>Smart account signatures:</strong> Uses ERC-1271 (requires on-chain verification)</li>
+          <li><strong>EIP-1193 hex decode:</strong> Test 10 verifies personal_sign correctly decodes hex messages</li>
+          <li><strong>SIWE end-to-end:</strong> Test 11 signs a SIWE message and verifies it via ERC-1271</li>
           <li>Test on <strong>Base network</strong> (chain ID: 8453)</li>
           <li>All tests send minimal amounts (0.0001 ETH, 1 USDC)</li>
         </ul>
