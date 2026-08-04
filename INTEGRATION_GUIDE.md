@@ -2,8 +2,8 @@
 
 > A comprehensive guide for integrating Unicorn wallet support into your existing dApp or creating a new integration from scratch.
 
-**Version:** 1.5.2
-**Last Updated:** January 2026
+**Version:** 1.5.3
+**Last Updated:** August 2026
 
 ---
 
@@ -56,9 +56,9 @@ Before integrating, ensure you have:
 ### Required Dependencies:
 ```json
 {
-  "wagmi": "^2.0.0",
+  "wagmi": "^2.0.0 || ^3.0.0",
   "viem": "^2.0.0",
-  "thirdweb": "^5.118.0",
+  "thirdweb": "^5.120.1",
   "@tanstack/react-query": "^5.0.0",
   "react": "^18.2.0 || ^19.0.0"
 }
@@ -705,6 +705,27 @@ declare module '@unicorn.eth/autoconnect' {
 
 ## Migration from Older Versions
 
+### Using wagmi v3
+
+AutoConnect v1.5.3+ supports both wagmi v2 and v3. The connector and AutoConnect component work with both versions — no changes needed.
+
+If you're upgrading **your own app** to wagmi v3, note these hook renames in your code (not in autoconnect's code):
+
+| wagmi v2 | wagmi v3 | Notes |
+|----------|----------|-------|
+| `useAccount()` | `useConnection()` | Returns the same `{ address, isConnected, connector, chain }` |
+| `useAccountEffect()` | `useConnectionEffect()` | Same API |
+| `useSwitchAccount()` | `useSwitchConnection()` | Same API |
+| `useConnect().connectors` | `useConnectors()` | Separate hook in v3 |
+| `useDisconnect().connectors` | `useConnections()` | Separate hook in v3 |
+| `useSwitchChain().chains` | `useChains()` | Separate hook in v3 |
+
+**AutoConnect handles this automatically** — `unicornConnector()` and `<UnicornAutoConnect />` work with both versions.
+
+See the [official wagmi v3 migration guide](https://wagmi.sh/react/guides/migrate-from-v2-to-v3) for full details.
+
+---
+
 ### From v1.2 to v1.3+
 
 **Breaking Change:** Custom hooks removed in favor of standard wagmi hooks
@@ -1334,6 +1355,6 @@ Before deploying, ensure:
 
 ---
 
-*Last updated: February 2026*
-*AutoConnect Version: 1.5.2*
+*Last updated: August 2026*
+*AutoConnect Version: 1.5.3*
 *License: MIT*

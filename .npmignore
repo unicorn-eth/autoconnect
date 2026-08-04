@@ -2,6 +2,7 @@
 src/
 examples/
 .github/
+.omc/
 
 # Config files
 tsup.config.js

@@ -3,7 +3,16 @@
 // Just add this component and everything works!
 
 import React from 'react';
-import { useConnect, useAccount, useConfig } from 'wagmi';
+import * as wagmiExports from 'wagmi';
+
+// Support both wagmi v2 and v3
+const useConnect = wagmiExports.useConnect;
+const useConfig = wagmiExports.useConfig;
+// wagmi v3 renamed useAccount → useConnection
+const useConnectionState = wagmiExports.useConnection || wagmiExports.useAccount;
+// wagmi v3 moved connectors from useConnect() to useConnectors()
+// Provide a no-op fallback so we can call it unconditionally (Rules of Hooks)
+const useConnectors = wagmiExports.useConnectors || (() => null);
 
 /**
  * UnicornAutoConnect Component
@@ -39,8 +48,12 @@ const UnicornAutoConnect = ({
   onError,
   debug = false,
 }) => {
-  const { connectAsync, connectors } = useConnect();
-  const { isConnected, connector, address } = useAccount();
+  const connectResult = useConnect();
+  const { connectAsync } = connectResult;
+  // wagmi v3: useConnectors(), wagmi v2: useConnect().connectors
+  const v3Connectors = useConnectors();
+  const connectors = v3Connectors || connectResult.connectors || [];
+  const { isConnected, connector, address } = useConnectionState();
   const config = useConfig();
   const attemptedRef = React.useRef(false);
 

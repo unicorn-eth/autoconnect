@@ -1,6 +1,6 @@
 {
   "name": "@unicorn.eth/autoconnect",
-  "version": "1.5.2",
+  "version": "1.5.3",
   "description": "Drop-in Unicorn wallet integration for existing web3 apps. Works alongside your existing wallet setup (RainbowKit, Wagmi, Web3Modal, etc.) without modifying any code.",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
@@ -29,7 +29,10 @@
   "scripts": {
     "build": "tsup src/index.js --format cjs,esm --external react,react-dom,wagmi,thirdweb && cp src/types/index.d.ts dist/index.d.ts",
     "dev": "tsup src/index.js --format esm --watch",
-    "prepublishOnly": "pnpm run build"
+    "prepublishOnly": "pnpm run build",
+    "local:pack": "pnpm run build && rm -rf .local-pkg && mkdir -p .local-pkg && npm pack --pack-destination .local-pkg --silent && tar -xzf .local-pkg/*.tgz -C .local-pkg && rm .local-pkg/*.tgz",
+    "local:link": "pnpm run local:pack && pnpm --filter unicorn-autoconnect-basic-example run local:link && pnpm --filter @unicorn.eth/autoconnect-web3modal-example run local:link",
+    "local:unlink": "pnpm --filter unicorn-autoconnect-basic-example run local:unlink && pnpm --filter @unicorn.eth/autoconnect-web3modal-example run local:unlink"
   },
   "keywords": [
     "unicorn",
@@ -59,12 +62,16 @@
   "peerDependencies": {
     "react": "^18.2.0 || ^19.0.0",
     "react-dom": "^18.2.0 || ^19.0.0",
-    "thirdweb": "^5.118.0",
-    "wagmi": "^2.0.0"
+    "thirdweb": "^5.120.1",
+    "wagmi": "^2.0.0 || ^3.0.0"
   },
   "peerDependenciesMeta": {
-    "react": { "optional": true },
-    "react-dom": { "optional": true }
+    "react": {
+      "optional": true
+    },
+    "react-dom": {
+      "optional": true
+    }
   },
   "devDependencies": {
     "rollup": "^4.52.5",

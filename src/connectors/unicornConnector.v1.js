@@ -28,6 +28,11 @@ import {
 // Transaction approval dialog (dynamically imported when needed)
 let requestTransactionApproval = null;
 
+// Allow setting the approval handler externally
+export function setTransactionApprovalHandler(handler) {
+  requestTransactionApproval = handler;
+}
+
 // Load the approval UI component dynamically
 async function loadApprovalUI() {
   if (!requestTransactionApproval) {
@@ -36,8 +41,15 @@ async function loadApprovalUI() {
       requestTransactionApproval = module.requestTransactionApproval || module.default;
       console.log('[UnicornConnector v1] Transaction approval UI loaded');
     } catch (error) {
-      console.warn('[UnicornConnector v1] Transaction approval UI not found');
-      requestTransactionApproval = async () => true;
+      console.error('[UnicornConnector v1] Failed to load transaction approval UI:', error);
+      // Fail closed: never auto-approve when the approval UI is unavailable.
+      // Do not cache the thrower, so a transient failure can be retried next call.
+      return async () => {
+        throw new Error(
+          '[UnicornConnector v1] Transaction approval UI failed to load, so this request cannot be confirmed by the user. ' +
+          'Call setTransactionApprovalHandler() to supply a custom approval handler if you do not want the default UI.'
+        );
+      };
     }
   }
   return requestTransactionApproval;

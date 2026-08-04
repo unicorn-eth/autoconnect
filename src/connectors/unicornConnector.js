@@ -67,9 +67,15 @@ async function loadApprovalUI() {
       requestTransactionApproval = module.requestTransactionApproval || module.default;
       console.log('[UnicornConnector] Transaction approval UI loaded');
     } catch (error) {
-      console.warn('[UnicornConnector] Transaction approval UI not found, transactions will execute without confirmation');
-      // Return a pass-through function if approval UI isn't available
-      requestTransactionApproval = async () => true;
+      console.error('[UnicornConnector] Failed to load transaction approval UI:', error);
+      // Fail closed: never auto-approve when the approval UI is unavailable.
+      // Do not cache the thrower, so a transient failure can be retried next call.
+      return async () => {
+        throw new Error(
+          '[UnicornConnector] Transaction approval UI failed to load, so this request cannot be confirmed by the user. ' +
+          'Call setTransactionApprovalHandler() to supply a custom approval handler if you do not want the default UI.'
+        );
+      };
     }
   }
   return requestTransactionApproval;
@@ -399,7 +405,11 @@ export function unicornConnector(options = {}) {
             removeListener: () => {},
           };
         }
-        
+
+        // Keep connector state in sync so signing paths that check this.account
+        // still show the approval dialog
+        this.account = account;
+
         // Try importing EIP1193
         let EIP1193;
         try {
@@ -599,6 +609,12 @@ export function unicornConnector(options = {}) {
               // Try to use the account's sendTransaction for eth_sendTransaction
               if (method === 'eth_sendTransaction' && account.sendTransaction) {
                 const tx = params[0];
+
+                // Same approval gate as the primary provider - never send unconfirmed
+                const approvalHandler = await loadApprovalUI();
+                await approvalHandler(tx);
+                console.log('[UnicornConnector] Transaction approved by user');
+
                 return account.sendTransaction(tx);
               }
               throw new Error(`Provider method ${method} not supported in fallback mode`);

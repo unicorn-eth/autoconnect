@@ -1,6 +1,7 @@
 // Coded lovingly by @cryptowampum and Claude AI
 // src/hooks/useUniversalWallet.js - Bridge Unicorn wallet to work with existing Wagmi code
-import { useAccount } from 'wagmi';
+import * as wagmiExports from 'wagmi';
+const useAccount = wagmiExports.useConnection || wagmiExports.useAccount;
 import { useState, useEffect } from 'react';
 
 // 🔥 GLOBAL STORE - Shared across all hook instances

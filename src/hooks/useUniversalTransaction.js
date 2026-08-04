@@ -65,6 +65,9 @@ export const useUniversalTransaction = () => {
     isPending: isUnicorn ? unicornTx.isPending : (wagmiSend.isPending || wagmiWrite.isPending),
     isLoading: isUnicorn ? unicornTx.isLoading : (wagmiSend.isPending || wagmiWrite.isPending),
     
+    // Transaction result (hash)
+    data: isUnicorn ? unicornTx.data : (wagmiSend.data || wagmiWrite.data),
+
     // Error handling
     error: isUnicorn ? unicornTx.error : (wagmiSend.error || wagmiWrite.error),
     

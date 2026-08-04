@@ -1,7 +1,8 @@
 //Coded lovingly by @cryptowampum and Claude AI
 // UnicornSignButton.jsx - Pre-built signing button
 import React, { useState } from 'react';
-import { useUnicornSignMessage } from '../hooks/useUnicornSignMessage';
+import { useUniversalSignMessage } from '../hooks/useUniversalSignMessage';
+import { useUniversalWallet } from '../hooks/useUniversalWallet';
 
 /**
  * Pre-built signing button that handles both Unicorn and standard wallets
@@ -22,13 +23,14 @@ export const UnicornSignButton = ({
   style = {},
   ...props 
 }) => {
-  const { signMessage, isLoading, signature, error, isConnected, isUnicorn } = useUnicornSignMessage();
+  const { signMessage, isLoading, signature, error } = useUniversalSignMessage();
+  const { isConnected, isUnicorn } = useUniversalWallet();
   const [status, setStatus] = useState('');
 
   const handleClick = async () => {
     try {
       setStatus('');
-      const sig = await signMessage(message);
+      const sig = await signMessage({ message });
       setStatus('✅ Message signed!');
       onSuccess?.(sig);
     } catch (err) {

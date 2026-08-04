@@ -1,7 +1,8 @@
 //Coded lovingly by @cryptowampum and Claude AI
 // UnicornTransactionButton.jsx - Pre-built transaction button
 import React, { useState } from 'react';
-import { useUnicornTransaction } from '../hooks/useUnicornTransaction';
+import { useUniversalTransaction } from '../hooks/useUniversalTransaction';
+import { useUniversalWallet } from '../hooks/useUniversalWallet';
 
 /**
  * Pre-built transaction button that handles both Unicorn and standard wallets
@@ -22,7 +23,8 @@ export const UnicornTransactionButton = ({
   style = {},
   ...props 
 }) => {
-  const { sendTransaction, isLoading, hash, error, isConnected, isUnicorn } = useUnicornTransaction();
+  const { sendTransaction, isLoading, data: hash, error } = useUniversalTransaction();
+  const { isConnected, isUnicorn } = useUniversalWallet();
   const [status, setStatus] = useState('');
 
   const handleClick = async () => {
