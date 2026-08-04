@@ -1,11 +1,32 @@
-# @unicorn.eth/autoconnect v1.5.2
+# @unicorn.eth/autoconnect v1.5.3
 
 [![npm version](https://img.shields.io/npm/v/@unicorn.eth/autoconnect.svg)](https://www.npmjs.com/package/@unicorn.eth/autoconnect)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 > True seamless Wagmi integration - Use standard wagmi hooks with Unicorn wallets
 
-AutoConnect v1.5.2 is a **standard Wagmi v2 connector** that enables gasless smart account transactions through the familiar wagmi interface you already know. No custom hooks required.
+AutoConnect v1.5.3 is a **standard Wagmi v2/v3 connector** that enables gasless smart account transactions through the familiar wagmi interface you already know. No custom hooks required.
+
+## ✨ What's New in v1.5.3
+
+- ⬆️ **Wagmi v3 Support** - Now supports wagmi 2.x and 3.x
+- 🔐 **SIWE Adapter** - Server-side SIWE verification for smart contract wallets (`@unicorn.eth/autoconnect/siwe`)
+- 🔧 **EIP-1193 Fix** - personal_sign correctly decodes hex-encoded messages
+- ⬆️ **Thirdweb 5.120.1** - Updated thirdweb peer dependency
+
+## ⬆️ Upgrading to v1.5.3
+
+```bash
+npm install @unicorn.eth/autoconnect@latest
+# or
+pnpm add @unicorn.eth/autoconnect@latest
+```
+
+No breaking changes — existing wagmi v2 configs, `unicornConnector()`, and `<UnicornAutoConnect />` usage all continue to work unchanged. Wagmi v3 support is additive (see [wagmi v3 migration notes](./INTEGRATION_GUIDE.md#using-wagmi-v3) if you're also upgrading your app's wagmi version), and the SIWE adapter is a new opt-in import (`@unicorn.eth/autoconnect/siwe`).
+
+The `thirdweb` peer dependency floor is now `^5.120.1` (up from `^5.118.0`) — if your app pins an older thirdweb version, bump it too: `npm install thirdweb@latest`.
+
+One behavior change to be aware of: `personal_sign` now correctly decodes hex-encoded messages before signing. If you'd previously added a workaround for malformed signatures from smart account wallets, remove it — this fix addresses that at the source.
 
 ## ✨ What's New in v1.5.2
 
@@ -758,7 +779,8 @@ See the complete [Portal Setup Guide](./PORTAL_SETUP_GUIDE.md) for:
 - 🌐 [Portal Setup Guide](./PORTAL_SETUP_GUIDE.md) - Get your dApp listed in Unicorn portals
 - 🔍 [Visual Explanation](./VISUAL-EXPLANATION.md) - Architecture diagrams
 - 🔄 [Continuation Prompt](./CONTINUATION-PROMPT.md) - For development handoff
-- 📋 [Release Notes v1.5.2](./RELEASE_NOTES_v1.5.2.md) - Latest release details
+- 📋 [Release Notes v1.5.3](./RELEASE_NOTES_v1.5.3.md) - Latest release details
+- 📋 [Release Notes v1.5.2](./RELEASE_NOTES_v1.5.2.md) - Prior release details
 - 📋 [Changelog](./CHANGELOG.md) - Full version history
 - 💬 [Discord](https://discord.gg/unicorn) - Community support
 - 🐛 [Issues](https://github.com/MyUnicornAccount/autoconnect/issues) - Bug reports

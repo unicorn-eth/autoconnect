@@ -32,6 +32,8 @@ lerna-debug.log*
 *.swp
 *.swo
 *~
+.omc/
+
 
 # OS
 .DS_Store
@@ -47,3 +49,6 @@ Thumbs.db
 # Package manager
 .yarn/
 .npm/
+
+# Local package testing (see CLAUDE.md "Examples workspace")
+.local-pkg/

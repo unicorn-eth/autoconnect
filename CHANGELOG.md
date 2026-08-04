@@ -7,7 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Planned
+- Enhanced transaction approval UI
+- Analytics integration
+- Deep linking support
+- Mobile SDK
+
+## [1.5.3] - 2026-08-04
+
 ### Added
+- **Wagmi v3 support** — peer dependency now accepts `^2.0.0 || ^3.0.0`
+- UnicornAutoConnect component works with both wagmi v2 and v3 hook APIs
+- Wagmi v3 migration guide in Integration Guide
 - SIWE (Sign-In with Ethereum) verification adapter (`@unicorn.eth/autoconnect/siwe`)
   - `verifySiweMessage()` — one-shot ERC-1271-aware signature verification
   - `createSiweVerifier()` — reusable verifier with configurable RPC URLs
@@ -17,15 +28,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - SIWE sign & verify end-to-end test (Test 11) in basic example
 - `/version.json` endpoint to example apps (reports library version from root package.json)
 
+### Changed
+- Updated thirdweb peer dependency to `^5.120.1`
+
 ### Fixed
+- EIP-1193 `personal_sign` now decodes hex-encoded messages before signing (fixes ERC-1271 / SIWE verification)
 - `.npmrc` auth token variable mismatch (`NPM_TOKEN` → `NODE_AUTH_TOKEN`) that prevented CI publishing
 - Example `.npmrc` files cleaned up (removed pnpm-specific settings)
-
-### Planned
-- Enhanced transaction approval UI
-- Analytics integration
-- Deep linking support
-- Mobile SDK
 
 ## [1.5.2] - 2026-01-29
 

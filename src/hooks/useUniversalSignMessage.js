@@ -65,7 +65,8 @@ export const useUniversalSignMessage = () => {
     
     // Loading states
     isPending: isUnicorn ? unicornSign.isPending : (wagmiSign.isPending || wagmiTypedData.isPending),
-    
+    isLoading: isUnicorn ? unicornSign.isPending : (wagmiSign.isPending || wagmiTypedData.isPending),
+
     // Signature (from wagmi or unicorn)
     signature: isUnicorn ? unicornSign.signature : (wagmiSign.data || wagmiTypedData.data),
     

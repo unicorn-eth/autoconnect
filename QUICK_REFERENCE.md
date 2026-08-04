@@ -1,4 +1,4 @@
-# @unicorn.eth/autoconnect v1.5.2
+# @unicorn.eth/autoconnect v1.5.3
 
 > True zero-code integration - use standard wagmi hooks everywhere
 
@@ -14,6 +14,13 @@ Drop-in Unicorn wallet integration for existing web3 apps. **Copy/paste any wagm
 - ✅ **Works with RainbowKit & Web3Modal** - Shows up in wallet list automatically
 - ✅ **React 18 & 19 support** - Optional React dependency
 - ✅ **TypeScript support** - Full type definitions
+
+## What's New in v1.5.3
+
+- ⬆️ **Wagmi v3 Support** - Works with wagmi 2.x and 3.x
+- 🔐 **SIWE Adapter** - `@unicorn.eth/autoconnect/siwe` for smart account verification
+- 🔧 **EIP-1193 Fix** - personal_sign hex decode for correct signatures
+- ⬆️ **Thirdweb 5.120.1** - Updated peer dependency (was `^5.118.0`)
 
 ## What's New in v1.5.2
 
